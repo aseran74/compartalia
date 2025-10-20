@@ -150,8 +150,8 @@
         <div class="hero-image">
           <div class="scroll-container">
             <div class="scroll-content">
-              <img src="/escena1.png" alt="Escena de personas" class="scroll-image scene-1" />
-              <img src="/Escenacoche.png" alt="Escena de coche" class="scroll-image scene-2" />
+              <img src="/images/escena1.png" alt="Escena de personas" class="scroll-image scene-1" />
+              <img src="/images/Escenacoche.png" alt="Escena de coche" class="scroll-image scene-2" />
             </div>
           </div>
         </div>
@@ -730,8 +730,6 @@ const handleGoogleLogin = async () => {
   50%, 100% {
     transform: scale(4) translateX(0);
   }
-}
-  z-index: 1;
 }
 
 
