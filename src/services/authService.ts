@@ -2,7 +2,11 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/config/firebase';
@@ -77,6 +81,55 @@ class AuthService {
     }
   }
 
+  // Login with Google
+  async loginWithGoogle() {
+    try {
+      const provider = new GoogleAuthProvider();
+      
+      // Configurar el proveedor de Google
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      // Usar popup para mejor UX
+      const result = await signInWithPopup(auth, provider);
+      
+      console.log('Google login successful:', result.user);
+      return result.user;
+    } catch (error) {
+      console.error('Error logging in with Google:', error);
+      throw error;
+    }
+  }
+
+  // Login with Google (redirect method - for mobile)
+  async loginWithGoogleRedirect() {
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      await signInWithRedirect(auth, provider);
+    } catch (error) {
+      console.error('Error with Google redirect:', error);
+      throw error;
+    }
+  }
+
+  // Handle Google redirect result
+  async handleGoogleRedirectResult() {
+    try {
+      const result = await getRedirectResult(auth);
+      if (result) {
+        console.log('Google redirect result:', result.user);
+        return result.user;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error handling Google redirect result:', error);
+      throw error;
+    }
+  }
+
   // Logout
   async logout() {
     try {
@@ -106,28 +159,37 @@ class AuthService {
   // Create user profile in Supabase
   private async createUserProfile(firebaseUser: FirebaseUser, name?: string, role: 'conductor' | 'pasajero' = 'pasajero') {
     try {
-      // Para usuarios de Google, usar displayName si está disponible
+      // Para usuarios de Google, usar displayName y photoURL si están disponibles
       const userName = name || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuario';
+      const photoURL = firebaseUser.photoURL;
       
       console.log('Creating user profile:', { 
         uid: firebaseUser.uid, 
         email: firebaseUser.email, 
-        name: userName, 
+        name: userName,
+        photoURL: photoURL,
         role 
       });
 
+      const profileData = {
+        id: firebaseUser.uid,
+        email: firebaseUser.email || '',
+        name: userName,
+        avatar_url: photoURL,
+        phone: null,
+        preferences: {
+          role: role,
+          notifications: true,
+          language: 'es',
+          theme: 'light'
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       const { data, error } = await supabase
         .from('profiles')
-        .insert([
-          {
-            id: firebaseUser.uid,
-            email: firebaseUser.email,
-            name: userName,
-            role: role,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ]);
+        .insert([profileData]);
 
       if (error) {
         console.error('Error creating user profile:', error);

@@ -148,7 +148,12 @@
         </div>
         
         <div class="hero-image">
-          <div class="parallax-image"></div>
+          <div class="scroll-container">
+            <div class="scroll-content">
+              <img src="/escena1.png" alt="Escena de personas" class="scroll-image scene-1" />
+              <img src="/Escenacoche.png" alt="Escena de coche" class="scroll-image scene-2" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -504,7 +509,7 @@ import AuthModal from '@/components/auth/AuthModal.vue';
 const router = useRouter();
 
 // Auth composable
-const { user, userProfile, isAuthenticated, logout } = useAuth();
+const { user, userProfile, isAuthenticated, logout, loginWithGoogle } = useAuth();
 
 // Variables reactivas para el navbar
 const isScrolled = ref(false);
@@ -587,6 +592,19 @@ function scrollToSection(sectionId: string) {
   }
 }
 
+// Función de login con Google
+const handleGoogleLogin = async () => {
+  try {
+    console.log('Iniciando login con Google...');
+    await loginWithGoogle();
+    console.log('Login con Google exitoso');
+    closeAuthModal();
+  } catch (error) {
+    console.error('Error en login con Google:', error);
+    alert('Error al iniciar sesión con Google. Inténtalo de nuevo.');
+  }
+};
+
 // Componente listo para usar
 </script>
 
@@ -653,18 +671,66 @@ function scrollToSection(sectionId: string) {
   position: relative;
   height: 500px;
   overflow: hidden;
+  margin-top: 50px;
 }
 
-.parallax-image {
-  position: absolute;
-  top: 0;
-  left: 0;
+.scroll-container {
+  position: relative;
   width: 100%;
   height: 100%;
-  background-image: url('/images/hero.png');
-  background-size: 100%;
-  background-position: center;
-  background-repeat: no-repeat;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.scroll-content {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  animation: scrollHorizontal 20s linear infinite;
+}
+
+.scroll-image {
+  width: 50%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(4);
+  transform-origin: center center;
+}
+
+.scene-1 {
+  animation: moveScene1 20s linear infinite;
+}
+
+.scene-2 {
+  animation: moveScene2 20s linear infinite;
+}
+
+@keyframes scrollHorizontal {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes moveScene1 {
+  0%, 50% {
+    transform: scale(4) translateX(0);
+  }
+  100% {
+    transform: scale(4) translateX(-25%);
+  }
+}
+
+@keyframes moveScene2 {
+  0% {
+    transform: scale(4) translateX(25%);
+  }
+  50%, 100% {
+    transform: scale(4) translateX(0);
+  }
+}
   z-index: 1;
 }
 
@@ -697,6 +763,11 @@ function scrollToSection(sectionId: string) {
   .hero-image {
     height: 300px;
     order: -1;
+    margin-top: 20px;
+  }
+  
+  .scroll-image {
+    transform: scale(2.5);
   }
 }
 </style>

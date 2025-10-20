@@ -52,6 +52,20 @@ export function useAuth() {
     }
   };
 
+  // Google login function
+  const loginWithGoogle = async () => {
+    try {
+      isLoading.value = true;
+      await authService.loginWithGoogle();
+      user.value = authService.getCurrentUser();
+      userProfile.value = authService.getUserProfile();
+    } catch (error) {
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   // Update profile function
   const updateProfile = async (updates: Partial<UserProfile>) => {
     try {
@@ -90,6 +104,7 @@ export function useAuth() {
     isLoading,
     login,
     register,
+    loginWithGoogle,
     logout,
     updateProfile
   };
