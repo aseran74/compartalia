@@ -21,18 +21,31 @@ class SupabaseAuthService {
   constructor() {
     // Listen to auth state changes
     supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session);
+      console.log('=== SUPABASE AUTH STATE CHANGE ===');
+      console.log('Event:', event);
+      console.log('Session:', session);
+      console.log('User:', session?.user);
+      
       this.currentUser = session?.user || null;
       
       if (session?.user) {
+        console.log('User logged in, syncing profile...');
         // Sync user profile with Supabase
         await this.syncUserProfile(session.user);
       } else {
+        console.log('User logged out, clearing profile...');
         this.userProfile = null;
       }
       
+      console.log('Current user after change:', this.currentUser);
+      console.log('User profile after change:', this.userProfile);
+      
       // Notify all callbacks
-      this.authStateCallbacks.forEach(callback => callback(this.currentUser, this.userProfile));
+      this.authStateCallbacks.forEach(callback => {
+        console.log('Notifying callback with:', { user: this.currentUser, profile: this.userProfile });
+        callback(this.currentUser, this.userProfile);
+      });
+      console.log('=== END AUTH STATE CHANGE ===');
     });
   }
 
@@ -114,11 +127,21 @@ class SupabaseAuthService {
   // Logout
   async logout() {
     try {
+      console.log('=== STARTING LOGOUT ===');
+      console.log('Current user before logout:', this.currentUser);
+      console.log('Current profile before logout:', this.userProfile);
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
+      console.log('Supabase signOut completed, clearing local state...');
+      this.currentUser = null;
       this.userProfile = null;
-      console.log('Logout successful');
+      
+      console.log('Local state cleared');
+      console.log('Current user after logout:', this.currentUser);
+      console.log('Current profile after logout:', this.userProfile);
+      console.log('=== LOGOUT COMPLETED ===');
     } catch (error) {
       console.error('Error logging out:', error);
       throw error;
