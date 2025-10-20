@@ -168,7 +168,6 @@ onMounted(() => {
   addLog('🚀 Componente montado - Listo para búsqueda');
 });
 </script>
-</template>
 
 <style scoped>
 /* Estilos adicionales si es necesario */

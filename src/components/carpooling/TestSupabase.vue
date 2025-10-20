@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { supabase } from '../config/supabase'
+import { supabase } from '../../config/supabase'
 
 const loading = ref(false)
 const result = ref(null)
