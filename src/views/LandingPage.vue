@@ -578,6 +578,23 @@ async function handleLogout() {
 // Event listeners
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
+  
+  // Debug: Verificar estado de autenticación
+  console.log('LandingPage mounted - Auth state:', {
+    user: user.value,
+    userProfile: userProfile.value,
+    isAuthenticated: isAuthenticated.value
+  });
+  
+  // Debug: Verificar cada segundo el estado
+  setInterval(() => {
+    console.log('Auth state check:', {
+      user: user.value,
+      userProfile: userProfile.value,
+      isAuthenticated: isAuthenticated.value,
+      timestamp: new Date().toLocaleTimeString()
+    });
+  }, 5000);
 });
 
 onUnmounted(() => {
@@ -599,9 +616,16 @@ const ciudadesPrincipales = [
 ];
 
 function irAlDashboard() {
-  // Aquí mantienes tu lógica de redirección
-  router.push('/dashboard');
+  // Verificar si el usuario está autenticado
+  if (isAuthenticated.value) {
+    // Usuario autenticado → ir al dashboard
+    router.push('/dashboard');
+  } else {
+    // Usuario no autenticado → mostrar modal de login
+    openAuthModal();
+  }
 }
+
 
 function scrollToSection(sectionId: string) {
   const element = document.getElementById(sectionId);
