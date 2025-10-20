@@ -4,10 +4,11 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center py-4">
         <div class="flex items-center">
-          <img src="/images/logo/Compartalia2.png" alt="Compartalia Logo" class="h-10 w-auto object-contain sm:h-15" style="transform: scale(1.5);" />
+          <img src="/images/logo/Compartalia2.png" alt="Compartalia Logo" class="h-10 w-auto object-contain sm:h-12 md:scale-150 ml-2" />
         </div>
         <!-- Menú desktop -->
         <nav class="hidden md:flex space-x-8 items-center">
+          <router-link to="/buscar-viajes" class="font-semibold transition duration-150 ease-in-out" :class="isScrolled ? 'text-black hover:text-green-600' : 'text-black hover:text-green-600'">Buscar Viajes</router-link>
           <a href="#como-funciona" class="font-semibold transition duration-150 ease-in-out" :class="isScrolled ? 'text-black hover:text-green-600' : 'text-black hover:text-green-600'">Cómo funciona</a>
           <a href="#beneficios" class="font-semibold transition duration-150 ease-in-out" :class="isScrolled ? 'text-black hover:text-green-600' : 'text-black hover:text-green-600'">Beneficios</a>
           <a href="#precios" class="font-semibold transition duration-150 ease-in-out" :class="isScrolled ? 'text-black hover:text-green-600' : 'text-black hover:text-green-600'">Precios</a>
@@ -94,6 +95,7 @@
       <!-- Menú móvil -->
       <div v-if="isMobileMenuOpen" class="md:hidden bg-white shadow-lg border-t border-gray-200 rounded-b-xl mx-2 mt-2">
         <nav class="flex flex-col space-y-3 px-6 py-6">
+          <router-link to="/buscar-viajes" @click="closeMobileMenu" class="text-gray-700 font-semibold hover:text-green-600 transition duration-150 ease-in-out py-3 px-4 rounded-lg hover:bg-green-50">Buscar Viajes</router-link>
           <a href="#como-funciona" @click="closeMobileMenu" class="text-gray-700 font-semibold hover:text-green-600 transition duration-150 ease-in-out py-3 px-4 rounded-lg hover:bg-green-50">Cómo funciona</a>
           <a href="#beneficios" @click="closeMobileMenu" class="text-gray-700 font-semibold hover:text-green-600 transition duration-150 ease-in-out py-3 px-4 rounded-lg hover:bg-green-50">Beneficios</a>
           <a href="#precios" @click="closeMobileMenu" class="text-gray-700 font-semibold hover:text-green-600 transition duration-150 ease-in-out py-3 px-4 rounded-lg hover:bg-green-50">Precios</a>
@@ -151,7 +153,12 @@
           <div class="scroll-container">
             <div class="scroll-content">
               <img src="/images/escena1.png" alt="Escena de personas" class="scroll-image scene-1" />
-              <img src="/images/Escenacoche.png" alt="Escena de coche" class="scroll-image scene-2" />
+              <img 
+                src="/images/Escenacoche.png" 
+                alt="Escena de coche" 
+                class="scroll-image scene-2" 
+                :style="{ transform: `scale(1.1) translateX(${carPosition}px) translateY(50px)` }"
+              />
             </div>
           </div>
         </div>
@@ -517,9 +524,20 @@ const isMobileMenuOpen = ref(false);
 const isProfileMenuOpen = ref(false);
 const showAuthModal = ref(false);
 
+// Variable para el efecto de scroll del coche
+const carPosition = ref(0);
+
 // Función para manejar el scroll
 function handleScroll() {
   isScrolled.value = window.scrollY > 50;
+  
+  // Efecto de movimiento del coche según el scroll
+  const scrollY = window.scrollY;
+  const maxScroll = window.innerHeight;
+  const scrollPercentage = Math.min(scrollY / maxScroll, 1);
+  
+  // Mapear el scroll a posición horizontal del coche (-100px a 100px)
+  carPosition.value = (scrollPercentage - 0.5) * 200;
 }
 
 // Funciones para el menú móvil
@@ -670,7 +688,7 @@ const handleGoogleLogin = async () => {
 .hero-image {
   position: relative;
   height: 500px;
-  overflow: hidden;
+  overflow: visible;
   margin-top: 50px;
 }
 
@@ -678,8 +696,7 @@ const handleGoogleLogin = async () => {
   position: relative;
   width: 100%;
   height: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: visible;
 }
 
 .scroll-content {
@@ -706,23 +723,11 @@ const handleGoogleLogin = async () => {
 
 .scene-2 {
   /* Imagen superior con efecto de movimiento */
-  transform: scale(2);
   transform-origin: center center;
-  z-index: 2;
-  animation: moveLeftToRight 8s ease-in-out infinite;
+  z-index: 9999;
+  transition: transform 0.1s ease-out;
 }
 
-@keyframes moveLeftToRight {
-  0% {
-    transform: scale(2) translateX(-10px) translateY(20px);
-  }
-  50% {
-    transform: scale(2) translateX(10px) translateY(20px);
-  }
-  100% {
-    transform: scale(2) translateX(-10px) translateY(20px);
-  }
-}
 
 
 /* Responsive */

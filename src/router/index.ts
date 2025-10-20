@@ -15,6 +15,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/buscar-viajes',
+      name: 'PublicTripSearch',
+      component: () => import('../views/PublicTripSearch.vue'),
+      meta: {
+        title: 'Buscar Viajes - Compartalia',
+      },
+    },
+    {
       path: '/dashboard',
       name: 'Dashboard',
       component: () => import('../views/Ecommerce.vue'),
