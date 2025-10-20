@@ -151,7 +151,7 @@
           <div class="scroll-container">
             <div class="scroll-content">
               <img src="/images/escena1.png" alt="Escena de personas" class="scroll-image scene-1" />
-              <img src="/images/Escenacoche.png" alt="Escena de coche" class="scroll-image scene-2" />
+              <img src="/images/Cochepng.png" alt="Escena de coche" class="scroll-image scene-2" />
             </div>
           </div>
         </div>
@@ -701,19 +701,9 @@ const handleGoogleLogin = async () => {
 }
 
 .scene-2 {
-  /* Imagen con scroll y escala 300% */
-  transform: scale(3);
+  /* Imagen normal sin scroll */
+  transform: scale(1);
   transform-origin: center center;
-  animation: scrollCar 15s linear infinite;
-}
-
-@keyframes scrollCar {
-  0% {
-    transform: scale(3) translateX(-20%);
-  }
-  100% {
-    transform: scale(3) translateX(20%);
-  }
 }
 
 
@@ -753,7 +743,7 @@ const handleGoogleLogin = async () => {
   }
   
   .scene-2 {
-    transform: scale(2);
+    transform: scale(1);
   }
 }
 </style>
