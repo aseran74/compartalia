@@ -110,6 +110,13 @@ const handleClickOutside = (event) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  
+  // Debug: Log auth state
+  console.log('UserMenu mounted - Auth state:', {
+    userProfile: userProfile.value,
+    hasUserProfile: !!userProfile.value,
+    userProfileKeys: userProfile.value ? Object.keys(userProfile.value) : 'No profile'
+  })
 })
 
 onUnmounted(() => {

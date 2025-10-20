@@ -312,14 +312,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import Modal from './Modal.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const isProfileInfoModal = ref(false)
+const { user, userProfile, isAuthenticated } = useAuth()
 
 const saveProfile = () => {
   // Implement save profile logic here
   console.log('Profile saved')
   isProfileInfoModal.value = false
 }
+
+// Debug function to check auth state
+onMounted(() => {
+  console.log('ProfileCard mounted - Auth state:', {
+    user: user.value,
+    userProfile: userProfile.value,
+    isAuthenticated: isAuthenticated.value
+  })
+})
 </script>
