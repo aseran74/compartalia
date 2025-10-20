@@ -13,24 +13,18 @@
     @mouseenter="!isExpanded && (isHovered = true)"
     @mouseleave="isHovered = false"
   >
+    <!-- Logo solo en vista móvil -->
     <div
+      v-if="isMobileOpen"
       :class="[
-        'py-8 flex',
-        !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start',
+        'py-8 flex justify-start',
       ]"
     >
       <router-link to="/">
          <img
-           v-if="isExpanded || isHovered || isMobileOpen"
            src="/images/logo/Compartalia2.png"
            alt="Compartalia Logo"
            class="w-32 h-28 object-contain"
-         />
-         <img
-           v-else
-           src="/images/logo/Compartalia2.png"
-           alt="Compartalia Icon"
-           class="w-16 h-14 object-contain"
          />
       </router-link>
     </div>
