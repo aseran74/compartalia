@@ -22,6 +22,7 @@ export interface Database {
           id: string
           email: string
           name: string
+          role: string
           phone: string | null
           avatar_url: string | null
           preferences: Record<string, any>
@@ -32,6 +33,7 @@ export interface Database {
           id?: string
           email: string
           name: string
+          role?: string
           phone?: string | null
           avatar_url?: string | null
           preferences?: Record<string, any>
@@ -42,6 +44,7 @@ export interface Database {
           id?: string
           email?: string
           name?: string
+          role?: string
           phone?: string | null
           avatar_url?: string | null
           preferences?: Record<string, any>
