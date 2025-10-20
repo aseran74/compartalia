@@ -87,8 +87,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { ChevronDownIcon, UserCircleIcon, SettingsIcon, InfoCircleIcon } from '@heroicons/vue/24/outline'
-import { LogoutIcon } from '@heroicons/vue/24/solid'
+import { ChevronDownIcon, UserCircleIcon, SettingsIcon, InfoCircleIcon, LogoutIcon } from '@/icons'
 import { supabase } from '@/config/supabase'
 import { auth } from '@/config/firebase'
 import { signOut } from 'firebase/auth'
