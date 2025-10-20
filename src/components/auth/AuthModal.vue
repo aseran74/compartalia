@@ -138,6 +138,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useAuth } from '@/composables/useAuth';
+import { supabase } from '@/config/supabase';
 
 interface Props {
   isOpen: boolean;
@@ -225,19 +226,18 @@ const loginWithGoogle = async () => {
     isLoading.value = true;
     error.value = '';
 
-    // Importar GoogleAuthProvider dinámicamente
-    const { GoogleAuthProvider, signInWithPopup } = await import('firebase/auth');
-    const { auth } = await import('@/config/firebase');
+    // Usar Supabase Auth para Google login
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    });
     
-    const provider = new GoogleAuthProvider();
-    provider.addScope('email');
-    provider.addScope('profile');
+    if (error) throw error;
     
-    const result = await signInWithPopup(auth, provider);
-    
-    // El usuario ya está autenticado, emitir éxito
-    emit('success');
-    emit('close');
+    console.log('Google login initiated:', data);
+    // Supabase maneja la redirección automáticamente
   } catch (err: any) {
     console.error('Error con Google Auth:', err);
     error.value = err.message || 'Error al iniciar sesión con Google';

@@ -89,8 +89,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ChevronDownIcon, UserCircleIcon, SettingsIcon, InfoCircleIcon, LogoutIcon } from '@/icons'
 import { supabase } from '@/config/supabase'
-import { auth } from '@/config/firebase'
-import { signOut } from 'firebase/auth'
 
 interface UserProfile {
   id: string
