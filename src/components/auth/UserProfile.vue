@@ -195,10 +195,13 @@ const closeDropdown = () => {
 // Handle logout
 const handleLogout = async () => {
   try {
-    await signOut(auth)
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+    
     profile.value = null
     emit('logout')
     closeDropdown()
+    console.log('Logout successful')
   } catch (error) {
     console.error('Error logging out:', error)
   }
