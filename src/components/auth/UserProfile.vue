@@ -36,7 +36,7 @@
             {{ profile?.name || 'Usuario' }}
           </span>
           <span class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {{ profile?.email || 'Cargando...' }}
+            {{ profile?.email || (loading ? 'Cargando...' : 'No autenticado') }}
           </span>
           <span v-if="profile?.role" class="mt-0.5 block text-theme-xs text-green-600 font-medium">
             {{ profile.role === 'conductor' ? 'Conductor' : 'Pasajero' }}
@@ -123,6 +123,9 @@ const getCurrentUserId = async (): Promise<string | null> => {
   return new Promise((resolve) => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       unsubscribe()
+      console.log('Firebase auth state:', user)
+      console.log('User ID:', user?.uid)
+      console.log('User email:', user?.email)
       resolve(user?.uid || null)
     })
   })
@@ -132,10 +135,13 @@ const getCurrentUserId = async (): Promise<string | null> => {
 const fetchUserProfile = async () => {
   try {
     loading.value = true
+    console.log('=== FETCHING USER PROFILE ===')
+    
     const userId = await getCurrentUserId()
+    console.log('User ID obtained:', userId)
     
     if (!userId) {
-      console.log('No user authenticated')
+      console.log('No user authenticated - stopping')
       return
     }
 
@@ -148,16 +154,18 @@ const fetchUserProfile = async () => {
       .single()
 
     if (error) {
-      console.error('Error fetching user profile:', error)
+      console.error('Supabase error:', error)
+      console.error('Error details:', error.message)
       return
     }
 
-    console.log('User profile loaded:', data)
+    console.log('User profile loaded successfully:', data)
     profile.value = data
   } catch (error) {
     console.error('Error in fetchUserProfile:', error)
   } finally {
     loading.value = false
+    console.log('=== FETCH COMPLETE ===')
   }
 }
 
