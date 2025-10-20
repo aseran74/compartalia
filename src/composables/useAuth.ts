@@ -100,9 +100,22 @@ export function useAuth() {
     return authService.debugCurrentState();
   };
 
-  // Make debug function available globally
+  // Force profile sync function
+  const forceProfileSync = async () => {
+    try {
+      const profile = await authService.forceProfileSync();
+      userProfile.value = profile;
+      return profile;
+    } catch (error) {
+      console.error('Error forcing profile sync:', error);
+      throw error;
+    }
+  };
+
+  // Make debug functions available globally
   if (typeof window !== 'undefined') {
     (window as any).debugAuth = debugAuthState;
+    (window as any).forceProfileSync = forceProfileSync;
   }
 
   return {

@@ -165,6 +165,16 @@ class AuthService {
     };
   }
 
+  // Force profile sync
+  async forceProfileSync() {
+    if (this.currentUser) {
+      console.log('Forcing profile sync for:', this.currentUser.uid);
+      await this.syncUserProfile(this.currentUser);
+      return this.userProfile;
+    }
+    return null;
+  }
+
   // Check if user is authenticated
   isAuthenticated(): boolean {
     return this.currentUser !== null;
