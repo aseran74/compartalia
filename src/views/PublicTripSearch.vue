@@ -207,6 +207,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { supabase } from '@/config/supabase'
+import { useToast } from '@/composables/useToast'
 
 // Reactive data
 const searchForm = reactive({
@@ -218,6 +219,9 @@ const searchForm = reactive({
 const searchResults = ref([])
 const isSearching = ref(false)
 const hasSearched = ref(false)
+
+// Toast system
+const { warning } = useToast()
 
 // Mock data for demonstration
 const mockTrips = [
@@ -289,7 +293,31 @@ const searchTrips = async () => {
 }
 
 const contactDriver = (trip: any) => {
-  alert(`Para contactar con ${trip.driver_name}, necesitas registrarte primero.`)
+  warning(
+    'Registro requerido',
+    `Para contactar con ${trip.driver_name}, necesitas registrarte primero.`,
+    {
+      actions: [
+        {
+          label: 'Registrarse',
+          class: 'bg-green-600 text-white hover:bg-green-700',
+          action: () => {
+            // Aquí podrías redirigir al registro
+            console.log('Redirigir al registro')
+          }
+        },
+        {
+          label: 'Iniciar Sesión',
+          class: 'bg-blue-600 text-white hover:bg-blue-700',
+          action: () => {
+            // Aquí podrías redirigir al login
+            console.log('Redirigir al login')
+          }
+        }
+      ],
+      duration: 8000 // Más tiempo para que el usuario pueda leer las opciones
+    }
+  )
 }
 
 const formatTime = (time: string) => {
