@@ -151,6 +151,20 @@ class AuthService {
     return this.userProfile;
   }
 
+  // Debug function to check current state
+  debugCurrentState() {
+    console.log('=== AUTH SERVICE DEBUG ===');
+    console.log('Current Firebase User:', this.currentUser);
+    console.log('Current User Profile:', this.userProfile);
+    console.log('Is Authenticated:', this.isAuthenticated());
+    console.log('========================');
+    return {
+      firebaseUser: this.currentUser,
+      userProfile: this.userProfile,
+      isAuthenticated: this.isAuthenticated()
+    };
+  }
+
   // Check if user is authenticated
   isAuthenticated(): boolean {
     return this.currentUser !== null;
@@ -211,6 +225,12 @@ class AuthService {
   private async syncUserProfile(firebaseUser: FirebaseUser) {
     try {
       console.log('Syncing user profile for:', firebaseUser.uid);
+      console.log('Firebase user data:', {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: firebaseUser.displayName,
+        photoURL: firebaseUser.photoURL
+      });
       
       const { data, error } = await supabase
         .from('profiles')

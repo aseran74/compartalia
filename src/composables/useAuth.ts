@@ -95,6 +95,16 @@ export function useAuth() {
     }
   });
 
+  // Debug function
+  const debugAuthState = () => {
+    return authService.debugCurrentState();
+  };
+
+  // Make debug function available globally
+  if (typeof window !== 'undefined') {
+    (window as any).debugAuth = debugAuthState;
+  }
+
   return {
     user,
     userProfile,
@@ -106,6 +116,7 @@ export function useAuth() {
     register,
     loginWithGoogle,
     logout,
-    updateProfile
+    updateProfile,
+    debugAuthState
   };
 }
