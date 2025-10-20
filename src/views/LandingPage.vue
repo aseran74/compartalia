@@ -151,7 +151,7 @@
           <div class="scroll-container">
             <div class="scroll-content">
               <img src="/images/escena1.png" alt="Escena de personas" class="scroll-image scene-1" />
-              <img src="/images/Cochepng.png" alt="Escena de coche" class="scroll-image scene-2" />
+              <img src="/images/Escenacoche.png" alt="Escena de coche" class="scroll-image scene-2" />
             </div>
           </div>
         </div>
