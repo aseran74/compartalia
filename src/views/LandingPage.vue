@@ -706,7 +706,7 @@ const handleGoogleLogin = async () => {
 
 .scene-2 {
   /* Imagen superior con efecto de movimiento */
-  transform: scale(1);
+  transform: scale(0.5);
   transform-origin: center center;
   z-index: 2;
   animation: moveLeftToRight 8s ease-in-out infinite;
@@ -714,13 +714,13 @@ const handleGoogleLogin = async () => {
 
 @keyframes moveLeftToRight {
   0% {
-    transform: translateX(-10px);
+    transform: scale(0.5) translateX(-10px);
   }
   50% {
-    transform: translateX(10px);
+    transform: scale(0.5) translateX(10px);
   }
   100% {
-    transform: translateX(-10px);
+    transform: scale(0.5) translateX(-10px);
   }
 }
 
