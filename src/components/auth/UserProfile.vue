@@ -156,11 +156,11 @@ const fetchUserProfile = async () => {
     console.log('Test query result:', testData)
     console.log('Test query error:', testError)
     
-    // Ahora la consulta real - buscar por email en lugar de ID
+    // Ahora la consulta real - buscar por ID de Supabase
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('email', user.value?.email)
+      .eq('id', userId)
       .single()
 
     if (error) {

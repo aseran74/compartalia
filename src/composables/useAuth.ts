@@ -1,10 +1,10 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { authService, type UserProfile } from '@/services/authService';
+import { supabaseAuthService, type UserProfile } from '@/services/supabaseAuthService';
 
 export function useAuth() {
   const isLoading = ref(true);
-  const user = ref(authService.getCurrentUser());
-  const userProfile = ref<UserProfile | null>(authService.getUserProfile());
+  const user = ref(supabaseAuthService.getCurrentUser());
+  const userProfile = ref<UserProfile | null>(supabaseAuthService.getUserProfile());
 
   const isAuthenticated = computed(() => user.value !== null);
   const isConductor = computed(() => userProfile.value?.role === 'conductor');
@@ -14,9 +14,9 @@ export function useAuth() {
   const login = async (email: string, password: string) => {
     try {
       isLoading.value = true;
-      await authService.login(email, password);
-      user.value = authService.getCurrentUser();
-      userProfile.value = authService.getUserProfile();
+      await supabaseAuthService.login(email, password);
+      user.value = supabaseAuthService.getCurrentUser();
+      userProfile.value = supabaseAuthService.getUserProfile();
     } catch (error) {
       throw error;
     } finally {
@@ -28,9 +28,9 @@ export function useAuth() {
   const register = async (email: string, password: string, name?: string, role: 'conductor' | 'pasajero' = 'pasajero') => {
     try {
       isLoading.value = true;
-      await authService.register(email, password, name, role);
-      user.value = authService.getCurrentUser();
-      userProfile.value = authService.getUserProfile();
+      await supabaseAuthService.register(email, password, name, role);
+      user.value = supabaseAuthService.getCurrentUser();
+      userProfile.value = supabaseAuthService.getUserProfile();
     } catch (error) {
       throw error;
     } finally {
@@ -42,7 +42,7 @@ export function useAuth() {
   const logout = async () => {
     try {
       isLoading.value = true;
-      await authService.logout();
+      await supabaseAuthService.logout();
       user.value = null;
       userProfile.value = null;
     } catch (error) {
@@ -56,9 +56,9 @@ export function useAuth() {
   const loginWithGoogle = async () => {
     try {
       isLoading.value = true;
-      await authService.loginWithGoogle();
-      user.value = authService.getCurrentUser();
-      userProfile.value = authService.getUserProfile();
+      await supabaseAuthService.loginWithGoogle();
+      user.value = supabaseAuthService.getCurrentUser();
+      userProfile.value = supabaseAuthService.getUserProfile();
     } catch (error) {
       throw error;
     } finally {
@@ -69,8 +69,8 @@ export function useAuth() {
   // Update profile function
   const updateProfile = async (updates: Partial<UserProfile>) => {
     try {
-      await authService.updateProfile(updates);
-      userProfile.value = authService.getUserProfile();
+      await supabaseAuthService.updateProfile(updates);
+      userProfile.value = supabaseAuthService.getUserProfile();
     } catch (error) {
       throw error;
     }
@@ -81,9 +81,9 @@ export function useAuth() {
 
   onMounted(() => {
     // Listen to auth state changes
-    unsubscribe = authService.onAuthStateChanged((firebaseUser, profile) => {
-      console.log('Auth state changed:', { firebaseUser, profile });
-      user.value = firebaseUser;
+    unsubscribe = supabaseAuthService.onAuthStateChanged((supabaseUser, profile) => {
+      console.log('Auth state changed:', { supabaseUser, profile });
+      user.value = supabaseUser;
       userProfile.value = profile;
       isLoading.value = false;
     });
@@ -97,13 +97,13 @@ export function useAuth() {
 
   // Debug function
   const debugAuthState = () => {
-    return authService.debugCurrentState();
+    return supabaseAuthService.debugCurrentState();
   };
 
   // Force profile sync function
   const forceProfileSync = async () => {
     try {
-      const profile = await authService.forceProfileSync();
+      const profile = await supabaseAuthService.forceProfileSync();
       userProfile.value = profile;
       return profile;
     } catch (error) {

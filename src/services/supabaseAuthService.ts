@@ -8,9 +8,12 @@ export interface UserProfile {
   role: 'conductor' | 'pasajero';
   created_at: string;
   updated_at: string;
+  avatar_url?: string | null;
+  phone?: string | null;
+  preferences?: Record<string, any>;
 }
 
-class AuthService {
+class SupabaseAuthService {
   private currentUser: User | null = null;
   private userProfile: UserProfile | null = null;
   private authStateCallbacks: Array<(user: User | null, profile: UserProfile | null) => void> = [];
@@ -34,7 +37,7 @@ class AuthService {
   }
 
   // Subscribe to auth state changes
-  onAuthStateChanged(callback: (user: FirebaseUser | null, profile: UserProfile | null) => void) {
+  onAuthStateChanged(callback: (user: User | null, profile: UserProfile | null) => void) {
     this.authStateCallbacks.push(callback);
     
     // Return unsubscribe function
@@ -49,8 +52,15 @@ class AuthService {
   // Login with email and password
   async login(email: string, password: string) {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) throw error;
+      
+      console.log('Login successful:', data.user);
+      return data.user;
     } catch (error) {
       console.error('Error logging in:', error);
       throw error;
@@ -60,12 +70,21 @@ class AuthService {
   // Register with email and password
   async register(email: string, password: string, name?: string, role: 'conductor' | 'pasajero' = 'pasajero') {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name || email.split('@')[0],
+            role: role
+          }
+        }
+      });
       
-      // Create user profile in Supabase
-      await this.createUserProfile(userCredential.user, name, role);
+      if (error) throw error;
       
-      return userCredential.user;
+      console.log('Registration successful:', data.user);
+      return data.user;
     } catch (error) {
       console.error('Error registering:', error);
       throw error;
@@ -75,48 +94,19 @@ class AuthService {
   // Login with Google
   async loginWithGoogle() {
     try {
-      const provider = new GoogleAuthProvider();
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
       
-      // Configurar el proveedor de Google
-      provider.addScope('email');
-      provider.addScope('profile');
+      if (error) throw error;
       
-      // Usar popup para mejor UX
-      const result = await signInWithPopup(auth, provider);
-      
-      console.log('Google login successful:', result.user);
-      return result.user;
+      console.log('Google login initiated:', data);
+      return data;
     } catch (error) {
       console.error('Error logging in with Google:', error);
-      throw error;
-    }
-  }
-
-  // Login with Google (redirect method - for mobile)
-  async loginWithGoogleRedirect() {
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      await signInWithRedirect(auth, provider);
-    } catch (error) {
-      console.error('Error with Google redirect:', error);
-      throw error;
-    }
-  }
-
-  // Handle Google redirect result
-  async handleGoogleRedirectResult() {
-    try {
-      const result = await getRedirectResult(auth);
-      if (result) {
-        console.log('Google redirect result:', result.user);
-        return result.user;
-      }
-      return null;
-    } catch (error) {
-      console.error('Error handling Google redirect result:', error);
       throw error;
     }
   }
@@ -124,8 +114,11 @@ class AuthService {
   // Logout
   async logout() {
     try {
-      await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
       this.userProfile = null;
+      console.log('Logout successful');
     } catch (error) {
       console.error('Error logging out:', error);
       throw error;
@@ -133,7 +126,7 @@ class AuthService {
   }
 
   // Get current user
-  getCurrentUser(): FirebaseUser | null {
+  getCurrentUser(): User | null {
     return this.currentUser;
   }
 
@@ -142,15 +135,20 @@ class AuthService {
     return this.userProfile;
   }
 
+  // Check if user is authenticated
+  isAuthenticated(): boolean {
+    return this.currentUser !== null;
+  }
+
   // Debug function to check current state
   debugCurrentState() {
-    console.log('=== AUTH SERVICE DEBUG ===');
-    console.log('Current Firebase User:', this.currentUser);
+    console.log('=== SUPABASE AUTH SERVICE DEBUG ===');
+    console.log('Current User:', this.currentUser);
     console.log('Current User Profile:', this.userProfile);
     console.log('Is Authenticated:', this.isAuthenticated());
     console.log('========================');
     return {
-      firebaseUser: this.currentUser,
+      user: this.currentUser,
       userProfile: this.userProfile,
       isAuthenticated: this.isAuthenticated()
     };
@@ -159,47 +157,70 @@ class AuthService {
   // Force profile sync
   async forceProfileSync() {
     if (this.currentUser) {
-      console.log('Forcing profile sync for:', this.currentUser.uid);
+      console.log('Forcing profile sync for:', this.currentUser.id);
       await this.syncUserProfile(this.currentUser);
       return this.userProfile;
     }
     return null;
   }
 
-  // Check if user is authenticated
-  isAuthenticated(): boolean {
-    return this.currentUser !== null;
+  // Sync user profile with Supabase
+  private async syncUserProfile(user: User) {
+    try {
+      console.log('Syncing user profile for:', user.id);
+      console.log('User data:', {
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.name || user.user_metadata?.full_name
+      });
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        // If profile doesn't exist, create it
+        await this.createUserProfile(user);
+        return;
+      }
+
+      console.log('User profile synced successfully:', data);
+      this.userProfile = data as UserProfile;
+    } catch (error) {
+      console.error('Error syncing user profile:', error);
+    }
   }
 
   // Create user profile in Supabase
-  private async createUserProfile(firebaseUser: FirebaseUser, name?: string, role: 'conductor' | 'pasajero' = 'pasajero') {
+  private async createUserProfile(user: User) {
     try {
-      // Para usuarios de Google, usar displayName y photoURL si están disponibles
-      const userName = name || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuario';
-      const photoURL = firebaseUser.photoURL;
+      const userName = user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario';
+      const avatarUrl = user.user_metadata?.avatar_url;
       
       console.log('Creating user profile:', { 
-        uid: firebaseUser.uid, 
-        email: firebaseUser.email, 
+        id: user.id, 
+        email: user.email, 
         name: userName,
-        photoURL: photoURL,
-        role 
+        avatarUrl: avatarUrl
       });
 
       const profileData = {
-        id: firebaseUser.uid,
-        email: firebaseUser.email || '',
+        id: user.id,
+        email: user.email || '',
         name: userName,
-        role: role,
-        avatar_url: photoURL,
+        role: 'pasajero',
+        avatar_url: avatarUrl,
         phone: null,
         preferences: {
-          role: role,
+          role: 'pasajero',
           notifications: true,
           language: 'es',
           theme: 'light',
-          google_user: !!firebaseUser.photoURL,
-          display_name: firebaseUser.displayName
+          google_user: !!avatarUrl,
+          display_name: userName
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -222,38 +243,6 @@ class AuthService {
     }
   }
 
-  // Sync user profile with Supabase
-  private async syncUserProfile(firebaseUser: FirebaseUser) {
-    try {
-      console.log('Syncing user profile for:', firebaseUser.uid);
-      console.log('Firebase user data:', {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL
-      });
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', firebaseUser.uid)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user profile:', error);
-        // If profile doesn't exist, create it
-        await this.createUserProfile(firebaseUser);
-        return;
-      }
-
-      console.log('User profile synced successfully:', data);
-      this.userProfile = data as UserProfile;
-    } catch (error) {
-      console.error('Error syncing user profile:', error);
-    }
-  }
-
-
   // Update user profile
   async updateProfile(updates: Partial<UserProfile>) {
     try {
@@ -267,7 +256,7 @@ class AuthService {
           ...updates,
           updated_at: new Date().toISOString()
         })
-        .eq('id', this.currentUser.uid);
+        .eq('id', this.currentUser.id);
 
       if (error) {
         console.error('Error updating profile:', error);
@@ -285,5 +274,4 @@ class AuthService {
   }
 }
 
-// Export singleton instance
-export const authService = new AuthService();
+export const supabaseAuthService = new SupabaseAuthService();
