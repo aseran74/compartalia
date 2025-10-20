@@ -686,49 +686,33 @@ const handleGoogleLogin = async () => {
   display: flex;
   width: 200%;
   height: 100%;
-  animation: scrollHorizontal 20s linear infinite;
 }
 
 .scroll-image {
   width: 50%;
   height: 100%;
   object-fit: cover;
-  transform: scale(4);
-  transform-origin: center center;
 }
 
 .scene-1 {
-  animation: moveScene1 20s linear infinite;
+  /* Imagen normal sin scroll */
+  transform: scale(1);
+  transform-origin: center center;
 }
 
 .scene-2 {
-  animation: moveScene2 20s linear infinite;
+  /* Imagen con scroll y escala 300% */
+  transform: scale(3);
+  transform-origin: center center;
+  animation: scrollCar 15s linear infinite;
 }
 
-@keyframes scrollHorizontal {
+@keyframes scrollCar {
   0% {
-    transform: translateX(0);
+    transform: scale(3) translateX(-20%);
   }
   100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes moveScene1 {
-  0%, 50% {
-    transform: scale(4) translateX(0);
-  }
-  100% {
-    transform: scale(4) translateX(-25%);
-  }
-}
-
-@keyframes moveScene2 {
-  0% {
-    transform: scale(4) translateX(25%);
-  }
-  50%, 100% {
-    transform: scale(4) translateX(0);
+    transform: scale(3) translateX(20%);
   }
 }
 
@@ -764,8 +748,12 @@ const handleGoogleLogin = async () => {
     margin-top: 20px;
   }
   
-  .scroll-image {
-    transform: scale(2.5);
+  .scene-1 {
+    transform: scale(1);
+  }
+  
+  .scene-2 {
+    transform: scale(2);
   }
 }
 </style>
