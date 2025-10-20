@@ -147,6 +147,16 @@ const fetchUserProfile = async () => {
 
     console.log('Fetching profile for user:', userId)
     
+    // Primero probar una consulta simple
+    const { data: testData, error: testError } = await supabase
+      .from('profiles')
+      .select('*')
+      .limit(5)
+    
+    console.log('Test query result:', testData)
+    console.log('Test query error:', testError)
+    
+    // Ahora la consulta real
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
