@@ -116,17 +116,22 @@ const profile = ref<UserProfile | null>(null)
 const dropdownOpen = ref(false)
 const loading = ref(true)
 
-// Get current user ID from Firebase
+// Get current user ID from Supabase
 const getCurrentUserId = async (): Promise<string | null> => {
-  return new Promise((resolve) => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      unsubscribe()
-      console.log('Firebase auth state:', user)
-      console.log('User ID:', user?.uid)
-      console.log('User email:', user?.email)
-      resolve(user?.uid || null)
-    })
-  })
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error) {
+      console.error('Error getting user:', error)
+      return null
+    }
+    console.log('Supabase auth state:', user)
+    console.log('User ID:', user?.id)
+    console.log('User email:', user?.email)
+    return user?.id || null
+  } catch (error) {
+    console.error('Error in getCurrentUserId:', error)
+    return null
+  }
 }
 
 // Fetch user profile from Supabase
