@@ -175,13 +175,16 @@ class AuthService {
         id: firebaseUser.uid,
         email: firebaseUser.email || '',
         name: userName,
+        role: role,
         avatar_url: photoURL,
         phone: null,
         preferences: {
           role: role,
           notifications: true,
           language: 'es',
-          theme: 'light'
+          theme: 'light',
+          google_user: !!firebaseUser.photoURL,
+          display_name: firebaseUser.displayName
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
