@@ -683,27 +683,32 @@ const handleGoogleLogin = async () => {
 }
 
 .scroll-content {
-  display: flex;
-  width: 200%;
+  position: relative;
+  width: 100%;
   height: 100%;
 }
 
 .scroll-image {
-  width: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 .scene-1 {
-  /* Imagen normal sin scroll */
+  /* Imagen de fondo */
   transform: scale(1);
   transform-origin: center center;
+  z-index: 1;
 }
 
 .scene-2 {
-  /* Imagen normal sin scroll */
+  /* Imagen superior */
   transform: scale(1);
   transform-origin: center center;
+  z-index: 2;
 }
 
 
