@@ -269,10 +269,15 @@ const createTestUsers = async () => {
       console.log('❌ Error creando admin:', err.code, err.message);
       if (err.code === 'auth/email-already-in-use') {
         console.log('ℹ️ Usuario admin ya existe');
+      } else if (err.code === 'auth/too-many-requests') {
+        console.log('⚠️ Demasiadas solicitudes. Espera unos minutos antes de intentar de nuevo.');
       } else {
         console.error('❌ Error inesperado creando admin:', err);
       }
     }
+
+    // Esperar un poco antes de crear el segundo usuario
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Crear usuario test usando Firebase directamente
     try {
@@ -283,6 +288,8 @@ const createTestUsers = async () => {
       console.log('❌ Error creando test:', err.code, err.message);
       if (err.code === 'auth/email-already-in-use') {
         console.log('ℹ️ Usuario test ya existe');
+      } else if (err.code === 'auth/too-many-requests') {
+        console.log('⚠️ Demasiadas solicitudes. Espera unos minutos antes de intentar de nuevo.');
       } else {
         console.error('❌ Error inesperado creando test:', err);
       }
@@ -291,7 +298,7 @@ const createTestUsers = async () => {
     console.log('=== FIN CREACIÓN USUARIOS ===');
 
     // Mostrar mensaje de éxito
-    error.value = 'Usuarios de prueba procesados. Revisa la consola para detalles. Ya puedes hacer login.';
+    error.value = 'Usuarios de prueba procesados. Si ves errores de "too-many-requests", espera unos minutos y vuelve a intentar.';
     
   } catch (err: any) {
     console.error('❌ Error general creando usuarios:', err);
