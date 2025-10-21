@@ -117,8 +117,8 @@
             <div class="flex justify-between">
               <span class="font-medium">Admin:</span>
               <div class="text-gray-600">
-                <div>admin@compartalia.com</div>
-                <div>123456</div>
+                <div>administrador@compartalia.com</div>
+                <div>admin123</div>
               </div>
             </div>
             <div class="flex justify-between">
@@ -132,7 +132,7 @@
           <div class="mt-3 flex space-x-2">
             <button
               type="button"
-              @click="fillCredentials('admin@compartalia.com', '123456')"
+              @click="fillCredentials('administrador@compartalia.com', 'admin123')"
               class="flex-1 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition"
             >
               Usar Admin
@@ -263,7 +263,7 @@ const createTestUsers = async () => {
     // Crear usuario admin usando Firebase directamente
     try {
       console.log('Creando usuario admin...');
-      const adminCredential = await createUserWithEmailAndPassword(auth, 'admin@compartalia.com', '123456');
+      const adminCredential = await createUserWithEmailAndPassword(auth, 'administrador@compartalia.com', 'admin123');
       console.log('✅ Usuario admin creado exitosamente:', adminCredential.user.email);
     } catch (err: any) {
       console.log('❌ Error creando admin:', err.code, err.message);
