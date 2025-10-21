@@ -110,6 +110,43 @@
           <span>Continuar con Google</span>
         </button>
 
+        <!-- Credenciales de prueba -->
+        <div v-if="isLogin" class="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h3 class="text-sm font-medium text-gray-700 mb-3">Credenciales de Prueba:</h3>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between">
+              <span class="font-medium">Admin:</span>
+              <div class="text-gray-600">
+                <div>admin@compartalia.com</div>
+                <div>123456</div>
+              </div>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-medium">Test:</span>
+              <div class="text-gray-600">
+                <div>test@compartalia.com</div>
+                <div>123456</div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 flex space-x-2">
+            <button
+              type="button"
+              @click="fillCredentials('admin@compartalia.com', '123456')"
+              class="flex-1 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            >
+              Usar Admin
+            </button>
+            <button
+              type="button"
+              @click="fillCredentials('test@compartalia.com', '123456')"
+              class="flex-1 px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition"
+            >
+              Usar Test
+            </button>
+          </div>
+        </div>
+
         <!-- Toggle between login and register -->
         <div class="text-center">
           <button
@@ -197,6 +234,12 @@ const toggleMode = () => {
   form.email = '';
   form.password = '';
   form.role = 'pasajero';
+};
+
+const fillCredentials = (email: string, password: string) => {
+  form.email = email;
+  form.password = password;
+  error.value = '';
 };
 
 const createTestUser = async () => {
