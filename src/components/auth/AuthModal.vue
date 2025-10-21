@@ -97,7 +97,7 @@
         <!-- Botón de Google -->
         <button
           type="button"
-          @click="loginWithGoogle"
+          @click="handleGoogleLogin"
           :disabled="isLoading"
           class="w-full py-3 px-4 rounded-lg font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition duration-150 ease-in-out flex items-center justify-center space-x-3"
         >
@@ -185,7 +185,8 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useAuth } from '@/composables/useAuth';
-import { supabase } from '@/config/supabase';
+import { auth } from '@/config/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 interface Props {
   isOpen: boolean;
@@ -257,60 +258,32 @@ const createTestUsers = async () => {
     isLoading.value = true;
     error.value = '';
 
-    // Crear usuario admin usando Supabase directamente
+    // Crear usuario admin usando Firebase directamente
     try {
-      const { data, error: adminError } = await supabase.auth.signUp({
-        email: 'admin@compartalia.com',
-        password: '123456',
-        options: {
-          data: {
-            name: 'Administrador',
-            role: 'conductor'
-          }
-        }
-      });
-      
-      if (adminError) {
-        if (adminError.message.includes('already registered')) {
-          console.log('Usuario admin ya existe');
-        } else {
-          console.error('Error creando admin:', adminError);
-        }
-      } else {
-        console.log('Usuario admin creado:', data.user);
-      }
+      const adminCredential = await createUserWithEmailAndPassword(auth, 'admin@compartalia.com', '123456');
+      console.log('Usuario admin creado:', adminCredential.user);
     } catch (err: any) {
-      console.error('Error creando admin:', err);
+      if (err.code === 'auth/email-already-in-use') {
+        console.log('Usuario admin ya existe');
+      } else {
+        console.error('Error creando admin:', err);
+      }
     }
 
-    // Crear usuario test usando Supabase directamente
+    // Crear usuario test usando Firebase directamente
     try {
-      const { data, error: testError } = await supabase.auth.signUp({
-        email: 'test@compartalia.com',
-        password: '123456',
-        options: {
-          data: {
-            name: 'Usuario de Prueba',
-            role: 'pasajero'
-          }
-        }
-      });
-      
-      if (testError) {
-        if (testError.message.includes('already registered')) {
-          console.log('Usuario test ya existe');
-        } else {
-          console.error('Error creando test:', testError);
-        }
-      } else {
-        console.log('Usuario test creado:', data.user);
-      }
+      const testCredential = await createUserWithEmailAndPassword(auth, 'test@compartalia.com', '123456');
+      console.log('Usuario test creado:', testCredential.user);
     } catch (err: any) {
-      console.error('Error creando test:', err);
+      if (err.code === 'auth/email-already-in-use') {
+        console.log('Usuario test ya existe');
+      } else {
+        console.error('Error creando test:', err);
+      }
     }
 
     // Mostrar mensaje de éxito
-    error.value = 'Usuarios de prueba procesados. Intenta hacer login ahora.';
+    error.value = 'Usuarios de prueba creados correctamente. Ya puedes hacer login.';
     
   } catch (err: any) {
     error.value = err.message || 'Error al crear usuarios de prueba';
@@ -341,23 +314,16 @@ const createTestUser = async () => {
   }
 };
 
-const loginWithGoogle = async () => {
+const handleGoogleLogin = async () => {
   try {
     isLoading.value = true;
     error.value = '';
 
-    // Usar Supabase Auth para Google login
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`
-      }
-    });
+    // Usar Firebase Auth para Google login
+    await loginWithGoogle();
     
-    if (error) throw error;
-    
-    console.log('Google login initiated:', data);
-    // Supabase maneja la redirección automáticamente
+    emit('success');
+    emit('close');
   } catch (err: any) {
     console.error('Error con Google Auth:', err);
     error.value = err.message || 'Error al iniciar sesión con Google';

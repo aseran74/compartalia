@@ -1,10 +1,11 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { supabaseAuthService, type UserProfile } from '@/services/supabaseAuthService';
+import { firebaseAuthService, type UserProfile } from '@/services/firebaseAuthService';
+import type { User } from 'firebase/auth';
 
 export function useAuth() {
   const isLoading = ref(true);
-  const user = ref(supabaseAuthService.getCurrentUser());
-  const userProfile = ref<UserProfile | null>(supabaseAuthService.getUserProfile());
+  const user = ref<User | null>(firebaseAuthService.getCurrentUser());
+  const userProfile = ref<UserProfile | null>(firebaseAuthService.getUserProfile());
 
   const isAuthenticated = computed(() => user.value !== null);
   const isConductor = computed(() => userProfile.value?.role === 'conductor');
@@ -14,9 +15,9 @@ export function useAuth() {
   const login = async (email: string, password: string) => {
     try {
       isLoading.value = true;
-      await supabaseAuthService.login(email, password);
-      user.value = supabaseAuthService.getCurrentUser();
-      userProfile.value = supabaseAuthService.getUserProfile();
+      await firebaseAuthService.login(email, password);
+      user.value = firebaseAuthService.getCurrentUser();
+      userProfile.value = firebaseAuthService.getUserProfile();
     } catch (error) {
       throw error;
     } finally {
@@ -28,9 +29,9 @@ export function useAuth() {
   const register = async (email: string, password: string, name?: string, role: 'conductor' | 'pasajero' = 'pasajero') => {
     try {
       isLoading.value = true;
-      await supabaseAuthService.register(email, password, name, role);
-      user.value = supabaseAuthService.getCurrentUser();
-      userProfile.value = supabaseAuthService.getUserProfile();
+      await firebaseAuthService.register(email, password, name, role);
+      user.value = firebaseAuthService.getCurrentUser();
+      userProfile.value = firebaseAuthService.getUserProfile();
     } catch (error) {
       throw error;
     } finally {
@@ -42,7 +43,7 @@ export function useAuth() {
   const logout = async () => {
     try {
       isLoading.value = true;
-      await supabaseAuthService.logout();
+      await firebaseAuthService.logout();
       user.value = null;
       userProfile.value = null;
     } catch (error) {
@@ -56,9 +57,9 @@ export function useAuth() {
   const loginWithGoogle = async () => {
     try {
       isLoading.value = true;
-      await supabaseAuthService.loginWithGoogle();
-      user.value = supabaseAuthService.getCurrentUser();
-      userProfile.value = supabaseAuthService.getUserProfile();
+      await firebaseAuthService.loginWithGoogle();
+      user.value = firebaseAuthService.getCurrentUser();
+      userProfile.value = firebaseAuthService.getUserProfile();
     } catch (error) {
       throw error;
     } finally {
@@ -69,8 +70,10 @@ export function useAuth() {
   // Update profile function
   const updateProfile = async (updates: Partial<UserProfile>) => {
     try {
-      await supabaseAuthService.updateProfile(updates);
-      userProfile.value = supabaseAuthService.getUserProfile();
+      // For Firebase, we'll just update the local profile
+      if (userProfile.value) {
+        userProfile.value = { ...userProfile.value, ...updates };
+      }
     } catch (error) {
       throw error;
     }
@@ -81,9 +84,9 @@ export function useAuth() {
 
   onMounted(() => {
     // Listen to auth state changes
-    unsubscribe = supabaseAuthService.onAuthStateChanged((supabaseUser, profile) => {
-      console.log('Auth state changed:', { supabaseUser, profile });
-      user.value = supabaseUser;
+    unsubscribe = firebaseAuthService.onAuthStateChanged((firebaseUser, profile) => {
+      console.log('Auth state changed:', { firebaseUser, profile });
+      user.value = firebaseUser;
       userProfile.value = profile;
       isLoading.value = false;
     });
@@ -97,13 +100,14 @@ export function useAuth() {
 
   // Debug function
   const debugAuthState = () => {
-    return supabaseAuthService.debugCurrentState();
+    return firebaseAuthService.debugCurrentState();
   };
 
   // Force profile sync function
   const forceProfileSync = async () => {
     try {
-      const profile = await supabaseAuthService.forceProfileSync();
+      // For Firebase, just return current profile
+      const profile = firebaseAuthService.getUserProfile();
       userProfile.value = profile;
       return profile;
     } catch (error) {

@@ -88,7 +88,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ChevronDownIcon, UserCircleIcon, SettingsIcon, InfoCircleIcon, LogoutIcon } from '@/icons'
-import { supabase } from '@/config/supabase'
+import { auth } from '@/config/firebase'
+import { signOut } from 'firebase/auth'
 
 interface UserProfile {
   id: string
@@ -116,18 +117,18 @@ const profile = ref<UserProfile | null>(null)
 const dropdownOpen = ref(false)
 const loading = ref(true)
 
-// Get current user ID from Supabase
+// Get current user ID from Firebase
 const getCurrentUserId = async (): Promise<string | null> => {
   try {
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) {
-      console.error('Error getting user:', error)
+    const user = auth.currentUser
+    if (!user) {
+      console.log('No user authenticated')
       return null
     }
-    console.log('Supabase auth state:', user)
-    console.log('User ID:', user?.id)
-    console.log('User email:', user?.email)
-    return user?.id || null
+    console.log('Firebase auth state:', user)
+    console.log('User ID:', user.uid)
+    console.log('User email:', user.email)
+    return user.uid
   } catch (error) {
     console.error('Error in getCurrentUserId:', error)
     return null
@@ -195,8 +196,7 @@ const closeDropdown = () => {
 // Handle logout
 const handleLogout = async () => {
   try {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    await signOut(auth)
     
     profile.value = null
     emit('logout')
