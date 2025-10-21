@@ -44,8 +44,7 @@ export function useAuth() {
     try {
       isLoading.value = true;
       await firebaseAuthService.logout();
-      user.value = null;
-      userProfile.value = null;
+      // No limpiar manualmente aquí, dejar que onAuthStateChanged lo maneje
     } catch (error) {
       throw error;
     } finally {

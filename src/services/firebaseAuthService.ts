@@ -29,6 +29,8 @@ class FirebaseAuthService {
     onAuthStateChanged(auth, async (user) => {
       console.log('=== FIREBASE AUTH STATE CHANGE ===');
       console.log('User:', user);
+      console.log('User UID:', user?.uid);
+      console.log('User Email:', user?.email);
       
       this.currentUser = user;
       
@@ -51,11 +53,16 @@ class FirebaseAuthService {
       
       console.log('Current user after change:', this.currentUser);
       console.log('User profile after change:', this.userProfile);
+      console.log('Number of callbacks to notify:', this.authStateCallbacks.length);
       
       // Notify all callbacks
-      this.authStateCallbacks.forEach(callback => {
-        console.log('Notifying callback with:', { user: this.currentUser, profile: this.userProfile });
-        callback(this.currentUser, this.userProfile);
+      this.authStateCallbacks.forEach((callback, index) => {
+        console.log(`Notifying callback ${index} with:`, { user: this.currentUser, profile: this.userProfile });
+        try {
+          callback(this.currentUser, this.userProfile);
+        } catch (error) {
+          console.error(`Error in callback ${index}:`, error);
+        }
       });
       console.log('=== END FIREBASE AUTH STATE CHANGE ===');
     });
