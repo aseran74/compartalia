@@ -258,34 +258,43 @@ const createTestUsers = async () => {
     isLoading.value = true;
     error.value = '';
 
+    console.log('=== CREANDO USUARIOS DE PRUEBA ===');
+
     // Crear usuario admin usando Firebase directamente
     try {
+      console.log('Creando usuario admin...');
       const adminCredential = await createUserWithEmailAndPassword(auth, 'admin@compartalia.com', '123456');
-      console.log('Usuario admin creado:', adminCredential.user);
+      console.log('✅ Usuario admin creado exitosamente:', adminCredential.user.email);
     } catch (err: any) {
+      console.log('❌ Error creando admin:', err.code, err.message);
       if (err.code === 'auth/email-already-in-use') {
-        console.log('Usuario admin ya existe');
+        console.log('ℹ️ Usuario admin ya existe');
       } else {
-        console.error('Error creando admin:', err);
+        console.error('❌ Error inesperado creando admin:', err);
       }
     }
 
     // Crear usuario test usando Firebase directamente
     try {
+      console.log('Creando usuario test...');
       const testCredential = await createUserWithEmailAndPassword(auth, 'test@compartalia.com', '123456');
-      console.log('Usuario test creado:', testCredential.user);
+      console.log('✅ Usuario test creado exitosamente:', testCredential.user.email);
     } catch (err: any) {
+      console.log('❌ Error creando test:', err.code, err.message);
       if (err.code === 'auth/email-already-in-use') {
-        console.log('Usuario test ya existe');
+        console.log('ℹ️ Usuario test ya existe');
       } else {
-        console.error('Error creando test:', err);
+        console.error('❌ Error inesperado creando test:', err);
       }
     }
 
+    console.log('=== FIN CREACIÓN USUARIOS ===');
+
     // Mostrar mensaje de éxito
-    error.value = 'Usuarios de prueba creados correctamente. Ya puedes hacer login.';
+    error.value = 'Usuarios de prueba procesados. Revisa la consola para detalles. Ya puedes hacer login.';
     
   } catch (err: any) {
+    console.error('❌ Error general creando usuarios:', err);
     error.value = err.message || 'Error al crear usuarios de prueba';
   } finally {
     isLoading.value = false;
