@@ -196,12 +196,17 @@ const closeDropdown = () => {
 // Handle logout
 const handleLogout = async () => {
   try {
+    console.log('=== USER PROFILE LOGOUT START ===')
+    console.log('Current user before logout:', auth.currentUser)
+    
     await signOut(auth)
     
     profile.value = null
     emit('logout')
     closeDropdown()
-    console.log('Logout successful')
+    
+    console.log('User profile logout successful')
+    console.log('=== USER PROFILE LOGOUT END ===')
   } catch (error) {
     console.error('Error logging out:', error)
   }

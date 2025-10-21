@@ -49,6 +49,15 @@ class FirebaseAuthService {
       } else {
         console.log('User logged out, clearing profile...');
         this.userProfile = null;
+        
+        // Force redirect to login if not on public pages
+        const currentPath = window.location.pathname;
+        const publicPaths = ['/', '/buscar-viajes', '/login', '/register'];
+        
+        if (!publicPaths.includes(currentPath)) {
+          console.log('Redirecting to login from:', currentPath);
+          window.location.href = '/login';
+        }
       }
       
       console.log('Current user after change:', this.currentUser);
