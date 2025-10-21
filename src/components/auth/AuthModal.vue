@@ -145,6 +145,16 @@
               Usar Test
             </button>
           </div>
+          <div class="mt-3 flex space-x-2">
+            <button
+              type="button"
+              @click="createTestUsers()"
+              :disabled="isLoading"
+              class="w-full px-3 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600 transition disabled:opacity-50"
+            >
+              {{ isLoading ? 'Creando...' : 'Crear Usuarios de Prueba' }}
+            </button>
+          </div>
         </div>
 
         <!-- Toggle between login and register -->
@@ -240,6 +250,45 @@ const fillCredentials = (email: string, password: string) => {
   form.email = email;
   form.password = password;
   error.value = '';
+};
+
+const createTestUsers = async () => {
+  try {
+    isLoading.value = true;
+    error.value = '';
+
+    // Crear usuario admin
+    try {
+      await register('admin@compartalia.com', '123456', 'Administrador', 'conductor');
+      console.log('Usuario admin creado');
+    } catch (err: any) {
+      if (err.message.includes('already registered')) {
+        console.log('Usuario admin ya existe');
+      } else {
+        console.error('Error creando admin:', err);
+      }
+    }
+
+    // Crear usuario test
+    try {
+      await register('test@compartalia.com', '123456', 'Usuario de Prueba', 'pasajero');
+      console.log('Usuario test creado');
+    } catch (err: any) {
+      if (err.message.includes('already registered')) {
+        console.log('Usuario test ya existe');
+      } else {
+        console.error('Error creando test:', err);
+      }
+    }
+
+    // Mostrar mensaje de éxito
+    error.value = 'Usuarios de prueba creados correctamente. Ya puedes hacer login.';
+    
+  } catch (err: any) {
+    error.value = err.message || 'Error al crear usuarios de prueba';
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const createTestUser = async () => {
