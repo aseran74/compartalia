@@ -257,32 +257,60 @@ const createTestUsers = async () => {
     isLoading.value = true;
     error.value = '';
 
-    // Crear usuario admin
+    // Crear usuario admin usando Supabase directamente
     try {
-      await register('admin@compartalia.com', '123456', 'Administrador', 'conductor');
-      console.log('Usuario admin creado');
-    } catch (err: any) {
-      if (err.message.includes('already registered')) {
-        console.log('Usuario admin ya existe');
+      const { data, error: adminError } = await supabase.auth.signUp({
+        email: 'admin@compartalia.com',
+        password: '123456',
+        options: {
+          data: {
+            name: 'Administrador',
+            role: 'conductor'
+          }
+        }
+      });
+      
+      if (adminError) {
+        if (adminError.message.includes('already registered')) {
+          console.log('Usuario admin ya existe');
+        } else {
+          console.error('Error creando admin:', adminError);
+        }
       } else {
-        console.error('Error creando admin:', err);
+        console.log('Usuario admin creado:', data.user);
       }
+    } catch (err: any) {
+      console.error('Error creando admin:', err);
     }
 
-    // Crear usuario test
+    // Crear usuario test usando Supabase directamente
     try {
-      await register('test@compartalia.com', '123456', 'Usuario de Prueba', 'pasajero');
-      console.log('Usuario test creado');
-    } catch (err: any) {
-      if (err.message.includes('already registered')) {
-        console.log('Usuario test ya existe');
+      const { data, error: testError } = await supabase.auth.signUp({
+        email: 'test@compartalia.com',
+        password: '123456',
+        options: {
+          data: {
+            name: 'Usuario de Prueba',
+            role: 'pasajero'
+          }
+        }
+      });
+      
+      if (testError) {
+        if (testError.message.includes('already registered')) {
+          console.log('Usuario test ya existe');
+        } else {
+          console.error('Error creando test:', testError);
+        }
       } else {
-        console.error('Error creando test:', err);
+        console.log('Usuario test creado:', data.user);
       }
+    } catch (err: any) {
+      console.error('Error creando test:', err);
     }
 
     // Mostrar mensaje de éxito
-    error.value = 'Usuarios de prueba creados correctamente. Ya puedes hacer login.';
+    error.value = 'Usuarios de prueba procesados. Intenta hacer login ahora.';
     
   } catch (err: any) {
     error.value = err.message || 'Error al crear usuarios de prueba';

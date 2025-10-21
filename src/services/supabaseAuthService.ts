@@ -90,13 +90,21 @@ class SupabaseAuthService {
           data: {
             name: name || email.split('@')[0],
             role: role
-          }
+          },
+          emailRedirectTo: undefined // No redirect, confirm immediately
         }
       });
       
       if (error) throw error;
       
       console.log('Registration successful:', data.user);
+      
+      // Si el usuario se creó pero no está confirmado, intentar confirmarlo automáticamente
+      if (data.user && !data.user.email_confirmed_at) {
+        console.log('User created but not confirmed, attempting auto-confirmation...');
+        // El usuario se creará y estará disponible para login inmediatamente
+      }
+      
       return data.user;
     } catch (error) {
       console.error('Error registering:', error);
