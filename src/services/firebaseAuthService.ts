@@ -5,9 +5,9 @@ import {
   signOut, 
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup,
-  User
+  signInWithPopup
 } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 
 export interface UserProfile {
   id: string;
