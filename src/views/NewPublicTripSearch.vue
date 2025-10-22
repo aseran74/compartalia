@@ -14,6 +14,11 @@
               Inicio
             </router-link>
             
+            <!-- Debug info (temporal) -->
+            <div v-if="user" class="text-xs text-gray-500 mr-4">
+              Debug: {{ user.email }} | {{ userProfile?.name || 'Sin perfil' }}
+            </div>
+            
             <!-- Si el usuario está logueado -->
             <div v-if="user" class="flex items-center space-x-4">
               <router-link to="/dashboard" class="text-gray-600 hover:text-green-600 font-medium">
@@ -425,19 +430,31 @@ const resetSearch = () => {
 // Funciones de autenticación
 const checkAuth = async () => {
   try {
-    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    console.log('🔍 Verificando autenticación...')
+    const { data: { user: currentUser }, error } = await supabase.auth.getUser()
+    
+    if (error) {
+      console.error('❌ Error obteniendo usuario:', error)
+      return
+    }
+    
+    console.log('👤 Usuario actual:', currentUser)
     user.value = currentUser
     
     if (currentUser) {
+      console.log('📋 Obteniendo perfil del usuario...')
       await fetchUserProfile(currentUser.id)
+    } else {
+      console.log('❌ No hay usuario logueado')
     }
   } catch (error) {
-    console.error('Error checking auth:', error)
+    console.error('❌ Error checking auth:', error)
   }
 }
 
 const fetchUserProfile = async (userId: string) => {
   try {
+    console.log('📋 Buscando perfil para usuario:', userId)
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -445,13 +462,28 @@ const fetchUserProfile = async (userId: string) => {
       .single()
     
     if (error) {
-      console.error('Error fetching profile:', error)
+      console.error('❌ Error obteniendo perfil:', error)
+      // Si no existe el perfil, crear uno básico
+      userProfile.value = {
+        id: userId,
+        name: user.value?.user_metadata?.name || user.value?.email?.split('@')[0] || 'Usuario',
+        email: user.value?.email || '',
+        avatar_url: user.value?.user_metadata?.avatar_url || null
+      }
       return
     }
     
+    console.log('✅ Perfil obtenido:', data)
     userProfile.value = data
   } catch (error) {
-    console.error('Error fetching profile:', error)
+    console.error('❌ Error fetching profile:', error)
+    // Fallback a datos básicos del usuario
+    userProfile.value = {
+      id: userId,
+      name: user.value?.user_metadata?.name || user.value?.email?.split('@')[0] || 'Usuario',
+      email: user.value?.email || '',
+      avatar_url: user.value?.user_metadata?.avatar_url || null
+    }
   }
 }
 
@@ -494,12 +526,22 @@ onMounted(async () => {
   
   // Escuchar cambios de autenticación
   const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log('🔄 Cambio de autenticación:', event, session?.user?.email)
+    
     if (event === 'SIGNED_IN' && session?.user) {
+      console.log('✅ Usuario logueado:', session.user.email)
       user.value = session.user
       await fetchUserProfile(session.user.id)
     } else if (event === 'SIGNED_OUT') {
+      console.log('❌ Usuario deslogueado')
       user.value = null
       userProfile.value = null
+    } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+      console.log('🔄 Token refrescado para:', session.user.email)
+      user.value = session.user
+      if (!userProfile.value) {
+        await fetchUserProfile(session.user.id)
+      }
     }
   })
   
