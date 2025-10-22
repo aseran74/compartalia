@@ -230,15 +230,26 @@
                     <p class="text-sm text-body-color">
                       {{ formatTime(result.trip.departure_time) }}
                     </p>
-                    <!-- Indicador de tipo de coincidencia -->
-                    <div class="mt-1">
+                    <!-- Indicadores -->
+                    <div class="mt-1 flex flex-wrap items-center gap-2">
+                      <!-- Tipo de viaje -->
+                      <span 
+                        class="inline-block px-2 py-1 text-xs rounded-full font-medium"
+                        :class="getTripTypeClass(result.trip)"
+                      >
+                        {{ getTripTypeLabel(result.trip) }}
+                      </span>
+                      
+                      <!-- Tipo de coincidencia -->
                       <span 
                         class="inline-block px-2 py-1 text-xs rounded-full"
                         :class="getMatchTypeClass(result.matchType)"
                       >
                         {{ getMatchTypeLabel(result.matchType) }}
                       </span>
-                      <span v-if="result.distance" class="ml-2 text-xs text-gray-500">
+                      
+                      <!-- Distancia -->
+                      <span v-if="result.distance" class="text-xs text-gray-500">
                         {{ result.distance.toFixed(1) }} km
                       </span>
                     </div>
@@ -351,7 +362,12 @@
                   </div>
                   <div>
                     <span class="text-gray-600 dark:text-gray-400">Tipo:</span>
-                    <span class="ml-2 text-black dark:text-white">{{ getTripTypeLabel(selectedTrip) }}</span>
+                    <span 
+                      class="ml-2 inline-block px-2 py-1 text-xs rounded-full font-medium"
+                      :class="getTripTypeClass(selectedTrip)"
+                    >
+                      {{ getTripTypeLabel(selectedTrip) }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -625,13 +641,30 @@ const confirmBooking = async () => {
 const getTripTypeLabel = (trip: any) => {
   if (trip.route_data?.pricing_type) {
     switch (trip.route_data.pricing_type) {
-      case 'daily': return 'Viaje diario'
-      case 'weekly': return 'Viaje semanal'
-      case 'monthly': return 'Viaje mensual'
-      default: return 'Viaje único'
+      case 'daily': return 'Diario'
+      case 'weekly': return 'Semanal'
+      case 'monthly': return 'Mensual'
+      default: return 'Único'
     }
   }
-  return 'Viaje único'
+  return 'Único'
+}
+
+// Función para obtener las clases CSS del tipo de viaje
+const getTripTypeClass = (trip: any) => {
+  if (trip.route_data?.pricing_type) {
+    switch (trip.route_data.pricing_type) {
+      case 'daily': 
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+      case 'weekly': 
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+      case 'monthly': 
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+      default: 
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+    }
+  }
+  return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
 }
 
 // Funciones auxiliares
