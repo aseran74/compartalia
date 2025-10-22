@@ -23,11 +23,14 @@
         <!-- Formulario de Búsqueda -->
         <div class="mb-8 rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
           <form @submit.prevent="searchTrips" class="space-y-6">
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <!-- Origen -->
-              <div>
-                <label class="mb-2.5 block text-black dark:text-white">
-                  Origen
+            <!-- Sección de Origen -->
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-black dark:text-white mb-4">🚗 ¿Desde dónde viajas?</h3>
+              
+              <!-- Búsqueda por dirección exacta -->
+              <div class="mb-4">
+                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  O escribe una dirección exacta:
                 </label>
                 <div class="relative">
                   <input
@@ -36,49 +39,60 @@
                     @focus="showOriginSuggestions = true"
                     @blur="hideOriginSuggestions"
                     type="text"
-                    placeholder="📍 Ubicación exacta del origen"
+                    placeholder="📍 Ej: Calle Gran Vía, 1, Madrid"
                     class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                    required
                   />
                   <!-- Sugerencias de origen -->
                   <div 
-                    v-if="showOriginSuggestions && (originSuggestions.length > 0 || madridCities.length > 0)"
+                    v-if="showOriginSuggestions && originSuggestions.length > 0"
                     class="absolute z-10 mt-1 w-full bg-white border border-stroke rounded-lg shadow-lg max-h-60 overflow-auto dark:border-strokedark dark:bg-boxdark"
                   >
-                    <!-- Ciudades del extrarradio -->
-                    <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b dark:bg-gray-800">
-                      Ciudades del extrarradio de Madrid:
-                    </div>
-                    <div
-                      v-for="city in filteredMadridCities"
-                      :key="city"
-                      @mousedown="selectOriginCity(city)"
-                      class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 dark:hover:bg-gray-700 dark:border-strokedark"
-                    >
-                      <div class="font-medium text-black dark:text-white">{{ city }}</div>
-                    </div>
-                    
-                    <!-- Sugerencias de geocodificación -->
-                    <div v-if="originSuggestions.length > 0" class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b dark:bg-gray-800">
-                      Sugerencias de ubicación:
-                    </div>
-                    <div
-                      v-for="suggestion in originSuggestions"
-                      :key="suggestion.id"
-                      @mousedown="selectOriginSuggestion(suggestion)"
-                      class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 dark:hover:bg-gray-700 dark:border-strokedark"
-                    >
-                      <div class="font-medium text-black dark:text-white">{{ suggestion.name }}</div>
-                      <div class="text-sm text-body-color">{{ suggestion.address }}</div>
+                    <div class="p-2">
+                      <div
+                        v-for="suggestion in originSuggestions"
+                        :key="suggestion.id"
+                        @click="selectOrigin(suggestion)"
+                        class="p-2 hover:bg-gray-100 rounded cursor-pointer dark:hover:bg-gray-700"
+                      >
+                        <div class="font-medium text-black dark:text-white">{{ suggestion.name }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ suggestion.address }}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Destino -->
+              <!-- Orígenes predefinidos -->
               <div>
-                <label class="mb-2.5 block text-black dark:text-white">
-                  Destino
+                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  O selecciona una ciudad del extrarradio:
+                </label>
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  <button
+                    v-for="city in madridCities"
+                    :key="city"
+                    @click="selectOriginFromList(city)"
+                    :class="[
+                      'p-3 rounded-lg border text-center transition-all duration-200',
+                      searchForm.origin === city
+                        ? 'border-primary bg-primary text-white'
+                        : 'border-stroke bg-white hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:hover:bg-gray-700'
+                    ]"
+                  >
+                    <div class="font-medium text-sm">{{ city }}</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección de Destino -->
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-black dark:text-white mb-4">🎯 ¿A dónde vas?</h3>
+              
+              <!-- Búsqueda por dirección exacta -->
+              <div class="mb-4">
+                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  O escribe una dirección exacta:
                 </label>
                 <div class="relative">
                   <input
@@ -87,45 +101,54 @@
                     @focus="showDestinationSuggestions = true"
                     @blur="hideDestinationSuggestions"
                     type="text"
-                    placeholder="🎯 Destino"
+                    placeholder="🎯 Ej: Plaza de Callao, Madrid"
                     class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                    required
                   />
                   <!-- Sugerencias de destino -->
                   <div 
-                    v-if="showDestinationSuggestions && (destinationSuggestions.length > 0 || madridDestinations.length > 0)"
+                    v-if="showDestinationSuggestions && destinationSuggestions.length > 0"
                     class="absolute z-10 mt-1 w-full bg-white border border-stroke rounded-lg shadow-lg max-h-60 overflow-auto dark:border-strokedark dark:bg-boxdark"
                   >
-                    <!-- Destinos populares -->
-                    <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b dark:bg-gray-800">
-                      Destinos populares en Madrid:
-                    </div>
-                    <div
-                      v-for="destination in filteredMadridDestinations"
-                      :key="destination"
-                      @mousedown="selectDestinationPlace(destination)"
-                      class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 dark:hover:bg-gray-700 dark:border-strokedark"
-                    >
-                      <div class="font-medium text-black dark:text-white">{{ destination }}</div>
-                    </div>
-                    
-                    <!-- Sugerencias de geocodificación -->
-                    <div v-if="destinationSuggestions.length > 0" class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b dark:bg-gray-800">
-                      Sugerencias de ubicación:
-                    </div>
-                    <div
-                      v-for="suggestion in destinationSuggestions"
-                      :key="suggestion.id"
-                      @mousedown="selectDestinationSuggestion(suggestion)"
-                      class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 dark:hover:bg-gray-700 dark:border-strokedark"
-                    >
-                      <div class="font-medium text-black dark:text-white">{{ suggestion.name }}</div>
-                      <div class="text-sm text-body-color">{{ suggestion.address }}</div>
+                    <div class="p-2">
+                      <div
+                        v-for="suggestion in destinationSuggestions"
+                        :key="suggestion.id"
+                        @click="selectDestination(suggestion)"
+                        class="p-2 hover:bg-gray-100 rounded cursor-pointer dark:hover:bg-gray-700"
+                      >
+                        <div class="font-medium text-black dark:text-white">{{ suggestion.name }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ suggestion.address }}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <!-- Destinos predefinidos -->
+              <div>
+                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  O selecciona un destino popular:
+                </label>
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  <button
+                    v-for="destination in madridDestinations"
+                    :key="destination"
+                    @click="selectDestinationFromList(destination)"
+                    :class="[
+                      'p-3 rounded-lg border text-center transition-all duration-200',
+                      searchForm.destination === destination
+                        ? 'border-primary bg-primary text-white'
+                        : 'border-stroke bg-white hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:hover:bg-gray-700'
+                    ]"
+                  >
+                    <div class="font-medium text-sm">{{ destination }}</div>
+                  </button>
+                </div>
+              </div>
             </div>
+
+            <!-- Filtros adicionales -->
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
               <!-- Fecha -->
@@ -325,6 +348,7 @@
         </div>
       </main>
     </div>
+
   </div>
 </template>
 
@@ -369,6 +393,7 @@ const originSuggestions = ref<any[]>([])
 const destinationSuggestions = ref<any[]>([])
 const showOriginSuggestions = ref(false)
 const showDestinationSuggestions = ref(false)
+
 
 // Ciudades del extrarradio de Madrid
 const madridCities = ref([
@@ -527,6 +552,34 @@ const hideDestinationSuggestions = () => {
   setTimeout(() => {
     showDestinationSuggestions.value = false
   }, 200)
+}
+
+// Función para seleccionar origen desde la lista de ciudades
+const selectOriginFromList = (city: string) => {
+  searchForm.origin = city
+  showOriginSuggestions.value = false
+  searchTrips()
+}
+
+// Función para seleccionar origen desde sugerencias de geocodificación
+const selectOrigin = (suggestion: any) => {
+  searchForm.origin = suggestion.name
+  showOriginSuggestions.value = false
+  searchTrips()
+}
+
+// Función para seleccionar destino desde la lista de destinos
+const selectDestinationFromList = (destination: string) => {
+  searchForm.destination = destination
+  showDestinationSuggestions.value = false
+  searchTrips()
+}
+
+// Función para seleccionar destino desde sugerencias de geocodificación
+const selectDestination = (suggestion: any) => {
+  searchForm.destination = suggestion.name
+  showDestinationSuggestions.value = false
+  searchTrips()
 }
 
 // Funciones auxiliares
