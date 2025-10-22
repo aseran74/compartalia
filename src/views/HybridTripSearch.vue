@@ -105,8 +105,6 @@
 
             <!-- Filtros adicionales -->
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
               <!-- Fecha -->
               <div>
                 <label class="mb-2.5 block text-black dark:text-white">
@@ -151,30 +149,30 @@
               </div>
             </div>
 
-          <!-- Opciones de búsqueda -->
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-              <label class="flex items-center">
-                <input
-                  v-model="searchOptions.useGeolocation"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span class="ml-2 text-sm text-gray-700">Usar geolocalización</span>
-              </label>
-              <div class="flex items-center space-x-2">
-                <label class="text-sm text-gray-700">Radio:</label>
-                <select
-                  v-model="searchOptions.maxDistanceKm"
-                  class="rounded border-gray-300 text-sm"
-                >
-                  <option value="5">5 km</option>
-                  <option value="10">10 km</option>
-                  <option value="20">20 km</option>
-                </select>
+            <!-- Opciones de búsqueda -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4">
+                <label class="flex items-center">
+                  <input
+                    v-model="searchOptions.useGeolocation"
+                    type="checkbox"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Usar geolocalización</span>
+                </label>
+                <div class="flex items-center space-x-2">
+                  <label class="text-sm text-gray-700">Radio:</label>
+                  <select
+                    v-model="searchOptions.maxDistanceKm"
+                    class="rounded border-gray-300 text-sm"
+                  >
+                    <option value="5">5 km</option>
+                    <option value="10">10 km</option>
+                    <option value="20">20 km</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
 
             <!-- Botón de Búsqueda -->
             <div class="text-center">
