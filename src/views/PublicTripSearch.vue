@@ -333,9 +333,7 @@ const destinationSuggestions = ref([])
 // Fecha actual
 const today = new Date().toISOString().split('T')[0]
 
-// Toast system
-// const { warning } = useToast()
-
+// Toast system - using simple alert instead of useToast
 const warning = (message: string) => {
   alert(message)
 }
