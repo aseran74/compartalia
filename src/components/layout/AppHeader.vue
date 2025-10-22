@@ -8,7 +8,7 @@
       >
         <button
           @click="handleToggle"
-          class="flex items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 dark:text-gray-400 lg:h-11 lg:w-11 lg:border"
+          class="flex items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 dark:text-gray-400 lg:h-11 lg:w-11 lg:border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
           :class="[
             isMobileOpen
               ? 'lg:bg-transparent dark:lg:bg-transparent bg-gray-100 dark:bg-gray-800'
@@ -17,7 +17,7 @@
         >
           <svg
             v-if="isMobileOpen"
-            class="fill-current"
+            class="fill-current w-6 h-6 text-gray-700 dark:text-gray-300"
             width="24"
             height="24"
             viewBox="0 0 24 24"
@@ -33,6 +33,7 @@
           </svg>
           <svg
             v-else
+            class="w-4 h-3 text-gray-700 dark:text-gray-300"
             width="16"
             height="12"
             viewBox="0 0 16 12"
@@ -117,3 +118,38 @@ const toggleApplicationMenu = () => {
   isApplicationMenuOpen.value = !isApplicationMenuOpen.value
 }
 </script>
+
+<style scoped>
+/* Estilos específicos para el botón de hamburguesa/X */
+button svg {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Asegurar que el SVG de la X se vea correctamente */
+button svg[viewBox="0 0 24 24"] {
+  width: 24px !important;
+  height: 24px !important;
+  fill: currentColor !important;
+}
+
+/* Asegurar que el SVG del menú hamburguesa se vea correctamente */
+button svg[viewBox="0 0 16 12"] {
+  width: 16px !important;
+  height: 12px !important;
+  fill: currentColor !important;
+}
+
+/* Hover effects mejorados */
+button:hover svg {
+  transform: scale(1.05);
+}
+
+/* Dark mode adjustments */
+.dark button svg {
+  color: #d1d5db !important;
+}
+
+.dark button:hover svg {
+  color: #f9fafb !important;
+}
+</style>
