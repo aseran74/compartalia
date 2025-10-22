@@ -104,7 +104,7 @@ export class SimpleHybridService {
   }
 
   /**
-   * Normalizar búsquedas de Madrid
+   * Normalizar búsquedas de Madrid y destinos financieros
    */
   private normalizeMadridSearch(searchTerm: string): string {
     const term = searchTerm.toLowerCase().trim()
@@ -115,6 +115,23 @@ export class SimpleHybridService {
     
     if (term.includes('madrid centro')) {
       return 'madrid centro'
+    }
+    
+    // Normalizar destinos financieros
+    if (term.includes('santander') && term.includes('boadilla')) {
+      return 'Ciudad financiera Santander (Boadilla)'
+    }
+    
+    if (term.includes('bbva') && term.includes('tablas')) {
+      return 'Ciudad financiera BBVA (Las Tablas)'
+    }
+    
+    if (term.includes('santander')) {
+      return 'Ciudad financiera Santander (Boadilla)'
+    }
+    
+    if (term.includes('bbva')) {
+      return 'Ciudad financiera BBVA (Las Tablas)'
     }
     
     if (term.includes('madrid') && term.length > 6) {

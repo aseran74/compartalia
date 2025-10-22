@@ -1,141 +1,174 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-4">
-          <div class="flex items-center">
-            <img src="/images/logo/Compartalia2.png" alt="Compartalia Logo" class="h-8 w-auto object-contain" />
-          </div>
-          <div class="flex items-center space-x-4">
-            <button 
-              @click="$router.push('/login')"
-              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Iniciar Sesión
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
-
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <AppSidebar />
+    
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">
-          🚗 Buscar Viajes
-        </h1>
-        <p class="text-xl text-gray-600">
-          Encuentra viajes compatibles con tu ruta
-        </p>
-      </div>
+    <div class="flex flex-1 flex-col overflow-hidden" :class="{ 'ml-[90px]': !isExpanded, 'ml-[280px]': isExpanded }">
+      <!-- Header -->
+      <AppHeader />
+      
+      <!-- Page Content -->
+      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6 xl:p-7.5 dark:bg-boxdark">
+        <!-- Header -->
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-black dark:text-white">
+            Buscar Viajes
+          </h1>
+          <p class="text-sm font-medium text-body-color">
+            Encuentra viajes compatibles con tu ruta
+          </p>
+        </div>
 
-      <!-- Search Form -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <form @submit.prevent="searchTrips" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Origen -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                🚗 Origen
-              </label>
-              <div class="relative">
-                <input
-                  v-model="searchForm.origin"
-                  @input="onOriginInput"
-                  @focus="showOriginSuggestions = true"
-                  @blur="hideOriginSuggestions"
-                  type="text"
-                  placeholder="📍 Ubicación exacta del origen"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-                <!-- Sugerencias de origen -->
-                <div 
-                  v-if="showOriginSuggestions && (originSuggestions.length > 0 || madridCities.length > 0)"
-                  class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
-                >
-                  <!-- Ciudades del extrarradio -->
-                  <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b">
-                    Ciudades del extrarradio de Madrid:
-                  </div>
-                  <div
-                    v-for="city in filteredMadridCities"
-                    :key="city"
-                    @mousedown="selectOriginCity(city)"
-                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+        <!-- Formulario de Búsqueda -->
+        <div class="mb-8 rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+          <form @submit.prevent="searchTrips" class="space-y-6">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <!-- Origen -->
+              <div>
+                <label class="mb-2.5 block text-black dark:text-white">
+                  Origen
+                </label>
+                <div class="relative">
+                  <input
+                    v-model="searchForm.origin"
+                    @input="onOriginInput"
+                    @focus="showOriginSuggestions = true"
+                    @blur="hideOriginSuggestions"
+                    type="text"
+                    placeholder="¿Desde dónde viajas?"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    required
+                  />
+                  <!-- Sugerencias de origen -->
+                  <div 
+                    v-if="showOriginSuggestions && (originSuggestions.length > 0 || madridCities.length > 0)"
+                    class="absolute z-10 mt-1 w-full bg-white border border-stroke rounded-lg shadow-lg max-h-60 overflow-auto dark:border-strokedark dark:bg-boxdark"
                   >
-                    <div class="font-medium">{{ city }}</div>
+                    <!-- Ciudades del extrarradio -->
+                    <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b dark:bg-gray-800">
+                      Ciudades del extrarradio de Madrid:
+                    </div>
+                    <div
+                      v-for="city in filteredMadridCities"
+                      :key="city"
+                      @mousedown="selectOriginCity(city)"
+                      class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 dark:hover:bg-gray-700 dark:border-strokedark"
+                    >
+                      <div class="font-medium text-black dark:text-white">{{ city }}</div>
+                    </div>
+                    
+                    <!-- Sugerencias de geocodificación -->
+                    <div v-if="originSuggestions.length > 0" class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b dark:bg-gray-800">
+                      Sugerencias de ubicación:
+                    </div>
+                    <div
+                      v-for="suggestion in originSuggestions"
+                      :key="suggestion.id"
+                      @mousedown="selectOriginSuggestion(suggestion)"
+                      class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 dark:hover:bg-gray-700 dark:border-strokedark"
+                    >
+                      <div class="font-medium text-black dark:text-white">{{ suggestion.name }}</div>
+                      <div class="text-sm text-body-color">{{ suggestion.address }}</div>
+                    </div>
                   </div>
-                  
-                  <!-- Sugerencias de geocodificación -->
-                  <div v-if="originSuggestions.length > 0" class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b">
-                    Sugerencias de ubicación:
-                  </div>
-                  <div
-                    v-for="suggestion in originSuggestions"
-                    :key="suggestion.id"
-                    @mousedown="selectOriginSuggestion(suggestion)"
-                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                </div>
+              </div>
+
+              <!-- Destino -->
+              <div>
+                <label class="mb-2.5 block text-black dark:text-white">
+                  Destino
+                </label>
+                <div class="relative">
+                  <input
+                    v-model="searchForm.destination"
+                    @input="onDestinationInput"
+                    @focus="showDestinationSuggestions = true"
+                    @blur="hideDestinationSuggestions"
+                    type="text"
+                    placeholder="¿Hacia dónde vas?"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    required
+                  />
+                  <!-- Sugerencias de destino -->
+                  <div 
+                    v-if="showDestinationSuggestions && (destinationSuggestions.length > 0 || madridDestinations.length > 0)"
+                    class="absolute z-10 mt-1 w-full bg-white border border-stroke rounded-lg shadow-lg max-h-60 overflow-auto dark:border-strokedark dark:bg-boxdark"
                   >
-                    <div class="font-medium">{{ suggestion.name }}</div>
-                    <div class="text-sm text-gray-600">{{ suggestion.address }}</div>
+                    <!-- Destinos populares -->
+                    <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b dark:bg-gray-800">
+                      Destinos populares en Madrid:
+                    </div>
+                    <div
+                      v-for="destination in filteredMadridDestinations"
+                      :key="destination"
+                      @mousedown="selectDestinationPlace(destination)"
+                      class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 dark:hover:bg-gray-700 dark:border-strokedark"
+                    >
+                      <div class="font-medium text-black dark:text-white">{{ destination }}</div>
+                    </div>
+                    
+                    <!-- Sugerencias de geocodificación -->
+                    <div v-if="destinationSuggestions.length > 0" class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b dark:bg-gray-800">
+                      Sugerencias de ubicación:
+                    </div>
+                    <div
+                      v-for="suggestion in destinationSuggestions"
+                      :key="suggestion.id"
+                      @mousedown="selectDestinationSuggestion(suggestion)"
+                      class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 dark:hover:bg-gray-700 dark:border-strokedark"
+                    >
+                      <div class="font-medium text-black dark:text-white">{{ suggestion.name }}</div>
+                      <div class="text-sm text-body-color">{{ suggestion.address }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Destino -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                🎯 Destino
-              </label>
-              <div class="relative">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <!-- Fecha -->
+              <div>
+                <label class="mb-2.5 block text-black dark:text-white">
+                  Fecha
+                </label>
                 <input
-                  v-model="searchForm.destination"
-                  @input="onDestinationInput"
-                  @focus="showDestinationSuggestions = true"
-                  @blur="hideDestinationSuggestions"
-                  type="text"
-                  placeholder="Destinos populares en Madrid"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  v-model="searchForm.date"
+                  type="date"
+                  class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   required
                 />
-                <!-- Sugerencias de destino -->
-                <div 
-                  v-if="showDestinationSuggestions && (destinationSuggestions.length > 0 || madridDestinations.length > 0)"
-                  class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
+              </div>
+
+              <!-- Hora -->
+              <div>
+                <label class="mb-2.5 block text-black dark:text-white">
+                  Hora (opcional)
+                </label>
+                <input
+                  v-model="searchForm.time"
+                  type="time"
+                  class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                />
+              </div>
+
+              <!-- Pasajeros -->
+              <div>
+                <label class="mb-2.5 block text-black dark:text-white">
+                  Pasajeros
+                </label>
+                <select
+                  v-model="searchForm.passengers"
+                  class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 >
-                  <!-- Destinos populares -->
-                  <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b">
-                    Destinos populares en Madrid:
-                  </div>
-                  <div
-                    v-for="destination in filteredMadridDestinations"
-                    :key="destination"
-                    @mousedown="selectDestinationPlace(destination)"
-                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                  >
-                    <div class="font-medium">{{ destination }}</div>
-                  </div>
-                  
-                  <!-- Sugerencias de geocodificación -->
-                  <div v-if="destinationSuggestions.length > 0" class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b">
-                    Sugerencias de ubicación:
-                  </div>
-                  <div
-                    v-for="suggestion in destinationSuggestions"
-                    :key="suggestion.id"
-                    @mousedown="selectDestinationSuggestion(suggestion)"
-                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                  >
-                    <div class="font-medium">{{ suggestion.name }}</div>
-                    <div class="text-sm text-gray-600">{{ suggestion.address }}</div>
-                  </div>
-                </div>
+                  <option value="1">1 pasajero</option>
+                  <option value="2">2 pasajeros</option>
+                  <option value="3">3 pasajeros</option>
+                  <option value="4">4 pasajeros</option>
+                </select>
               </div>
             </div>
-          </div>
 
           <!-- Opciones de búsqueda -->
           <div class="flex items-center justify-between">
@@ -274,15 +307,26 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
-import { HybridTripService, type SearchResult } from '@/services/hybridTripService'
+import { useRouter } from 'vue-router'
+import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridService'
+import { useSidebar } from '@/composables/useSidebar'
+import AppSidebar from '@/components/layout/AppSidebar.vue'
+import AppHeader from '@/components/layout/AppHeader.vue'
 
-// Servicio híbrido
-const hybridService = new HybridTripService()
+// Servicio híbrido simplificado
+const hybridService = new SimpleHybridService()
+
+// Router y sidebar
+const router = useRouter()
+const { isExpanded } = useSidebar()
 
 // Estado del formulario
 const searchForm = reactive({
   origin: '',
-  destination: ''
+  destination: '',
+  date: '',
+  time: '',
+  passengers: 1
 })
 
 // Opciones de búsqueda
@@ -337,7 +381,9 @@ const madridDestinations = ref([
   'Cuatro Torres',
   'Universidad Complutense',
   'Hospital La Paz',
-  'Madrid Centro'
+  'Madrid Centro',
+  'Ciudad financiera Santander (Boadilla)',
+  'Ciudad financiera BBVA (Las Tablas)'
 ])
 
 // Propiedades computadas para filtrar ciudades y destinos
