@@ -195,113 +195,134 @@
             </div>
           </div>
 
-          <div class="flex justify-center">
-            <button
-              type="submit"
-              :disabled="isLoading"
-              class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
-            >
-              <span v-if="isLoading" class="animate-spin mr-2">⏳</span>
-              {{ isLoading ? 'Buscando...' : '🔍 Buscar Viajes' }}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Results -->
-      <div v-if="hasSearched" class="space-y-6">
-        <div class="text-center">
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">
-            Resultados de la Búsqueda
-          </h2>
-          <p class="text-gray-600">
-            {{ searchResults.length }} viajes encontrados
-          </p>
+            <!-- Botón de Búsqueda -->
+            <div class="text-center">
+              <button
+                type="submit"
+                :disabled="isLoading"
+                class="inline-flex items-center justify-center rounded-md bg-primary px-8 py-3 text-center font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+              >
+                <svg v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ isLoading ? 'Buscando...' : 'Buscar Viajes' }}
+              </button>
+            </div>
+          </form>
         </div>
 
-        <!-- Loading State -->
-        <div v-if="isLoading" class="text-center py-8">
-          <div class="animate-spin mx-auto w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-          <p class="mt-4 text-gray-600">Buscando viajes...</p>
+        <!-- Resultados de Búsqueda -->
+        <div v-if="searchResults.length > 0" class="space-y-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-black dark:text-white">
+              {{ searchResults.length }} viajes encontrados
+            </h2>
+          </div>
+
+          <!-- Lista de Viajes -->
+          <div class="space-y-4">
+            <div
+              v-for="result in searchResults"
+              :key="result.trip.id"
+              class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <!-- Información del Viaje -->
+                  <div class="mb-4">
+                    <h3 class="text-lg font-semibold text-black dark:text-white mb-2">
+                      {{ result.trip.origin_name }} → {{ result.trip.destination_name }}
+                    </h3>
+                    <p class="text-sm text-body-color">
+                      {{ formatTime(result.trip.departure_time) }}
+                    </p>
+                    <!-- Indicador de tipo de coincidencia -->
+                    <div class="mt-1">
+                      <span 
+                        class="inline-block px-2 py-1 text-xs rounded-full"
+                        :class="getMatchTypeClass(result.matchType)"
+                      >
+                        {{ getMatchTypeLabel(result.matchType) }}
+                      </span>
+                      <span v-if="result.distance" class="ml-2 text-xs text-gray-500">
+                        {{ result.distance.toFixed(1) }} km
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Detalles del Viaje -->
+                  <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    <div>
+                      <p class="text-sm text-body-color">Precio</p>
+                      <p class="font-medium text-black dark:text-white">
+                        {{ result.trip.price_per_seat }}€
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-body-color">Asientos</p>
+                      <p class="font-medium text-black dark:text-white">
+                        {{ result.trip.available_seats }} disponibles
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-body-color">Estado</p>
+                      <p class="font-medium text-black dark:text-white">
+                        {{ result.trip.status }}
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-body-color">ID</p>
+                      <p class="font-medium text-black dark:text-white text-xs">
+                        {{ result.trip.id.substring(0, 8) }}...
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Descripción -->
+                  <div v-if="result.trip.description" class="mt-4">
+                    <p class="text-sm text-body-color">{{ result.trip.description }}</p>
+                  </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="ml-4 flex flex-col space-y-2">
+                  <button
+                    @click="viewTripDetails(result.trip)"
+                    class="rounded-md bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
+                  >
+                    Ver Detalles
+                  </button>
+                  <button
+                    @click="bookTrip(result.trip)"
+                    class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                  >
+                    Reservar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- No Results -->
-        <div v-else-if="searchResults.length === 0" class="text-center py-8">
+        <div v-else-if="hasSearched && !isLoading" class="text-center py-12">
           <div class="text-6xl mb-4">😔</div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">No se encontraron viajes</h3>
-          <p class="text-gray-600">Intenta con otros términos de búsqueda</p>
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
+            No se encontraron viajes
+          </h3>
+          <p class="text-body-color">
+            Intenta con otros términos de búsqueda o verifica la ortografía
+          </p>
         </div>
 
-        <!-- Trip Cards -->
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div 
-            v-for="result in searchResults" 
-            :key="result.trip.id"
-            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-          >
-            <div class="flex justify-between items-start mb-4">
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900">
-                  {{ result.trip.origin_name }} → {{ result.trip.destination_name }}
-                </h3>
-                <p class="text-sm text-gray-600">
-                  {{ formatTime(result.trip.departure_time) }}
-                </p>
-                <!-- Indicador de tipo de coincidencia -->
-                <div class="mt-1">
-                  <span 
-                    class="inline-block px-2 py-1 text-xs rounded-full"
-                    :class="getMatchTypeClass(result.matchType)"
-                  >
-                    {{ getMatchTypeLabel(result.matchType) }}
-                  </span>
-                  <span v-if="result.distance" class="ml-2 text-xs text-gray-500">
-                    {{ result.distance.toFixed(1) }} km
-                  </span>
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="text-2xl font-bold text-blue-600">
-                  {{ result.trip.price_per_seat }}€
-                </div>
-                <div class="text-sm text-gray-500">por asiento</div>
-              </div>
-            </div>
-
-            <div class="space-y-2 mb-4">
-              <div class="flex items-center text-sm text-gray-600">
-                <span class="w-4 h-4 mr-2">👥</span>
-                {{ result.trip.available_seats }} asientos disponibles
-              </div>
-              <div v-if="result.trip.description" class="text-sm text-gray-600">
-                {{ result.trip.description }}
-              </div>
-            </div>
-
-            <div class="flex space-x-2">
-              <button 
-                @click="viewTripDetails(result.trip)"
-                class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-sm"
-              >
-                Ver Detalles
-              </button>
-              <button 
-                @click="bookTrip(result.trip)"
-                class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-sm"
-              >
-                Reservar
-              </button>
-            </div>
-          </div>
+        <!-- Debug Info (solo en desarrollo) -->
+        <div v-if="debugInfo && hasSearched" class="mt-8 bg-gray-100 rounded-lg p-4">
+          <h3 class="font-semibold mb-2">Debug Info:</h3>
+          <pre class="text-xs text-gray-600">{{ JSON.stringify(debugInfo, null, 2) }}</pre>
         </div>
-      </div>
-
-      <!-- Debug Info (solo en desarrollo) -->
-      <div v-if="debugInfo && hasSearched" class="mt-8 bg-gray-100 rounded-lg p-4">
-        <h3 class="font-semibold mb-2">Debug Info:</h3>
-        <pre class="text-xs text-gray-600">{{ JSON.stringify(debugInfo, null, 2) }}</pre>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
 </template>
 
