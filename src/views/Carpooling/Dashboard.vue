@@ -4,7 +4,7 @@
     <AppSidebar />
     
             <!-- Main Content -->
-            <div class="flex flex-1 flex-col overflow-hidden" :class="{ 'ml-[90px]': !isExpanded, 'ml-[280px]': isExpanded }">
+            <div class="flex flex-1 flex-col overflow-hidden" :class="{ 'ml-0 lg:ml-[90px]': !isExpanded, 'ml-0 lg:ml-[280px]': isExpanded }">
       <!-- Header -->
       <AppHeader />
       
