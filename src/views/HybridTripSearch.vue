@@ -32,11 +32,14 @@
                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Escribe una dirección exacta:
                 </label>
-                <input
+                <AutocompleteInput
                   v-model="searchForm.origin"
-                  type="text"
                   placeholder="📍 Ej: Calle Gran Vía, 1, Madrid"
-                  class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  :suggestions="originSuggestions"
+                  :is-loading="isLoadingOrigin"
+                  @input="handleOriginInput"
+                  @select="handleOriginSelect"
+                  input-class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 />
               </div>
 
@@ -72,11 +75,14 @@
                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Escribe una dirección exacta:
                 </label>
-                <input
+                <AutocompleteInput
                   v-model="searchForm.destination"
-                  type="text"
                   placeholder="🎯 Ej: Plaza de Callao, Madrid"
-                  class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  :suggestions="destinationSuggestions"
+                  :is-loading="isLoadingDestination"
+                  @input="handleDestinationInput"
+                  @select="handleDestinationSelect"
+                  input-class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 />
               </div>
 
@@ -442,12 +448,17 @@ import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridService'
 import DatePicker from '@/components/DatePicker.vue'
+import AutocompleteInput from '@/components/AutocompleteInput.vue'
+import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
 import { useSidebar } from '@/composables/useSidebar'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 
 // Servicio híbrido simplificado
 const hybridService = new SimpleHybridService()
+
+// Servicio de autocompletado
+const autocompleteService = new SimpleAutocompleteService()
 
 // Router y sidebar
 const router = useRouter()
@@ -489,6 +500,12 @@ const bookingForm = reactive({
   seats: 1,
   notes: ''
 })
+
+// Autocompletado
+const originSuggestions = ref<AutocompleteSuggestion[]>([])
+const destinationSuggestions = ref<AutocompleteSuggestion[]>([])
+const isLoadingOrigin = ref(false)
+const isLoadingDestination = ref(false)
 
 
 
@@ -710,5 +727,34 @@ const viewTripDetails = (trip: any) => {
 const bookTrip = (trip: any) => {
   console.log('Reservar viaje:', trip)
   alert('Función de reserva en desarrollo')
+}
+
+// Funciones de autocompletado
+const handleOriginInput = (value: string) => {
+  if (value.length >= 2) {
+    originSuggestions.value = autocompleteService.searchSuggestions(value, 8)
+  } else {
+    originSuggestions.value = []
+  }
+}
+
+const handleDestinationInput = (value: string) => {
+  if (value.length >= 2) {
+    destinationSuggestions.value = autocompleteService.searchSuggestions(value, 8)
+  } else {
+    destinationSuggestions.value = []
+  }
+}
+
+const handleOriginSelect = (suggestion: AutocompleteSuggestion) => {
+  searchForm.origin = suggestion.name
+  originSuggestions.value = []
+  console.log('Origen seleccionado:', suggestion)
+}
+
+const handleDestinationSelect = (suggestion: AutocompleteSuggestion) => {
+  searchForm.destination = suggestion.name
+  destinationSuggestions.value = []
+  console.log('Destino seleccionado:', suggestion)
 }
 </script>

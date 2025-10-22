@@ -1,19 +1,32 @@
 import type { Location } from '@/types/carpooling';
+import { GooglePlacesService } from './googlePlacesService';
 
 export class GeolocationService {
   private googlePlacesApiKey: string;
   private nominatimApiUrl: string;
+  private googlePlacesService: GooglePlacesService;
 
   constructor() {
     this.googlePlacesApiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY || '';
     this.nominatimApiUrl = import.meta.env.VITE_NOMINATIM_API_URL || 'https://nominatim.openstreetmap.org';
+    this.googlePlacesService = new GooglePlacesService();
   }
 
   /**
-   * Autocompleta direcciones usando OpenStreetMap (Nominatim)
+   * Autocompleta direcciones usando Google Places API o fallback a Nominatim
    */
   async autocompleteAddress(input: string, sessionToken?: string): Promise<Location[]> {
-    // Forzar uso de OpenStreetMap (Nominatim) para evitar errores de Google API
+    // Intentar usar Google Places API primero
+    if (this.googlePlacesApiKey) {
+      try {
+        console.log('🔍 Intentando usar Google Places API...');
+        return await this.googlePlacesService.autocompleteAddress(input, sessionToken);
+      } catch (error) {
+        console.warn('⚠️ Google Places API falló, usando Nominatim:', error);
+      }
+    }
+    
+    // Fallback a Nominatim
     console.log('🔍 Usando OpenStreetMap (Nominatim) para autocompletado');
     return this.autocompleteAddressNominatim(input);
   }
@@ -116,7 +129,17 @@ export class GeolocationService {
    * Obtiene coordenadas para una dirección específica (geocodificación)
    */
   async geocodeAddress(address: string): Promise<Location | null> {
-    // Forzar uso de OpenStreetMap (Nominatim) para evitar errores de Google API
+    // Intentar usar Google Places API primero
+    if (this.googlePlacesApiKey) {
+      try {
+        console.log('🔍 Intentando usar Google Places API para geocodificación...');
+        return await this.googlePlacesService.geocodeAddress(address);
+      } catch (error) {
+        console.warn('⚠️ Google Places geocoding falló, usando Nominatim:', error);
+      }
+    }
+    
+    // Fallback a Nominatim
     console.log('🔍 Usando OpenStreetMap (Nominatim) para geocodificación');
     return this.geocodeAddressNominatim(address);
   }
