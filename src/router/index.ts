@@ -17,7 +17,7 @@ const router = createRouter({
     {
       path: '/buscar-viajes',
       name: 'PublicTripSearch',
-      component: () => import('../views/PublicTripSearch.vue'),
+      component: () => import('../views/NewPublicTripSearch.vue'),
       meta: {
         title: 'Buscar Viajes - Compartalia',
       },
