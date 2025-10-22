@@ -95,6 +95,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/test-google-places',
+      name: 'TestGooglePlaces',
+      component: () => import('../views/TestGooglePlaces.vue'),
+      meta: {
+        title: 'Test Google Places API - Compartalia',
+      },
+    },
+    {
       path: '/dashboard',
       name: 'Dashboard',
       component: () => import('../views/Ecommerce.vue'),

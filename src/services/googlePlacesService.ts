@@ -15,22 +15,32 @@ export class GooglePlacesService {
   private loadGoogleMapsAPI(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (window.google && window.google.maps && window.google.maps.places) {
+        console.log('✅ Google Maps ya está cargado');
         this.initializeServices();
         resolve();
         return;
       }
 
+      if (!this.apiKey) {
+        console.warn('VITE_GOOGLE_PLACES_API_KEY no está configurada. Google Places API no se cargará.');
+        reject(new Error('Google Places API Key missing.'));
+        return;
+      }
+
+      console.log('📡 Cargando Google Maps API con Places...');
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKey}&libraries=places&language=es&region=ES&loading=async`;
       script.async = true;
       script.defer = true;
       
       script.onload = () => {
+        console.log('✅ Google Maps API cargado exitosamente');
         this.initializeServices();
         resolve();
       };
       
-      script.onerror = () => {
+      script.onerror = (error) => {
+        console.error('❌ Error cargando Google Maps API:', error);
         reject(new Error('Error cargando Google Maps API'));
       };
       
