@@ -9,7 +9,7 @@
       <AppHeader />
       
       <!-- Page Content -->
-      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 px-3 py-4 sm:px-4 sm:py-6 md:px-6 lg:px-8 xl:px-10 dark:bg-boxdark">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6 xl:p-7.5 dark:bg-boxdark">
         <!-- Header -->
         <div class="mb-6">
           <div class="flex items-center justify-between">
@@ -33,10 +33,10 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
           <!-- Panel de Búsqueda -->
           <div class="lg:col-span-1">
-            <div class="rounded-sm border border-stroke bg-white p-4 sm:p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
               <h3 class="mb-4 text-lg font-semibold text-black dark:text-white">
                 🔍 Filtros de Búsqueda
               </h3>
@@ -229,8 +229,8 @@
           </div>
 
           <!-- Mapa y Resultados -->
-          <div class="lg:col-span-2">
-            <div class="rounded-sm border border-stroke bg-white p-4 sm:p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+          <div class="lg:col-span-3">
+            <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
               <h3 class="mb-4 text-lg font-semibold text-black dark:text-white">
                 🗺️ Mapa Interactivo
               </h3>
