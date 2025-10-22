@@ -23,10 +23,10 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">
-          🚗 Buscar Viajes (Híbrido)
+          🚗 Buscar Viajes
         </h1>
         <p class="text-xl text-gray-600">
-          Búsqueda inteligente por texto y geolocalización
+          Encuentra viajes compatibles con tu ruta
         </p>
       </div>
 
@@ -46,15 +46,32 @@
                   @focus="showOriginSuggestions = true"
                   @blur="hideOriginSuggestions"
                   type="text"
-                  placeholder="Ej: Torrejón de Ardoz"
+                  placeholder="📍 Ubicación exacta del origen"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
                 <!-- Sugerencias de origen -->
                 <div 
-                  v-if="showOriginSuggestions && originSuggestions.length > 0"
+                  v-if="showOriginSuggestions && (originSuggestions.length > 0 || madridCities.length > 0)"
                   class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
                 >
+                  <!-- Ciudades del extrarradio -->
+                  <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b">
+                    Ciudades del extrarradio de Madrid:
+                  </div>
+                  <div
+                    v-for="city in filteredMadridCities"
+                    :key="city"
+                    @mousedown="selectOriginCity(city)"
+                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                  >
+                    <div class="font-medium">{{ city }}</div>
+                  </div>
+                  
+                  <!-- Sugerencias de geocodificación -->
+                  <div v-if="originSuggestions.length > 0" class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b">
+                    Sugerencias de ubicación:
+                  </div>
                   <div
                     v-for="suggestion in originSuggestions"
                     :key="suggestion.id"
@@ -80,15 +97,32 @@
                   @focus="showDestinationSuggestions = true"
                   @blur="hideDestinationSuggestions"
                   type="text"
-                  placeholder="Ej: Chamartín, Madrid Centro"
+                  placeholder="Destinos populares en Madrid"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
                 <!-- Sugerencias de destino -->
                 <div 
-                  v-if="showDestinationSuggestions && destinationSuggestions.length > 0"
+                  v-if="showDestinationSuggestions && (destinationSuggestions.length > 0 || madridDestinations.length > 0)"
                   class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
                 >
+                  <!-- Destinos populares -->
+                  <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b">
+                    Destinos populares en Madrid:
+                  </div>
+                  <div
+                    v-for="destination in filteredMadridDestinations"
+                    :key="destination"
+                    @mousedown="selectDestinationPlace(destination)"
+                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                  >
+                    <div class="font-medium">{{ destination }}</div>
+                  </div>
+                  
+                  <!-- Sugerencias de geocodificación -->
+                  <div v-if="destinationSuggestions.length > 0" class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-600 border-b">
+                    Sugerencias de ubicación:
+                  </div>
                   <div
                     v-for="suggestion in destinationSuggestions"
                     :key="suggestion.id"
@@ -239,7 +273,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { HybridTripService, type SearchResult } from '@/services/hybridTripService'
 
 // Servicio híbrido
@@ -268,6 +302,58 @@ const originSuggestions = ref<any[]>([])
 const destinationSuggestions = ref<any[]>([])
 const showOriginSuggestions = ref(false)
 const showDestinationSuggestions = ref(false)
+
+// Ciudades del extrarradio de Madrid
+const madridCities = ref([
+  'Móstoles',
+  'Alcalá de Henares',
+  'Fuenlabrada',
+  'Leganés',
+  'Getafe',
+  'Alcorcón',
+  'Torrejón de Ardoz',
+  'Parla',
+  'Alcobendas',
+  'Las Rozas de Madrid',
+  'San Sebastián de los Reyes',
+  'Pozuelo de Alarcón',
+  'Coslada',
+  'Valdemoro',
+  'Rivas-Vaciamadrid',
+  'Majadahonda'
+])
+
+// Destinos populares en Madrid
+const madridDestinations = ref([
+  'Puerta del Sol',
+  'Gran Vía',
+  'Chamartín',
+  'Atocha',
+  'Nuevos Ministerios',
+  'Plaza de Castilla',
+  'Moncloa',
+  'Plaza de España',
+  'AZCA',
+  'Cuatro Torres',
+  'Universidad Complutense',
+  'Hospital La Paz',
+  'Madrid Centro'
+])
+
+// Propiedades computadas para filtrar ciudades y destinos
+const filteredMadridCities = computed(() => {
+  if (!searchForm.origin) return madridCities.value
+  return madridCities.value.filter(city => 
+    city.toLowerCase().includes(searchForm.origin.toLowerCase())
+  )
+})
+
+const filteredMadridDestinations = computed(() => {
+  if (!searchForm.destination) return madridDestinations.value
+  return madridDestinations.value.filter(destination => 
+    destination.toLowerCase().includes(searchForm.destination.toLowerCase())
+  )
+})
 
 // Función de búsqueda
 const searchTrips = async () => {
@@ -347,8 +433,18 @@ const selectOriginSuggestion = (suggestion: any) => {
   showOriginSuggestions.value = false
 }
 
+const selectOriginCity = (city: string) => {
+  searchForm.origin = city
+  showOriginSuggestions.value = false
+}
+
 const selectDestinationSuggestion = (suggestion: any) => {
   searchForm.destination = suggestion.name
+  showDestinationSuggestions.value = false
+}
+
+const selectDestinationPlace = (destination: string) => {
+  searchForm.destination = destination
   showDestinationSuggestions.value = false
 }
 
