@@ -176,11 +176,10 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="form-group">
               <label class="block text-sm font-medium text-gray-700 mb-2">📅 Fecha</label>
-              <input
+              <DatePicker
                 v-model="searchForm.date"
-                type="date"
-                :min="today"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                :min-date="today"
+                placeholder="Selecciona la fecha del viaje"
               />
             </div>
             
@@ -274,6 +273,7 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { HybridTripService, type SearchResult } from '@/services/hybridTripService'
 import { supabase } from '@/config/supabase'
 import type { User } from '@supabase/supabase-js'
+import DatePicker from '@/components/DatePicker.vue'
 
 // Formulario de búsqueda
 const searchForm = reactive({
