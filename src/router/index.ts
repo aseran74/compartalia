@@ -55,6 +55,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/buscar-viajes-hibrido',
+      name: 'HybridTripSearch',
+      component: () => import('../views/HybridTripSearch.vue'),
+      meta: {
+        title: 'Buscar Viajes Híbrido - Compartalia',
+      },
+    },
+    {
       path: '/dashboard',
       name: 'Dashboard',
       component: () => import('../views/Ecommerce.vue'),
