@@ -450,6 +450,7 @@ import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridS
 import DatePicker from '@/components/DatePicker.vue'
 import AutocompleteInput from '@/components/AutocompleteInput.vue'
 import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
+import { GeolocationService } from '@/services/geolocation'
 import { useSidebar } from '@/composables/useSidebar'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
@@ -459,6 +460,7 @@ const hybridService = new SimpleHybridService()
 
 // Servicio de autocompletado
 const autocompleteService = new SimpleAutocompleteService()
+const geolocationService = new GeolocationService()
 
 // Router y sidebar
 const router = useRouter()
@@ -730,16 +732,40 @@ const bookTrip = (trip: any) => {
 }
 
 // Funciones de autocompletado
-const handleOriginInput = (value: string) => {
+const handleOriginInput = async (value: string) => {
   if (value.length >= 2) {
+    try {
+      // Intentar usar Google Places API primero
+      const googleResults = await geolocationService.autocompleteAddress(value)
+      if (googleResults.length > 0) {
+        originSuggestions.value = googleResults
+        return
+      }
+    } catch (error) {
+      console.warn('Google Places API falló, usando fallback:', error)
+    }
+    
+    // Fallback a servicio simple
     originSuggestions.value = autocompleteService.searchSuggestions(value, 8)
   } else {
     originSuggestions.value = []
   }
 }
 
-const handleDestinationInput = (value: string) => {
+const handleDestinationInput = async (value: string) => {
   if (value.length >= 2) {
+    try {
+      // Intentar usar Google Places API primero
+      const googleResults = await geolocationService.autocompleteAddress(value)
+      if (googleResults.length > 0) {
+        destinationSuggestions.value = googleResults
+        return
+      }
+    } catch (error) {
+      console.warn('Google Places API falló, usando fallback:', error)
+    }
+    
+    // Fallback a servicio simple
     destinationSuggestions.value = autocompleteService.searchSuggestions(value, 8)
   } else {
     destinationSuggestions.value = []

@@ -140,11 +140,14 @@
             </div>
             
             <!-- Input de origen -->
-            <input
+            <AutocompleteInput
               v-model="searchForm.origin"
-              type="text"
               placeholder="Escribe tu ciudad de origen..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              :suggestions="originSuggestions"
+              :is-loading="isLoadingOrigin"
+              @input="handleOriginInput"
+              @select="handleOriginSelect"
+              input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
 
@@ -169,11 +172,14 @@
             </div>
             
             <!-- Input de destino -->
-            <input
+            <AutocompleteInput
               v-model="searchForm.destination"
-              type="text"
               placeholder="Escribe tu destino en Madrid..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              :suggestions="destinationSuggestions"
+              :is-loading="isLoadingDestination"
+              @input="handleDestinationInput"
+              @select="handleDestinationSelect"
+              input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
 
@@ -279,6 +285,9 @@ import { HybridTripService, type SearchResult } from '@/services/hybridTripServi
 import { supabase } from '@/config/supabase'
 import type { User } from '@supabase/supabase-js'
 import DatePicker from '@/components/DatePicker.vue'
+import AutocompleteInput from '@/components/AutocompleteInput.vue'
+import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
+import { GeolocationService } from '@/services/geolocation'
 
 // Formulario de búsqueda
 const searchForm = reactive({
@@ -298,11 +307,21 @@ const user = ref<User | null>(null)
 const userProfile = ref<any>(null)
 const showProfileDropdown = ref(false)
 
+// Autocompletado
+const originSuggestions = ref<AutocompleteSuggestion[]>([])
+const destinationSuggestions = ref<AutocompleteSuggestion[]>([])
+const isLoadingOrigin = ref(false)
+const isLoadingDestination = ref(false)
+
 // Fecha actual
 const today = new Date().toISOString().split('T')[0]
 
 // Servicio de búsqueda híbrida
 const hybridService = new HybridTripService()
+
+// Servicios de autocompletado
+const autocompleteService = new SimpleAutocompleteService()
+const geolocationService = new GeolocationService()
 
 // Ciudades del extrarradio de Madrid
 const madridCities = ref([
@@ -550,6 +569,59 @@ onMounted(async () => {
   // Agregar listener para cerrar dropdown
   document.addEventListener('click', handleClickOutside)
 })
+
+// Funciones de autocompletado
+const handleOriginInput = async (value: string) => {
+  if (value.length >= 2) {
+    try {
+      // Intentar usar Google Places API primero
+      const googleResults = await geolocationService.autocompleteAddress(value)
+      if (googleResults.length > 0) {
+        originSuggestions.value = googleResults
+        return
+      }
+    } catch (error) {
+      console.warn('Google Places API falló, usando fallback:', error)
+    }
+    
+    // Fallback a servicio simple
+    originSuggestions.value = autocompleteService.searchSuggestions(value, 8)
+  } else {
+    originSuggestions.value = []
+  }
+}
+
+const handleDestinationInput = async (value: string) => {
+  if (value.length >= 2) {
+    try {
+      // Intentar usar Google Places API primero
+      const googleResults = await geolocationService.autocompleteAddress(value)
+      if (googleResults.length > 0) {
+        destinationSuggestions.value = googleResults
+        return
+      }
+    } catch (error) {
+      console.warn('Google Places API falló, usando fallback:', error)
+    }
+    
+    // Fallback a servicio simple
+    destinationSuggestions.value = autocompleteService.searchSuggestions(value, 8)
+  } else {
+    destinationSuggestions.value = []
+  }
+}
+
+const handleOriginSelect = (suggestion: AutocompleteSuggestion) => {
+  searchForm.origin = suggestion.name
+  originSuggestions.value = []
+  console.log('Origen seleccionado:', suggestion)
+}
+
+const handleDestinationSelect = (suggestion: AutocompleteSuggestion) => {
+  searchForm.destination = suggestion.name
+  destinationSuggestions.value = []
+  console.log('Destino seleccionado:', suggestion)
+}
 
 // Cleanup
 onUnmounted(() => {
