@@ -128,20 +128,50 @@ class SupabaseTripsService {
       console.log(`📍 Usuario: ${userLat}, ${userLng}`);
       console.log(`📏 Radio: ${radiusKm} km`);
 
+      // Consulta directa a la tabla trips
       const { data, error } = await supabase
-        .rpc('find_nearby_trips', {
-          user_lat: userLat,
-          user_lng: userLng,
-          radius_km: radiusKm
-        });
+        .from('trips')
+        .select('*')
+        .eq('status', 'active')
+        .gte('departure_time', new Date().toISOString())
+        .limit(50);
 
       if (error) {
         console.error('❌ Error en búsqueda:', error);
         return [];
       }
 
-      console.log(`✅ Encontrados ${data?.length || 0} matches`);
-      return data || [];
+      // Filtrar por proximidad (simplificado)
+      const nearbyTrips = data?.filter(trip => {
+        // Cálculo simple de distancia (aproximado)
+        const distance = Math.sqrt(
+          Math.pow(trip.origin_lat - userLat, 2) + 
+          Math.pow(trip.origin_lng - userLng, 2)
+        ) * 111; // Conversión aproximada a km
+        
+        return distance <= radiusKm;
+      }) || [];
+
+      console.log(`✅ Encontrados ${nearbyTrips.length} matches`);
+      
+      return nearbyTrips.map(trip => ({
+        id: trip.id,
+        origin: {
+          name: trip.origin_name,
+          lat: trip.origin_lat,
+          lng: trip.origin_lng
+        },
+        destination: {
+          name: trip.destination_name,
+          lat: trip.destination_lat,
+          lng: trip.destination_lng
+        },
+        departureTime: trip.departure_time,
+        availableSeats: trip.available_seats,
+        pricePerSeat: trip.price_per_seat,
+        description: trip.description || '',
+        status: trip.status
+      }));
 
     } catch (error) {
       console.error('❌ Error en searchTripsByLocation:', error);

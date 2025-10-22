@@ -750,22 +750,42 @@ class DataService {
     maxDeviationKm: number = 5,
     timeWindowHours: number = 2
   ) {
-    const { data, error } = await supabase.rpc('search_compatible_trips', {
-      p_origin_lat: originLat,
-      p_origin_lng: originLng,
-      p_destination_lat: destinationLat,
-      p_destination_lng: destinationLng,
-      p_departure_time: departureTime,
-      p_max_deviation_km: maxDeviationKm,
-      p_time_window_hours: timeWindowHours
-    })
+    try {
+      console.log('🔍 Buscando viajes compatibles...');
+      
+      const { data, error } = await supabase
+        .from('trips')
+        .select('*')
+        .eq('status', 'active')
+        .gte('departure_time', new Date().toISOString())
+        .limit(50);
 
-    if (error) {
+      if (error) {
+        console.error('Error searching compatible trips:', error)
+        return []
+      }
+
+      // Filtrar por proximidad (simplificado)
+      const compatibleTrips = data?.filter(trip => {
+        const originDistance = Math.sqrt(
+          Math.pow(trip.origin_lat - originLat, 2) + 
+          Math.pow(trip.origin_lng - originLng, 2)
+        ) * 111;
+        
+        const destDistance = Math.sqrt(
+          Math.pow(trip.destination_lat - destinationLat, 2) + 
+          Math.pow(trip.destination_lng - destinationLng, 2)
+        ) * 111;
+        
+        return originDistance <= maxDeviationKm && destDistance <= maxDeviationKm;
+      }) || [];
+
+      console.log(`✅ Encontrados ${compatibleTrips.length} viajes compatibles`);
+      return compatibleTrips;
+    } catch (error) {
       console.error('Error searching compatible trips:', error)
       return []
     }
-
-    return data
   }
 
   // Buscar rutas compatibles usando el nuevo sistema de waypoints

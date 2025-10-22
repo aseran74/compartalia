@@ -295,4 +295,10 @@ export const refreshSchema = async () => {
   }
 }
 
+// Aplicar parche para interceptar funciones RPC problemáticas
+import { interceptRPC } from '@/services/rpcPatch'
+
+// Interceptar RPC problemáticas
+interceptRPC()
+
 export default supabase
