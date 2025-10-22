@@ -23,6 +23,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/buscar-viajes-simple',
+      name: 'SimpleTripSearch',
+      component: () => import('../views/SimpleTripSearch.vue'),
+      meta: {
+        title: 'Buscar Viajes - Compartalia',
+      },
+    },
+    {
       path: '/dashboard',
       name: 'Dashboard',
       component: () => import('../views/Ecommerce.vue'),
