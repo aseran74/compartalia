@@ -81,7 +81,7 @@ const router = createRouter({
     {
       path: '/buscar-viajes-hibrido',
       name: 'HybridTripSearch',
-      component: () => import('../views/HybridTripSearch.vue'),
+      component: () => import('../views/Carpooling/NewSearchTrips.vue'),
       meta: {
         title: 'Buscar Viajes Híbrido - Compartalia',
       },
@@ -129,7 +129,7 @@ const router = createRouter({
     {
       path: '/carpooling/buscar-viajes-hibrido',
       name: 'Buscar Viajes Híbrido',
-      component: () => import('../views/HybridTripSearch.vue'),
+      component: () => import('../views/Carpooling/NewSearchTrips.vue'),
       meta: {
         title: 'Buscar Viajes',
       },
