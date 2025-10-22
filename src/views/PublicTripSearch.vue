@@ -304,7 +304,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { supabase } from '@/config/supabase'
+import { supabase, refreshSchema } from '@/config/supabase'
 import { useToast } from '@/composables/useToast'
 
 // Formulario de búsqueda
@@ -459,6 +459,13 @@ const searchTrips = async () => {
     console.log('Iniciando búsqueda de viajes...')
     console.log('Origen:', searchForm.origin)
     console.log('Destino:', searchForm.destination)
+    
+    // Refrescar el schema cache primero
+    const schemaRefreshed = await refreshSchema()
+    if (!schemaRefreshed) {
+      warning('Error de conexión con la base de datos')
+      return
+    }
     
     // Primero probamos una consulta simple
     const { data: testData, error: testError } = await supabase

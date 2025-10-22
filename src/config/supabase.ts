@@ -10,6 +10,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true
+  },
+  db: {
+    schema: 'public'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'compartalia-web'
+    }
   }
 })
 
@@ -261,6 +269,29 @@ export interface Database {
         }
       }
     }
+  }
+}
+
+// Función para refrescar el schema cache
+export const refreshSchema = async () => {
+  try {
+    console.log('Refrescando schema de Supabase...')
+    // Forzar una consulta simple para refrescar el cache
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .limit(1)
+    
+    if (error) {
+      console.error('Error refrescando schema:', error)
+      return false
+    }
+    
+    console.log('Schema refrescado exitosamente')
+    return true
+  } catch (err) {
+    console.error('Error al refrescar schema:', err)
+    return false
   }
 }
 
