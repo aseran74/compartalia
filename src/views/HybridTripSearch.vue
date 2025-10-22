@@ -30,36 +30,14 @@
               <!-- Búsqueda por dirección exacta -->
               <div class="mb-4">
                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  O escribe una dirección exacta:
+                  Escribe una dirección exacta:
                 </label>
-                <div class="relative">
-                  <input
-                    v-model="searchForm.origin"
-                    @input="onOriginInput"
-                    @focus="showOriginSuggestions = true"
-                    @blur="hideOriginSuggestions"
-                    type="text"
-                    placeholder="📍 Ej: Calle Gran Vía, 1, Madrid"
-                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  />
-                  <!-- Sugerencias de origen -->
-                  <div 
-                    v-if="showOriginSuggestions && originSuggestions.length > 0"
-                    class="absolute z-10 mt-1 w-full bg-white border border-stroke rounded-lg shadow-lg max-h-60 overflow-auto dark:border-strokedark dark:bg-boxdark"
-                  >
-                    <div class="p-2">
-                      <div
-                        v-for="suggestion in originSuggestions"
-                        :key="suggestion.id"
-                        @click="selectOrigin(suggestion)"
-                        class="p-2 hover:bg-gray-100 rounded cursor-pointer dark:hover:bg-gray-700"
-                      >
-                        <div class="font-medium text-black dark:text-white">{{ suggestion.name }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ suggestion.address }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <input
+                  v-model="searchForm.origin"
+                  type="text"
+                  placeholder="📍 Ej: Calle Gran Vía, 1, Madrid"
+                  class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                />
               </div>
 
               <!-- Orígenes predefinidos -->
@@ -92,36 +70,14 @@
               <!-- Búsqueda por dirección exacta -->
               <div class="mb-4">
                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  O escribe una dirección exacta:
+                  Escribe una dirección exacta:
                 </label>
-                <div class="relative">
-                  <input
-                    v-model="searchForm.destination"
-                    @input="onDestinationInput"
-                    @focus="showDestinationSuggestions = true"
-                    @blur="hideDestinationSuggestions"
-                    type="text"
-                    placeholder="🎯 Ej: Plaza de Callao, Madrid"
-                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  />
-                  <!-- Sugerencias de destino -->
-                  <div 
-                    v-if="showDestinationSuggestions && destinationSuggestions.length > 0"
-                    class="absolute z-10 mt-1 w-full bg-white border border-stroke rounded-lg shadow-lg max-h-60 overflow-auto dark:border-strokedark dark:bg-boxdark"
-                  >
-                    <div class="p-2">
-                      <div
-                        v-for="suggestion in destinationSuggestions"
-                        :key="suggestion.id"
-                        @click="selectDestination(suggestion)"
-                        class="p-2 hover:bg-gray-100 rounded cursor-pointer dark:hover:bg-gray-700"
-                      >
-                        <div class="font-medium text-black dark:text-white">{{ suggestion.name }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ suggestion.address }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <input
+                  v-model="searchForm.destination"
+                  type="text"
+                  placeholder="🎯 Ej: Plaza de Callao, Madrid"
+                  class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                />
               </div>
 
               <!-- Destinos predefinidos -->
@@ -388,11 +344,6 @@ const hasSearched = ref(false)
 const searchResults = ref<SearchResult[]>([])
 const debugInfo = ref<any>(null)
 
-// Sugerencias
-const originSuggestions = ref<any[]>([])
-const destinationSuggestions = ref<any[]>([])
-const showOriginSuggestions = ref(false)
-const showDestinationSuggestions = ref(false)
 
 
 // Ciudades del extrarradio de Madrid
@@ -495,90 +446,16 @@ const searchTrips = async () => {
   }
 }
 
-// Manejo de sugerencias
-const onOriginInput = async () => {
-  if (searchForm.origin.length < 3) {
-    originSuggestions.value = []
-    return
-  }
-  
-  try {
-    originSuggestions.value = await hybridService.getSuggestions(searchForm.origin, 'origin')
-  } catch (error) {
-    console.error('Error obteniendo sugerencias de origen:', error)
-  }
-}
-
-const onDestinationInput = async () => {
-  if (searchForm.destination.length < 3) {
-    destinationSuggestions.value = []
-    return
-  }
-  
-  try {
-    destinationSuggestions.value = await hybridService.getSuggestions(searchForm.destination, 'destination')
-  } catch (error) {
-    console.error('Error obteniendo sugerencias de destino:', error)
-  }
-}
-
-const selectOriginSuggestion = (suggestion: any) => {
-  searchForm.origin = suggestion.name
-  showOriginSuggestions.value = false
-}
-
-const selectOriginCity = (city: string) => {
-  searchForm.origin = city
-  showOriginSuggestions.value = false
-}
-
-const selectDestinationSuggestion = (suggestion: any) => {
-  searchForm.destination = suggestion.name
-  showDestinationSuggestions.value = false
-}
-
-const selectDestinationPlace = (destination: string) => {
-  searchForm.destination = destination
-  showDestinationSuggestions.value = false
-}
-
-const hideOriginSuggestions = () => {
-  setTimeout(() => {
-    showOriginSuggestions.value = false
-  }, 200)
-}
-
-const hideDestinationSuggestions = () => {
-  setTimeout(() => {
-    showDestinationSuggestions.value = false
-  }, 200)
-}
 
 // Función para seleccionar origen desde la lista de ciudades
 const selectOriginFromList = (city: string) => {
   searchForm.origin = city
-  showOriginSuggestions.value = false
-  searchTrips()
-}
-
-// Función para seleccionar origen desde sugerencias de geocodificación
-const selectOrigin = (suggestion: any) => {
-  searchForm.origin = suggestion.name
-  showOriginSuggestions.value = false
   searchTrips()
 }
 
 // Función para seleccionar destino desde la lista de destinos
 const selectDestinationFromList = (destination: string) => {
   searchForm.destination = destination
-  showDestinationSuggestions.value = false
-  searchTrips()
-}
-
-// Función para seleccionar destino desde sugerencias de geocodificación
-const selectDestination = (suggestion: any) => {
-  searchForm.destination = suggestion.name
-  showDestinationSuggestions.value = false
   searchTrips()
 }
 
