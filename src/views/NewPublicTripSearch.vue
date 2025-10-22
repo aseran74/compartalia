@@ -477,6 +477,9 @@ const handleClickOutside = (event: Event) => {
   }
 }
 
+// Variables para cleanup
+let authSubscription: any = null
+
 // Inicializar fecha actual y autenticación
 onMounted(async () => {
   searchForm.date = today
@@ -493,14 +496,18 @@ onMounted(async () => {
     }
   })
   
+  authSubscription = subscription
+  
   // Agregar listener para cerrar dropdown
   document.addEventListener('click', handleClickOutside)
-  
-  // Cleanup
-  onUnmounted(() => {
-    subscription.unsubscribe()
-    document.removeEventListener('click', handleClickOutside)
-  })
+})
+
+// Cleanup
+onUnmounted(() => {
+  if (authSubscription) {
+    authSubscription.unsubscribe()
+  }
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
