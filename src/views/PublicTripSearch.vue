@@ -305,7 +305,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { supabase, refreshSchema } from '@/config/supabase'
-import { useToast } from '@/composables/useToast'
+// import { useToast } from '@/composables/useToast'
 
 // Formulario de búsqueda
 const searchForm = reactive({
@@ -334,7 +334,11 @@ const destinationSuggestions = ref([])
 const today = new Date().toISOString().split('T')[0]
 
 // Toast system
-const { warning } = useToast()
+// const { warning } = useToast()
+
+const warning = (message: string) => {
+  alert(message)
+}
 
 // Ciudades del extrarradio de Madrid
 const madridCities = ref([
