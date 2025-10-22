@@ -309,11 +309,6 @@
           </p>
         </div>
 
-        <!-- Debug Info (solo en desarrollo) -->
-        <div v-if="debugInfo && hasSearched" class="mt-8 bg-gray-100 rounded-lg p-4">
-          <h3 class="font-semibold mb-2">Debug Info:</h3>
-          <pre class="text-xs text-gray-600">{{ JSON.stringify(debugInfo, null, 2) }}</pre>
-        </div>
       </main>
     </div>
 
@@ -469,7 +464,6 @@ const searchOptions = reactive({
 const isLoading = ref(false)
 const hasSearched = ref(false)
 const searchResults = ref<SearchResult[]>([])
-const debugInfo = ref<any>(null)
 
 // Modal de reserva
 const showBookingModal = ref(false)
@@ -560,16 +554,6 @@ const searchTrips = async () => {
     )
 
     searchResults.value = results
-    debugInfo.value = {
-      searchParams: { 
-        origin: searchForm.origin, 
-        destination: searchForm.destination,
-        options: searchOptions
-      },
-      resultsCount: results.length,
-      timestamp: new Date().toISOString(),
-      results: results.slice(0, 3) // Solo los primeros 3 para debug
-    }
 
     console.log(`✅ HybridTripSearch - Búsqueda completada: ${results.length} viajes encontrados`)
   } catch (error) {
