@@ -5,6 +5,8 @@ export const rpcPatch = {
   // Reemplazo para find_nearby_trips
   async findNearbyTrips(userLat: number, userLng: number, radiusKm: number) {
     try {
+      console.log('🔍 findNearbyTrips - Buscando viajes cercanos...');
+      
       const { data, error } = await supabase
         .from('trips')
         .select('*')
@@ -13,23 +15,26 @@ export const rpcPatch = {
         .limit(50);
 
       if (error) {
-        console.error('Error in findNearbyTrips:', error);
+        console.error('❌ Error in findNearbyTrips:', error);
         return [];
       }
+
+      console.log(`✅ findNearbyTrips - Encontrados ${data?.length || 0} viajes`);
 
       // Filtrar por proximidad
       const nearbyTrips = data?.filter(trip => {
         const distance = Math.sqrt(
-          Math.pow(trip.origin_lat - userLat, 2) + 
-          Math.pow(trip.origin_lng - userLng, 2)
+          Math.pow(parseFloat(trip.origin_lat) - userLat, 2) + 
+          Math.pow(parseFloat(trip.origin_lng) - userLng, 2)
         ) * 111; // Conversión aproximada a km
         
         return distance <= radiusKm;
       }) || [];
 
+      console.log(`✅ findNearbyTrips - ${nearbyTrips.length} viajes cercanos`);
       return nearbyTrips;
     } catch (error) {
-      console.error('Error in findNearbyTrips:', error);
+      console.error('❌ Error in findNearbyTrips:', error);
       return [];
     }
   },

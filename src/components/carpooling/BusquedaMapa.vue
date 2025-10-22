@@ -443,6 +443,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
+import { supabase } from '@/config/supabase';
 
 // Interfaces
 interface Viaje {
@@ -694,14 +695,52 @@ function abrirModalOrigen() {
   showOrigenModal.value = true;
 }
 
-function buscarViajes() {
+async function buscarViajes() {
   if (!origen.value) return;
   
   loading.value = true;
   
-  // Simular búsqueda
-  setTimeout(() => {
-    viajes.value = viajesEjemplo;
+  try {
+    console.log('🔍 Buscando viajes reales desde Supabase...');
+    
+    // Buscar viajes reales de Supabase
+    const { data, error } = await supabase
+      .from('trips')
+      .select('*')
+      .ilike('origin_name', `%${origen.value}%`)
+      .eq('status', 'active')
+      .gte('departure_time', new Date().toISOString())
+      .limit(20);
+
+    if (error) {
+      console.error('❌ Error buscando viajes:', error);
+      // Fallback a datos de ejemplo si hay error
+      viajes.value = viajesEjemplo;
+    } else {
+      console.log(`✅ Encontrados ${data?.length || 0} viajes reales`);
+      
+      // Convertir datos de Supabase al formato esperado
+      viajes.value = data?.map(trip => ({
+        id: trip.id,
+        origen: trip.origin_name,
+        destino: trip.destination_name,
+        horaSalida: new Date(trip.departure_time),
+        precio: parseFloat(trip.price_per_seat),
+        plazasDisponibles: trip.available_seats,
+        plazasTotales: 4,
+        conductor: {
+          id: trip.driver_id,
+          nombre: 'Conductor',
+          avatar: '/images/user/user-01.jpg',
+          rating: 4.5
+        },
+        coordenadas: {
+          origen: { lat: parseFloat(trip.origin_lat), lng: parseFloat(trip.origin_lng) },
+          destino: { lat: parseFloat(trip.destination_lat), lng: parseFloat(trip.destination_lng) }
+        }
+      })) || [];
+    }
+    
     mapaCargado.value = true;
     loading.value = false;
     
@@ -709,7 +748,17 @@ function buscarViajes() {
     nextTick(() => {
       inicializarMapa();
     });
-  }, 1000);
+  } catch (error) {
+    console.error('❌ Error en buscarViajes:', error);
+    // Fallback a datos de ejemplo
+    viajes.value = viajesEjemplo;
+    mapaCargado.value = true;
+    loading.value = false;
+    
+    nextTick(() => {
+      inicializarMapa();
+    });
+  }
 }
 
 function inicializarMapa() {
