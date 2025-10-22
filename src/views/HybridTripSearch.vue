@@ -126,12 +126,10 @@
                 <label class="mb-2.5 block text-black dark:text-white">
                   Fecha
                 </label>
-                <input
+                <DatePicker
                   v-model="searchForm.date"
-                  type="date"
                   placeholder="Selecciona fecha"
-                  class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  required
+                  :min-date="getTomorrowDate()"
                 />
               </div>
 
@@ -432,6 +430,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridService'
+import DatePicker from '@/components/common/DatePicker.vue'
 import { useSidebar } from '@/composables/useSidebar'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
@@ -444,11 +443,18 @@ const router = useRouter()
 const { isExpanded } = useSidebar()
 
 // Estado del formulario
+// Función para obtener la fecha de mañana
+const getTomorrowDate = () => {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return tomorrow.toISOString().split('T')[0]
+}
+
 const searchForm = reactive({
   origin: '',
   destination: '',
   tripType: 'all',
-  date: '',
+  date: getTomorrowDate(),
   time: '',
   passengers: 1
 })
