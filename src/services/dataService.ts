@@ -843,58 +843,73 @@ class DataService {
   }) {
     console.log('🔍 dataService - searchTripsAdvanced llamada con filtros:', filters);
     
-    const rpcParams = {
-      p_origin_name: filters.originName || null,
-      p_destination_name: filters.destinationName || null,
-      p_origin_lat: filters.originLat || null,
-      p_origin_lng: filters.originLng || null,
-      p_destination_lat: filters.destinationLat || null,
-      p_destination_lng: filters.destinationLng || null,
-      p_departure_date: filters.departureDate || null,
-      p_departure_time_from: filters.departureTimeFrom || null,
-      p_departure_time_to: filters.departureTimeTo || null,
-      p_max_price: filters.maxPrice || null,
-      p_pricing_model: filters.pricingModel || null,
-      p_max_deviation_km: filters.maxDeviationKm || 5.0,
-      p_limit: filters.limit || 50
-    };
-    
-    console.log('📡 dataService - Llamando a RPC con parámetros:', rpcParams);
-    
-    const { data, error } = await supabase.rpc('search_trips_advanced', rpcParams);
+    try {
+      // Construir consulta directa a la tabla trips
+      let query = supabase
+        .from('trips')
+        .select('*')
+        .eq('status', 'active')
+        .gte('departure_time', new Date().toISOString());
 
-    if (error) {
+      // Aplicar filtros
+      if (filters.originName) {
+        query = query.ilike('origin_name', `%${filters.originName}%`);
+      }
+      
+      if (filters.destinationName) {
+        query = query.ilike('destination_name', `%${filters.destinationName}%`);
+      }
+
+      if (filters.maxPrice) {
+        query = query.lte('price_per_seat', filters.maxPrice);
+      }
+
+      if (filters.limit) {
+        query = query.limit(filters.limit);
+      } else {
+        query = query.limit(50);
+      }
+
+      console.log('📡 dataService - Ejecutando consulta directa...');
+      
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('❌ dataService - Error in advanced search:', error);
+        return [];
+      }
+      
+      console.log('✅ dataService - Consulta exitosa, datos recibidos:', data?.length || 0);
+
+      return data?.map(trip => ({
+        id: trip.id,
+        driverId: trip.driver_id,
+        origin: {
+          name: trip.origin_name,
+          lat: trip.origin_lat,
+          lng: trip.origin_lng
+        },
+        destination: {
+          name: trip.destination_name,
+          lat: trip.destination_lat,
+          lng: trip.destination_lng
+        },
+        departureTime: trip.departure_time,
+        availableSeats: trip.available_seats,
+        pricePerSeat: trip.price_per_seat,
+        monthlyPrice: trip.route_data?.monthly_price,
+        pricingModel: trip.route_data?.pricing_type || 'single',
+        description: trip.description || '',
+        driverName: 'Conductor', // No tenemos JOIN con profiles
+        driverPhone: '',
+        distanceFromOrigin: 0,
+        compatibilityScore: 1.0,
+        status: trip.status
+      })) || [];
+    } catch (error) {
       console.error('❌ dataService - Error in advanced search:', error);
       return [];
     }
-    
-    console.log('✅ dataService - RPC exitoso, datos recibidos:', data);
-
-    return data.map(trip => ({
-      id: trip.trip_id,
-      driverId: trip.trip_id,
-      origin: {
-        name: trip.origin_name,
-        lat: trip.origin_lat,
-        lng: trip.origin_lng
-      },
-      destination: {
-        name: trip.destination_name,
-        lat: trip.destination_lat,
-        lng: trip.destination_lng
-      },
-      departureTime: trip.departure_time,
-      availableSeats: trip.available_seats,
-      pricePerSeat: trip.price_per_seat,
-      monthlyPrice: trip.monthly_price,
-      pricingModel: trip.pricing_model,
-      description: trip.description || '',
-      driverName: trip.driver_name,
-      driverPhone: trip.driver_phone,
-      distanceFromOrigin: trip.distance_from_origin,
-      compatibilityScore: trip.compatibility_score,
-      status: 'active'
-    }));
   }
 
   // Búsqueda por proximidad

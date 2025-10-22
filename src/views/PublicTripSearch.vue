@@ -481,14 +481,14 @@ const searchTrips = async () => {
     
     console.log('Consulta de prueba exitosa:', testData)
     
-    // Ahora la consulta completa
+    // Ahora la consulta completa - buscar por términos más flexibles
     const { data, error } = await supabase
       .from('trips')
       .select('*')
-      .ilike('origin_name', `%${searchForm.origin}%`)
-      .ilike('destination_name', `%${searchForm.destination}%`)
+      .or(`origin_name.ilike.%${searchForm.origin}%,destination_name.ilike.%${searchForm.destination}%`)
       .eq('status', 'active')
       .gte('departure_time', new Date().toISOString())
+      .limit(50)
 
     if (error) {
       console.error('Error searching trips:', error)
