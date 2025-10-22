@@ -150,9 +150,9 @@
             <!-- Opciones predefinidas -->
             <div class="mb-3">
               <p class="text-sm text-gray-600 mb-2">Destinos populares en Madrid:</p>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                 <button
-                  v-for="destination in madridDestinations.slice(0, 8)"
+                  v-for="destination in madridDestinations"
                   :key="destination.name"
                   @click="selectPredefinedDestination(destination)"
                   type="button"
@@ -323,14 +323,21 @@ const madridCities = ref([
 
 // Destinos populares en Madrid
 const madridDestinations = ref([
+  { name: 'Puerta del Sol', lat: 40.4168, lng: -3.7038 },
+  { name: 'Gran Vía', lat: 40.4194, lng: -3.7108 },
+  { name: 'Chamartín', lat: 40.4720, lng: -3.6806 },
+  { name: 'Atocha', lat: 40.4075, lng: -3.6917 },
+  { name: 'Nuevos Ministerios', lat: 40.4459, lng: -3.6900 },
+  { name: 'Plaza de Castilla', lat: 40.4669, lng: -3.6889 },
+  { name: 'Moncloa', lat: 40.4350, lng: -3.7200 },
+  { name: 'Plaza de España', lat: 40.4236, lng: -3.7122 },
+  { name: 'AZCA', lat: 40.4459, lng: -3.6900 },
+  { name: 'Cuatro Torres', lat: 40.4720, lng: -3.6806 },
+  { name: 'Universidad Complutense', lat: 40.4459, lng: -3.7297 },
+  { name: 'Hospital La Paz', lat: 40.4720, lng: -3.6806 },
   { name: 'Madrid Centro', lat: 40.4168, lng: -3.7038 },
   { name: 'Ciudad financiera Santander (Boadilla)', lat: 40.4057, lng: -3.8753 },
-  { name: 'Ciudad financiera BBVA (Las Tablas)', lat: 40.5475, lng: -3.6420 },
-  { name: 'Aeropuerto Adolfo Suárez Madrid-Barajas', lat: 40.4983, lng: -3.5676 },
-  { name: 'Estación de Atocha', lat: 40.4075, lng: -3.6917 },
-  { name: 'Estación de Chamartín', lat: 40.4720, lng: -3.6806 },
-  { name: 'Universidad Complutense', lat: 40.4459, lng: -3.7297 },
-  { name: 'Hospital 12 de Octubre', lat: 40.3906, lng: -3.7000 }
+  { name: 'Ciudad financiera BBVA (Las Tablas)', lat: 40.5475, lng: -3.6420 }
 ])
 
 // Funciones de selección
