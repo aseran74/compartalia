@@ -22,17 +22,47 @@ export class GeolocationService {
    * Autocompleta direcciones usando Nominatim (OpenStreetMap)
    */
   async autocompleteAddressNominatim(input: string): Promise<Location[]> {
+    if (input.length < 3) {
+      return [];
+    }
+
     try {
+      console.log(`🔍 Autocompletando con Nominatim: ${input}`);
+      
+      // Agregar headers para evitar bloqueos
+      const headers = {
+        'User-Agent': 'Compartalia/1.0 (compartalia@example.com)',
+        'Accept': 'application/json',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
+      };
+
       const response = await fetch(
         `${this.nominatimApiUrl}/search?` +
         `q=${encodeURIComponent(input)}&` +
         `format=json&` +
         `countrycodes=es&` +
         `limit=5&` +
-        `addressdetails=1`
+        `addressdetails=1`,
+        {
+          method: 'GET',
+          headers: headers,
+          mode: 'cors'
+        }
       );
 
+      if (!response.ok) {
+        console.error(`❌ Nominatim API error: ${response.status} ${response.statusText}`);
+        return this.getFallbackSuggestions(input);
+      }
+
       const data = await response.json();
+      
+      if (!data || !data.length) {
+        console.log('⚠️ No se encontraron sugerencias en Nominatim');
+        return this.getFallbackSuggestions(input);
+      }
+
+      console.log(`✅ Nominatim autocompletado exitoso: ${data.length} resultados`);
       
       return data.map((result: any) => ({
         id: `nominatim_${result.place_id}`,
@@ -45,9 +75,41 @@ export class GeolocationService {
         type: 'origin' as const
       }));
     } catch (error) {
-      console.error('Error with Nominatim API:', error);
-      return [];
+      console.error('❌ Error with Nominatim API:', error);
+      return this.getFallbackSuggestions(input);
     }
+  }
+
+  /**
+   * Fallback para sugerencias cuando Nominatim falla
+   */
+  private getFallbackSuggestions(input: string): Location[] {
+    console.log('🔄 Usando sugerencias de fallback para:', input);
+    
+    const suggestions = [
+      'Madrid Centro',
+      'Torrejón de Ardoz',
+      'Alcalá de Henares',
+      'Getafe',
+      'Leganés',
+      'Fuenlabrada',
+      'Móstoles',
+      'Alcorcón',
+      'Parla',
+      'Alcobendas'
+    ];
+
+    const filtered = suggestions.filter(suggestion => 
+      suggestion.toLowerCase().includes(input.toLowerCase())
+    );
+
+    return filtered.map((suggestion, index) => ({
+      id: `fallback_${index}`,
+      name: suggestion,
+      address: suggestion,
+      coordinates: { lat: 40.4168, lng: -3.7038 }, // Madrid Centro como fallback
+      type: 'origin' as const
+    }));
   }
 
   /**
@@ -64,22 +126,44 @@ export class GeolocationService {
    */
   async geocodeAddressNominatim(address: string): Promise<Location | null> {
     try {
+      console.log(`🔍 Geocodificando con Nominatim: ${address}`);
+      
+      // Agregar headers para evitar bloqueos
+      const headers = {
+        'User-Agent': 'Compartalia/1.0 (compartalia@example.com)',
+        'Accept': 'application/json',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
+      };
+
       const response = await fetch(
         `${this.nominatimApiUrl}/search?` +
         `q=${encodeURIComponent(address)}&` +
         `format=json&` +
         `countrycodes=es&` +
         `limit=1&` +
-        `addressdetails=1`
+        `addressdetails=1`,
+        {
+          method: 'GET',
+          headers: headers,
+          mode: 'cors'
+        }
       );
+
+      if (!response.ok) {
+        console.error(`❌ Nominatim API error: ${response.status} ${response.statusText}`);
+        return this.getFallbackLocation(address);
+      }
 
       const data = await response.json();
       
-      if (!data.length) {
-        return null;
+      if (!data || !data.length) {
+        console.log('⚠️ No se encontraron resultados en Nominatim');
+        return this.getFallbackLocation(address);
       }
 
       const result = data[0];
+      console.log(`✅ Nominatim geocodificación exitosa: ${result.display_name}`);
+      
       return {
         id: `nominatim_${result.place_id}`,
         name: result.display_name.split(',')[0],
@@ -91,9 +175,52 @@ export class GeolocationService {
         type: 'origin' as const
       };
     } catch (error) {
-      console.error('Error with Nominatim API:', error);
-      return null;
+      console.error('❌ Error with Nominatim API:', error);
+      return this.getFallbackLocation(address);
     }
+  }
+
+  /**
+   * Fallback para cuando Nominatim falla
+   */
+  private getFallbackLocation(address: string): Location | null {
+    console.log('🔄 Usando ubicación de fallback para:', address);
+    
+    // Coordenadas aproximadas para Madrid y alrededores
+    const fallbackCoordinates = {
+      'madrid': { lat: 40.4168, lng: -3.7038 },
+      'torrejón': { lat: 40.4594, lng: -3.4697 },
+      'alcalá': { lat: 40.4817, lng: -3.3641 },
+      'getafe': { lat: 40.3047, lng: -3.7312 },
+      'leganés': { lat: 40.3275, lng: -3.7639 },
+      'fuenlabrada': { lat: 40.2839, lng: -3.7942 },
+      'móstoles': { lat: 40.3228, lng: -3.8647 },
+      'alcorcón': { lat: 40.3489, lng: -3.8289 },
+      'parla': { lat: 40.2375, lng: -3.7731 },
+      'alcobendas': { lat: 40.5475, lng: -3.6419 }
+    };
+
+    const addressLower = address.toLowerCase();
+    for (const [key, coords] of Object.entries(fallbackCoordinates)) {
+      if (addressLower.includes(key)) {
+        return {
+          id: `fallback_${key}`,
+          name: address,
+          address: address,
+          coordinates: coords,
+          type: 'origin' as const
+        };
+      }
+    }
+
+    // Fallback genérico a Madrid Centro
+    return {
+      id: 'fallback_madrid',
+      name: address,
+      address: address,
+      coordinates: { lat: 40.4168, lng: -3.7038 },
+      type: 'origin' as const
+    };
   }
 
   /**
