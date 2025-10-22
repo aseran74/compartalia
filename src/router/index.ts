@@ -137,7 +137,7 @@ const router = createRouter({
     {
       path: '/carpooling/search-trips',
       name: 'Search Trips',
-      component: () => import('../views/HybridTripSearch.vue'),
+      component: () => import('../views/Carpooling/NewSearchTrips.vue'),
       meta: {
         title: 'Buscar Viajes',
       },
