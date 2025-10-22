@@ -1,7 +1,7 @@
 // Servicio de datos para el sistema de carpooling
 // Este servicio maneja la persistencia de datos usando Supabase
 
-import { supabase } from '@/config/supabase'
+import { supabaseClean as supabase } from '@/config/supabaseClean'
 import type { User, Trip, Booking, Message, Notification } from '@/types/carpooling'
 
 class DataService {

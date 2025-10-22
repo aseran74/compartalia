@@ -39,6 +39,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/test-search-trips',
+      name: 'TestSearchTrips',
+      component: () => import('../views/TestSearchTrips.vue'),
+      meta: {
+        title: 'Test Search Trips - Compartalia',
+      },
+    },
+    {
       path: '/dashboard',
       name: 'Dashboard',
       component: () => import('../views/Ecommerce.vue'),
