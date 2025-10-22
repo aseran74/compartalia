@@ -31,6 +31,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/test-supabase',
+      name: 'TestSupabase',
+      component: () => import('../views/TestSupabase.vue'),
+      meta: {
+        title: 'Test Supabase - Compartalia',
+      },
+    },
+    {
       path: '/dashboard',
       name: 'Dashboard',
       component: () => import('../views/Ecommerce.vue'),

@@ -162,8 +162,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { SimpleTripService, type Trip } from '@/services/simpleTripService'
+import { testConnection, clearCache } from '@/config/supabaseClean'
 
 // Estado del formulario
 const searchForm = reactive({
@@ -232,4 +233,20 @@ const bookTrip = (trip: Trip) => {
   console.log('Reservar viaje:', trip)
   alert('Función de reserva en desarrollo')
 }
+
+// Probar conexión al montar el componente
+onMounted(async () => {
+  console.log('🚀 Inicializando SimpleTripSearch...')
+  
+  // Limpiar cache
+  clearCache()
+  
+  // Probar conexión
+  const isConnected = await testConnection()
+  if (isConnected) {
+    console.log('✅ Conexión con Supabase establecida correctamente')
+  } else {
+    console.error('❌ Error de conexión con Supabase')
+  }
+})
 </script>

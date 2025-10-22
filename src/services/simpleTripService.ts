@@ -1,5 +1,5 @@
 // Servicio simple de búsqueda de viajes sin RPC
-import { supabase } from '@/config/supabase'
+import { supabaseClean } from '@/config/supabaseClean'
 
 export interface Trip {
   id: string
@@ -29,7 +29,7 @@ export class SimpleTripService {
     try {
       console.log('🔍 SimpleTripService - Buscando viajes:', { origin, destination, limit });
       
-      let query = supabase
+      let query = supabaseClean
         .from('trips')
         .select('*')
         .eq('status', 'active')
@@ -67,7 +67,7 @@ export class SimpleTripService {
     try {
       console.log('🔍 SimpleTripService - Obteniendo todos los viajes activos...');
       
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClean
         .from('trips')
         .select('*')
         .eq('status', 'active')
@@ -192,7 +192,7 @@ export class SimpleTripService {
     try {
       console.log('🔍 SimpleTripService - Obteniendo viaje por ID:', id);
       
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClean
         .from('trips')
         .select('*')
         .eq('id', id)
