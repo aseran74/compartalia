@@ -23,6 +23,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/test-public-route',
+      name: 'TestPublicRoute',
+      component: () => import('../views/TestPublicRoute.vue'),
+      meta: {
+        title: 'Test Public Route - Compartalia',
+      },
+    },
+    {
       path: '/buscar-viajes-simple',
       name: 'SimpleTripSearch',
       component: () => import('../views/SimpleTripSearch.vue'),
