@@ -1,11 +1,11 @@
 <template>
   <aside
     :class="[
-      'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-99999 border-r border-gray-200',
+      'fixed flex flex-col top-0 px-3 sm:px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-99999 border-r border-gray-200',
       {
         'lg:w-[290px]': isExpanded || isMobileOpen || isHovered,
         'lg:w-[90px]': !isExpanded && !isHovered,
-        'translate-x-0 w-[290px]': isMobileOpen,
+        'translate-x-0 w-[280px] sm:w-[290px]': isMobileOpen,
         '-translate-x-full': !isMobileOpen,
         'lg:translate-x-0': true,
       },
@@ -17,26 +17,26 @@
     <div
       v-if="isMobileOpen"
       :class="[
-        'py-8 flex justify-start',
+        'py-4 sm:py-8 flex justify-start',
       ]"
     >
       <router-link to="/">
          <img
            src="/images/logo/Compartalia2.png"
            alt="Compartalia Logo"
-           class="w-32 h-28 object-contain"
+           class="w-24 h-20 sm:w-32 sm:h-28 object-contain"
          />
       </router-link>
     </div>
     <div
       class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar"
     >
-      <nav class="mb-6">
-        <div class="flex flex-col gap-4">
+      <nav class="mb-4 sm:mb-6">
+        <div class="flex flex-col gap-2 sm:gap-4">
           <div v-for="(menuGroup, groupIndex) in menuGroups" :key="groupIndex">
             <h2
               :class="[
-                'mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
+                'mb-2 sm:mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
                 !isExpanded && !isHovered
                   ? 'lg:justify-center'
                   : 'justify-start',
@@ -47,7 +47,7 @@
               </template>
               <HorizontalDots v-else />
             </h2>
-            <ul class="flex flex-col gap-4">
+            <ul class="flex flex-col gap-2 sm:gap-4">
               <li v-for="(item, index) in menuGroup.items" :key="item.name">
                 <button
                   v-if="item.subItems"
