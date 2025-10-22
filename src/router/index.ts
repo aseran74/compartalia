@@ -103,6 +103,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/carpooling/buscar-viajes',
+      name: 'Buscar Viajes Híbrido',
+      component: () => import('../views/HybridTripSearch.vue'),
+      meta: {
+        title: 'Buscar Viajes',
+      },
+    },
+    {
       path: '/carpooling/busqueda-mapa',
       name: 'Busqueda Mapa',
       component: () => import('../views/Carpooling/BusquedaMapa.vue'),
