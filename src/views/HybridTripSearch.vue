@@ -36,7 +36,7 @@
                     @focus="showOriginSuggestions = true"
                     @blur="hideOriginSuggestions"
                     type="text"
-                    placeholder="¿Desde dónde viajas?"
+                    placeholder="📍 Ubicación exacta del origen"
                     class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     required
                   />
@@ -87,7 +87,7 @@
                     @focus="showDestinationSuggestions = true"
                     @blur="hideDestinationSuggestions"
                     type="text"
-                    placeholder="¿Hacia dónde vas?"
+                    placeholder="🎯 Destino"
                     class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     required
                   />
@@ -136,6 +136,7 @@
                 <input
                   v-model="searchForm.date"
                   type="date"
+                  placeholder="Selecciona fecha"
                   class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   required
                 />
@@ -149,6 +150,7 @@
                 <input
                   v-model="searchForm.time"
                   type="time"
+                  placeholder="Hora aproximada"
                   class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 />
               </div>
