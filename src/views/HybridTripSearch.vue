@@ -104,7 +104,23 @@
             </div>
 
             <!-- Filtros adicionales -->
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
+              <!-- Tipo de Viaje -->
+              <div>
+                <label class="mb-2.5 block text-black dark:text-white">
+                  Tipo de Viaje
+                </label>
+                <select
+                  v-model="searchForm.tripType"
+                  class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                >
+                  <option value="all">Todos los tipos</option>
+                  <option value="daily">Viajes diarios</option>
+                  <option value="weekly">Viajes semanales</option>
+                  <option value="monthly">Viajes mensuales</option>
+                </select>
+              </div>
+
               <!-- Fecha -->
               <div>
                 <label class="mb-2.5 block text-black dark:text-white">
@@ -273,7 +289,7 @@
                     Ver Detalles
                   </button>
                   <button
-                    @click="bookTrip(result.trip)"
+                    @click="openBookingModal(result.trip)"
                     class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                   >
                     Reservar
@@ -303,6 +319,112 @@
       </main>
     </div>
 
+    <!-- Modal de Reserva -->
+    <div v-if="showBookingModal" class="fixed inset-0 z-50 overflow-y-auto" @click="closeBookingModal">
+      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="closeBookingModal"></div>
+        
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full dark:bg-boxdark" @click.stop>
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 dark:bg-boxdark">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                🚗 Reservar Viaje
+              </h3>
+              <button @click="closeBookingModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            
+            <div v-if="selectedTrip" class="space-y-4">
+              <!-- Información del Viaje -->
+              <div class="bg-gray-50 rounded-lg p-4 dark:bg-gray-700">
+                <h4 class="font-semibold text-black dark:text-white mb-2">
+                  {{ selectedTrip.origin_name }} → {{ selectedTrip.destination_name }}
+                </h4>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span class="text-gray-600 dark:text-gray-400">Salida:</span>
+                    <span class="ml-2 text-black dark:text-white">{{ formatTime(selectedTrip.departure_time) }}</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-600 dark:text-gray-400">Precio:</span>
+                    <span class="ml-2 text-black dark:text-white font-semibold">{{ selectedTrip.price_per_seat }}€</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-600 dark:text-gray-400">Asientos:</span>
+                    <span class="ml-2 text-black dark:text-white">{{ selectedTrip.available_seats }} disponibles</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-600 dark:text-gray-400">Tipo:</span>
+                    <span class="ml-2 text-black dark:text-white">{{ getTripTypeLabel(selectedTrip) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Formulario de Reserva -->
+              <form @submit.prevent="confirmBooking" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Número de asientos
+                  </label>
+                  <select
+                    v-model="bookingForm.seats"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 font-medium outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input"
+                    required
+                  >
+                    <option v-for="n in Math.min(selectedTrip.available_seats, 4)" :key="n" :value="n">
+                      {{ n }} asiento{{ n > 1 ? 's' : '' }}
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Notas para el conductor (opcional)
+                  </label>
+                  <textarea
+                    v-model="bookingForm.notes"
+                    rows="3"
+                    placeholder="Ej: Punto de encuentro específico, equipaje especial..."
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 font-medium outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input"
+                  ></textarea>
+                </div>
+
+                <!-- Resumen de Precio -->
+                <div class="bg-primary/10 rounded-lg p-4">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Total a pagar:</span>
+                    <span class="text-lg font-semibold text-primary">
+                      {{ (selectedTrip.price_per_seat * bookingForm.seats).toFixed(2) }}€
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex space-x-3 pt-4">
+                  <button
+                    type="button"
+                    @click="closeBookingModal"
+                    class="flex-1 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:text-white dark:hover:bg-gray-700"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    :disabled="isBooking"
+                    class="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50"
+                  >
+                    {{ isBooking ? 'Reservando...' : 'Confirmar Reserva' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -325,6 +447,7 @@ const { isExpanded } = useSidebar()
 const searchForm = reactive({
   origin: '',
   destination: '',
+  tripType: 'all',
   date: '',
   time: '',
   passengers: 1
@@ -341,6 +464,15 @@ const isLoading = ref(false)
 const hasSearched = ref(false)
 const searchResults = ref<SearchResult[]>([])
 const debugInfo = ref<any>(null)
+
+// Modal de reserva
+const showBookingModal = ref(false)
+const selectedTrip = ref<any>(null)
+const isBooking = ref(false)
+const bookingForm = reactive({
+  seats: 1,
+  notes: ''
+})
 
 
 
@@ -455,6 +587,62 @@ const selectOriginFromList = (city: string) => {
 const selectDestinationFromList = (destination: string) => {
   searchForm.destination = destination
   searchTrips()
+}
+
+// Funciones del modal de reserva
+const openBookingModal = (trip: any) => {
+  selectedTrip.value = trip
+  bookingForm.seats = 1
+  bookingForm.notes = ''
+  showBookingModal.value = true
+}
+
+const closeBookingModal = () => {
+  showBookingModal.value = false
+  selectedTrip.value = null
+  bookingForm.seats = 1
+  bookingForm.notes = ''
+}
+
+const confirmBooking = async () => {
+  if (!selectedTrip.value) return
+  
+  isBooking.value = true
+  
+  try {
+    // Aquí iría la lógica para crear la reserva en Supabase
+    console.log('Reservando viaje:', {
+      tripId: selectedTrip.value.id,
+      seats: bookingForm.seats,
+      notes: bookingForm.notes,
+      totalPrice: selectedTrip.value.price_per_seat * bookingForm.seats
+    })
+    
+    // Simular delay de reserva
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    alert(`¡Reserva confirmada! Has reservado ${bookingForm.seats} asiento${bookingForm.seats > 1 ? 's' : ''} por ${(selectedTrip.value.price_per_seat * bookingForm.seats).toFixed(2)}€`)
+    
+    closeBookingModal()
+  } catch (error) {
+    console.error('Error al confirmar reserva:', error)
+    alert('Error al confirmar la reserva. Por favor, intenta de nuevo.')
+  } finally {
+    isBooking.value = false
+  }
+}
+
+// Función para obtener el tipo de viaje
+const getTripTypeLabel = (trip: any) => {
+  if (trip.route_data?.pricing_type) {
+    switch (trip.route_data.pricing_type) {
+      case 'daily': return 'Viaje diario'
+      case 'weekly': return 'Viaje semanal'
+      case 'monthly': return 'Viaje mensual'
+      default: return 'Viaje único'
+    }
+  }
+  return 'Viaje único'
 }
 
 // Funciones auxiliares
