@@ -456,17 +456,28 @@ const searchTrips = async () => {
   hasSearched.value = true
 
   try {
+    console.log('Iniciando búsqueda de viajes...')
+    console.log('Origen:', searchForm.origin)
+    console.log('Destino:', searchForm.destination)
+    
+    // Primero probamos una consulta simple
+    const { data: testData, error: testError } = await supabase
+      .from('trips')
+      .select('id, origin_name, destination_name')
+      .limit(5)
+    
+    if (testError) {
+      console.error('Error en consulta de prueba:', testError)
+      warning('Error de conexión con la base de datos')
+      return
+    }
+    
+    console.log('Consulta de prueba exitosa:', testData)
+    
+    // Ahora la consulta completa
     const { data, error } = await supabase
       .from('trips')
-      .select(`
-        *,
-        profiles:driver_id (
-          name,
-          email,
-          phone,
-          avatar_url
-        )
-      `)
+      .select('*')
       .ilike('origin_name', `%${searchForm.origin}%`)
       .ilike('destination_name', `%${searchForm.destination}%`)
       .eq('status', 'active')
@@ -478,6 +489,7 @@ const searchTrips = async () => {
       return
     }
 
+    console.log('Resultados encontrados:', data?.length || 0)
     searchResults.value = data || []
   } catch (error) {
     console.error('Error:', error)
