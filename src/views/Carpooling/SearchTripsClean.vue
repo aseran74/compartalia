@@ -48,14 +48,11 @@
                   <label class="mb-2.5 block text-black dark:text-white">
                     Escribe una dirección exacta:
                   </label>
-                  <AutocompleteInput
+                  <input
                     v-model="searchForm.origin"
+                    type="text"
                     placeholder="📍 Ej: Calle Gran Vía, 1, Madrid"
-                    :suggestions="originSuggestions"
-                    :is-loading="isLoadingOrigin"
-                    @input="handleOriginInput"
-                    @select="handleOriginSelect"
-                    input-class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   />
                 </div>
 
@@ -93,14 +90,11 @@
                   <label class="mb-2.5 block text-black dark:text-white">
                     Escribe una dirección exacta:
                   </label>
-                  <AutocompleteInput
+                  <input
                     v-model="searchForm.destination"
+                    type="text"
                     placeholder="📍 Ej: Plaza Mayor, Madrid"
-                    :suggestions="destinationSuggestions"
-                    :is-loading="isLoadingDestination"
-                    @input="handleDestinationInput"
-                    @select="handleDestinationSelect"
-                    input-class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   />
                 </div>
 
@@ -138,11 +132,11 @@
                     <label class="mb-2.5 block text-black dark:text-white">
                       Fecha *
                     </label>
-                    <DatePicker
+                    <input
                       v-model="searchForm.date"
-                      :min-date="today"
-                      placeholder="Selecciona una fecha"
-                      class="w-full"
+                      type="date"
+                      :min="today"
+                      class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
                   </div>
                   
@@ -300,23 +294,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridService'
-import DatePicker from '@/components/DatePicker.vue'
-import AutocompleteInput from '@/components/AutocompleteInput.vue'
-import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
-import { GeolocationService } from '@/services/geolocation'
 import { useSidebar } from '@/composables/useSidebar'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
-
-// Servicio híbrido simplificado
-const hybridService = new SimpleHybridService()
-
-// Servicio de autocompletado
-const autocompleteService = new SimpleAutocompleteService()
-const geolocationService = new GeolocationService()
 
 // Router y sidebar
 const router = useRouter()
@@ -334,15 +316,9 @@ const searchForm = reactive({
 })
 
 // Estados de la búsqueda
-const searchResults = ref<SearchResult[]>([])
+const searchResults = ref<any[]>([])
 const isSearching = ref(false)
 const hasSearched = ref(false)
-
-// Autocompletado
-const originSuggestions = ref<AutocompleteSuggestion[]>([])
-const destinationSuggestions = ref<AutocompleteSuggestion[]>([])
-const isLoadingOrigin = ref(false)
-const isLoadingDestination = ref(false)
 
 // Fecha actual
 const today = new Date().toISOString().split('T')[0]
@@ -390,68 +366,13 @@ const madridDestinations = [
   'Ciudad financiera BBVA (Las Tablas)'
 ]
 
-// Funciones de autocompletado
-const handleOriginInput = async (value: string) => {
-  if (value.length >= 2) {
-    try {
-      // Intentar usar Google Places API primero
-      const googleResults = await geolocationService.autocompleteAddress(value)
-      if (googleResults.length > 0) {
-        originSuggestions.value = googleResults
-        return
-      }
-    } catch (error) {
-      console.warn('Google Places API falló, usando fallback:', error)
-    }
-    
-    // Fallback a servicio simple
-    originSuggestions.value = autocompleteService.searchSuggestions(value, 8)
-  } else {
-    originSuggestions.value = []
-  }
-}
-
-const handleDestinationInput = async (value: string) => {
-  if (value.length >= 2) {
-    try {
-      // Intentar usar Google Places API primero
-      const googleResults = await geolocationService.autocompleteAddress(value)
-      if (googleResults.length > 0) {
-        destinationSuggestions.value = googleResults
-        return
-      }
-    } catch (error) {
-      console.warn('Google Places API falló, usando fallback:', error)
-    }
-    
-    // Fallback a servicio simple
-    destinationSuggestions.value = autocompleteService.searchSuggestions(value, 8)
-  } else {
-    destinationSuggestions.value = []
-  }
-}
-
-const handleOriginSelect = (suggestion: AutocompleteSuggestion) => {
-  searchForm.origin = suggestion.name
-  originSuggestions.value = []
-  console.log('Origen seleccionado:', suggestion)
-}
-
-const handleDestinationSelect = (suggestion: AutocompleteSuggestion) => {
-  searchForm.destination = suggestion.name
-  destinationSuggestions.value = []
-  console.log('Destino seleccionado:', suggestion)
-}
-
 // Selección desde listas predefinidas
 const selectOriginFromList = (city: string) => {
   searchForm.origin = city
-  originSuggestions.value = []
 }
 
 const selectDestinationFromList = (destination: string) => {
   searchForm.destination = destination
-  destinationSuggestions.value = []
 }
 
 // Búsqueda de viajes
@@ -465,20 +386,24 @@ const searchTrips = async () => {
   hasSearched.value = true
 
   try {
-    console.log('🔍 Iniciando búsqueda híbrida...', searchForm)
+    console.log('🔍 Iniciando búsqueda...', searchForm)
     
-    const results = await hybridService.searchTrips({
-      origin: searchForm.origin,
-      destination: searchForm.destination,
-      date: searchForm.date,
-      time: searchForm.time,
-      tripType: searchForm.tripType,
-      maxPrice: searchForm.maxPrice ? parseFloat(searchForm.maxPrice) : undefined,
-      seats: searchForm.seats ? parseInt(searchForm.seats) : 1
-    })
-
-    console.log('✅ Búsqueda completada:', results)
-    searchResults.value = results
+    // Simular búsqueda
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    // Resultados de ejemplo
+    searchResults.value = [
+      {
+        id: 1,
+        origin: searchForm.origin,
+        destination: searchForm.destination,
+        date: searchForm.date,
+        price: '15',
+        tripType: 'Diario'
+      }
+    ]
+    
+    console.log('✅ Búsqueda completada:', searchResults.value)
   } catch (error) {
     console.error('❌ Error en la búsqueda:', error)
     alert('Error al buscar viajes. Inténtalo de nuevo.')
@@ -488,4 +413,3 @@ const searchTrips = async () => {
   }
 }
 </script>
-
