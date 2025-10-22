@@ -4,12 +4,12 @@
     <AppSidebar />
     
     <!-- Main Content -->
-    <div class="flex flex-1 flex-col overflow-hidden" :class="{ 'ml-[90px]': !isExpanded, 'ml-[280px]': isExpanded }">
+    <div class="flex flex-1 flex-col overflow-hidden" :class="{ 'ml-[90px] lg:ml-[90px]': !isExpanded, 'ml-[280px] lg:ml-[280px]': isExpanded }">
       <!-- Header -->
       <AppHeader />
       
       <!-- Page Content -->
-      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6 xl:p-7.5 dark:bg-boxdark">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 px-3 py-4 sm:px-4 sm:py-6 md:px-6 lg:px-8 xl:px-10 dark:bg-boxdark">
         <!-- Header -->
         <div class="mb-6">
           <div class="flex items-center justify-between">
@@ -33,12 +33,12 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
           <!-- Formulario de Búsqueda -->
           <div class="lg:col-span-2">
             <form @submit.prevent="searchTrips" class="space-y-6">
               <!-- Sección de Origen -->
-              <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div class="rounded-sm border border-stroke bg-white p-4 sm:p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <h3 class="mb-4 text-lg font-semibold text-black dark:text-white">
                   🚗 ¿Desde dónde viajas?
                 </h3>
@@ -61,13 +61,13 @@
                   <label class="mb-2.5 block text-black dark:text-white">
                     O selecciona una ciudad del extrarradio:
                   </label>
-                  <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                  <div class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
                     <button
                       v-for="city in madridCities"
                       :key="city"
                       @click="selectOriginFromList(city)"
                       :class="[
-                        'rounded-lg border px-3 py-2 text-center text-sm font-medium transition-all duration-200',
+                        'rounded-lg border px-2 py-1.5 sm:px-3 sm:py-2 text-center text-xs sm:text-sm font-medium transition-all duration-200',
                         searchForm.origin === city
                           ? 'border-primary bg-primary text-white'
                           : 'border-stroke bg-white text-body-color hover:border-primary hover:bg-primary/5 dark:border-strokedark dark:bg-boxdark dark:text-white'
@@ -80,7 +80,7 @@
               </div>
 
               <!-- Sección de Destino -->
-              <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div class="rounded-sm border border-stroke bg-white p-4 sm:p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <h3 class="mb-4 text-lg font-semibold text-black dark:text-white">
                   🎯 ¿A dónde vas?
                 </h3>
@@ -103,13 +103,13 @@
                   <label class="mb-2.5 block text-black dark:text-white">
                     O selecciona un destino popular:
                   </label>
-                  <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                  <div class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
                     <button
                       v-for="destination in madridDestinations"
                       :key="destination"
                       @click="selectDestinationFromList(destination)"
                       :class="[
-                        'rounded-lg border px-3 py-2 text-center text-sm font-medium transition-all duration-200',
+                        'rounded-lg border px-2 py-1.5 sm:px-3 sm:py-2 text-center text-xs sm:text-sm font-medium transition-all duration-200',
                         searchForm.destination === destination
                           ? 'border-primary bg-primary text-white'
                           : 'border-stroke bg-white text-body-color hover:border-primary hover:bg-primary/5 dark:border-strokedark dark:bg-boxdark dark:text-white'
@@ -122,7 +122,7 @@
               </div>
 
               <!-- Fecha y Hora -->
-              <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div class="rounded-sm border border-stroke bg-white p-4 sm:p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <h3 class="mb-4 text-lg font-semibold text-black dark:text-white">
                   📅 ¿Cuándo viajas?
                 </h3>
@@ -154,7 +154,7 @@
               </div>
 
               <!-- Filtros -->
-              <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div class="rounded-sm border border-stroke bg-white p-4 sm:p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <h3 class="mb-4 text-lg font-semibold text-black dark:text-white">
                   🔍 Filtros
                 </h3>
