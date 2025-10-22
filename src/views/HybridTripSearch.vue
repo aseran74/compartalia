@@ -9,7 +9,7 @@
       <AppHeader />
       
       <!-- Page Content -->
-      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6 xl:p-7.5 dark:bg-boxdark">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-3 sm:p-4 md:p-6 xl:p-7.5 dark:bg-boxdark">
         <!-- Header -->
         <div class="mb-6">
           <h1 class="text-2xl font-bold text-black dark:text-white">
@@ -21,15 +21,15 @@
         </div>
 
         <!-- Formulario de Búsqueda -->
-        <div class="mb-8 rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-          <form @submit.prevent="searchTrips" class="space-y-6">
+        <div class="mb-6 sm:mb-8 rounded-sm border border-stroke bg-white p-4 sm:p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+          <form @submit.prevent="searchTrips" class="space-y-4 sm:space-y-6">
             <!-- Sección de Origen -->
-            <div class="mb-6">
-              <h3 class="text-lg font-semibold text-black dark:text-white mb-4">🚗 ¿Desde dónde viajas?</h3>
+            <div class="mb-4 sm:mb-6">
+              <h3 class="text-lg font-semibold text-black dark:text-white mb-3 sm:mb-4">🚗 ¿Desde dónde viajas?</h3>
               
               <!-- Búsqueda por dirección exacta -->
-              <div class="mb-4">
-                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div class="mb-3 sm:mb-4">
+                <label class="mb-1.5 sm:mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Escribe una dirección exacta:
                 </label>
                 <AutocompleteInput
@@ -45,7 +45,7 @@
 
               <!-- Orígenes predefinidos -->
               <div>
-                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label class="mb-1.5 sm:mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   O selecciona una ciudad del extrarradio:
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
@@ -67,12 +67,12 @@
             </div>
 
             <!-- Sección de Destino -->
-            <div class="mb-6">
-              <h3 class="text-lg font-semibold text-black dark:text-white mb-4">🎯 ¿A dónde vas?</h3>
+            <div class="mb-4 sm:mb-6">
+              <h3 class="text-lg font-semibold text-black dark:text-white mb-3 sm:mb-4">🎯 ¿A dónde vas?</h3>
               
               <!-- Búsqueda por dirección exacta -->
-              <div class="mb-4">
-                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div class="mb-3 sm:mb-4">
+                <label class="mb-1.5 sm:mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Escribe una dirección exacta:
                 </label>
                 <AutocompleteInput
@@ -88,7 +88,7 @@
 
               <!-- Destinos predefinidos -->
               <div>
-                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label class="mb-1.5 sm:mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   O selecciona un destino popular:
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
@@ -229,7 +229,7 @@
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <!-- Información del Viaje -->
-                  <div class="mb-4">
+                  <div class="mb-3 sm:mb-4">
                     <h3 class="text-lg font-semibold text-black dark:text-white mb-2">
                       {{ result.trip.origin_name }} → {{ result.trip.destination_name }}
                     </h3>
