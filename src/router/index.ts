@@ -63,6 +63,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/test-hybrid',
+      name: 'TestHybrid',
+      component: () => import('../views/TestHybrid.vue'),
+      meta: {
+        title: 'Test Hybrid - Compartalia',
+      },
+    },
+    {
       path: '/dashboard',
       name: 'Dashboard',
       component: () => import('../views/Ecommerce.vue'),
