@@ -457,7 +457,7 @@ const searchTrips = async () => {
 
   try {
     const { data, error } = await supabase
-      .from('daily_trips')
+      .from('trips')
       .select(`
         *,
         profiles:driver_id (
@@ -467,10 +467,10 @@ const searchTrips = async () => {
           avatar_url
         )
       `)
-      .ilike('origin', `%${searchForm.origin}%`)
-      .ilike('destination', `%${searchForm.destination}%`)
+      .ilike('origin_name', `%${searchForm.origin}%`)
+      .ilike('destination_name', `%${searchForm.destination}%`)
       .eq('status', 'active')
-      .gte('departure_date', new Date().toISOString().split('T')[0])
+      .gte('departure_time', new Date().toISOString())
 
     if (error) {
       console.error('Error searching trips:', error)
