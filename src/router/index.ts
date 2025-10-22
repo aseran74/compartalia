@@ -47,6 +47,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/carpooling/search-trips-fixed',
+      name: 'SearchTripsFixed',
+      component: () => import('../views/carpooling/SearchTripsFixed.vue'),
+      meta: {
+        title: 'Buscar Viajes - Compartalia',
+      },
+    },
+    {
       path: '/dashboard',
       name: 'Dashboard',
       component: () => import('../views/Ecommerce.vue'),

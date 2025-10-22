@@ -38,11 +38,15 @@ export class SimpleTripService {
 
       // Aplicar filtros si se proporcionan
       if (origin) {
-        query = query.ilike('origin_name', `%${origin}%`);
+        // Normalizar búsqueda de Madrid
+        const normalizedOrigin = this.normalizeMadridSearch(origin);
+        query = query.ilike('origin_name', `%${normalizedOrigin}%`);
       }
       
       if (destination) {
-        query = query.ilike('destination_name', `%${destination}%`);
+        // Normalizar búsqueda de Madrid
+        const normalizedDestination = this.normalizeMadridSearch(destination);
+        query = query.ilike('destination_name', `%${normalizedDestination}%`);
       }
 
       const { data, error } = await query;
@@ -58,6 +62,31 @@ export class SimpleTripService {
       console.error('❌ Error en SimpleTripService.searchTrips:', error);
       throw error;
     }
+  }
+
+  /**
+   * Normalizar búsquedas de Madrid para encontrar "Madrid Centro"
+   */
+  private static normalizeMadridSearch(searchTerm: string): string {
+    const term = searchTerm.toLowerCase().trim();
+    
+    // Si busca "madrid" sin especificar, buscar "madrid centro"
+    if (term === 'madrid') {
+      return 'madrid centro';
+    }
+    
+    // Si busca "madrid centro", mantenerlo
+    if (term.includes('madrid centro')) {
+      return 'madrid centro';
+    }
+    
+    // Si busca "madrid" con algo más, mantenerlo
+    if (term.includes('madrid') && term.length > 6) {
+      return searchTerm;
+    }
+    
+    // Para otros casos, devolver el término original
+    return searchTerm;
   }
 
   /**
