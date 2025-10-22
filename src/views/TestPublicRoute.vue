@@ -21,6 +21,11 @@
           Volver al Inicio
         </router-link>
       </div>
+      <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+        <p class="text-sm text-blue-800">
+          <strong>Nota:</strong> Si ves este mensaje, significa que el enrutamiento está funcionando correctamente.
+        </p>
+      </div>
     </div>
   </div>
 </template>
