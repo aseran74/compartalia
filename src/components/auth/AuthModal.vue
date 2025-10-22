@@ -204,7 +204,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
-const { login, register } = useAuth();
+const { login, register, loginWithGoogle } = useAuth();
 
 const isLogin = ref(props.defaultMode === 'login');
 const isLoading = ref(false);

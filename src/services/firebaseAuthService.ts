@@ -130,14 +130,39 @@ class FirebaseAuthService {
       console.log('=== FIREBASE GOOGLE LOGIN START ===');
       
       const provider = new GoogleAuthProvider();
+      
+      // Configure the provider
+      provider.addScope('email');
+      provider.addScope('profile');
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
+      console.log('Attempting Google Sign-In with popup...');
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
       console.log('Firebase Google login successful:', user);
+      console.log('User display name:', user.displayName);
+      console.log('User email:', user.email);
+      console.log('User photo URL:', user.photoURL);
+      
       return user;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Firebase Google login error:', error);
-      throw error;
+      
+      // Handle specific error cases
+      if (error.code === 'auth/popup-closed-by-user') {
+        throw new Error('El popup de Google fue cerrado. Por favor, intenta de nuevo.');
+      } else if (error.code === 'auth/popup-blocked') {
+        throw new Error('El popup de Google fue bloqueado. Por favor, permite popups para este sitio.');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        throw new Error('Dominio no autorizado. Contacta al administrador.');
+      } else if (error.code === 'auth/operation-not-allowed') {
+        throw new Error('Google Sign-In no está habilitado. Contacta al administrador.');
+      } else {
+        throw new Error(error.message || 'Error al iniciar sesión con Google');
+      }
     }
   }
 

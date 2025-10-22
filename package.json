@@ -24,6 +24,7 @@
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "apexcharts": "^4.4.0",
+    "autoprefixer": "^10.4.21",
     "dropzone": "^6.0.0-beta.2",
     "firebase": "^12.4.0",
     "flatpickr": "^4.6.13",

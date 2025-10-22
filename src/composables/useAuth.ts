@@ -56,10 +56,21 @@ export function useAuth() {
   const loginWithGoogle = async () => {
     try {
       isLoading.value = true;
+      console.log('=== USE AUTH GOOGLE LOGIN START ===');
+      console.log('Current user before login:', user.value);
+      console.log('Current profile before login:', userProfile.value);
+      
       await firebaseAuthService.loginWithGoogle();
+      
+      // Update local state
       user.value = firebaseAuthService.getCurrentUser();
       userProfile.value = firebaseAuthService.getUserProfile();
+      
+      console.log('User after login:', user.value);
+      console.log('Profile after login:', userProfile.value);
+      console.log('=== USE AUTH GOOGLE LOGIN END ===');
     } catch (error) {
+      console.error('Error in useAuth Google login:', error);
       throw error;
     } finally {
       isLoading.value = false;

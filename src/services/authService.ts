@@ -1,5 +1,15 @@
 import { supabase } from '@/config/supabase';
-import type { User } from '@supabase/supabase-js';
+import { auth } from '@/config/firebase';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
+} from 'firebase/auth';
+import type { User as FirebaseUser } from 'firebase/auth';
 
 export interface UserProfile {
   id: string;

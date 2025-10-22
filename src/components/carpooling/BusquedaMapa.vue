@@ -718,6 +718,12 @@ function inicializarMapa() {
     return;
   }
 
+  // Verificar que el elemento del mapa existe y es válido
+  if (!mapContainer.value || !(mapContainer.value instanceof HTMLElement)) {
+    console.error('El contenedor del mapa no es válido');
+    return;
+  }
+
   // Buscar coordenadas del origen seleccionado
   const origenSeleccionado = origenesComunes.find(o => o.nombre === origen.value);
   const centro = origenSeleccionado 

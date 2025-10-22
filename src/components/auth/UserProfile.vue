@@ -2,9 +2,9 @@
   <div class="flex items-center">
     <div class="flex items-center text-gray-700 dark:text-gray-400">
       <span class="mr-3 overflow-hidden rounded-full h-11 w-11">
-        <div v-if="profile?.name" class="w-full h-full bg-green-600 rounded-full flex items-center justify-center">
+        <div v-if="userProfile?.name" class="w-full h-full bg-green-600 rounded-full flex items-center justify-center">
           <span class="text-white text-sm font-semibold">
-            {{ profile.name.charAt(0).toUpperCase() }}
+            {{ userProfile.name.charAt(0).toUpperCase() }}
           </span>
         </div>
         <div v-else class="w-full h-full bg-gray-400 rounded-full flex items-center justify-center">
@@ -13,7 +13,7 @@
       </span>
 
       <span class="block mr-1 font-medium text-theme-sm">
-        {{ profile?.name?.split(' ')[0] || 'Usuario' }}
+        {{ userProfile?.name?.split(' ')[0] || 'Usuario' }}
       </span>
     </div>
 
@@ -33,13 +33,13 @@
       >
         <div class="pb-3 border-b border-gray-200 dark:border-gray-800">
           <span class="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {{ profile?.name || 'Usuario' }}
+            {{ userProfile?.name || 'Usuario' }}
           </span>
           <span class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {{ profile?.email || (loading ? 'Cargando...' : 'No autenticado') }}
+            {{ userProfile?.email || (loading ? 'Cargando...' : 'No autenticado') }}
           </span>
-          <span v-if="profile?.role" class="mt-0.5 block text-theme-xs text-green-600 font-medium">
-            {{ profile.role === 'conductor' ? 'Conductor' : 'Pasajero' }}
+          <span v-if="userProfile?.role" class="mt-0.5 block text-theme-xs text-green-600 font-medium">
+            {{ userProfile.role === 'conductor' ? 'Conductor' : 'Pasajero' }}
           </span>
         </div>
 
@@ -88,18 +88,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ChevronDownIcon, UserCircleIcon, SettingsIcon, InfoCircleIcon, LogoutIcon } from '@/icons'
-import { auth } from '@/config/firebase'
-import { signOut } from 'firebase/auth'
-
-interface UserProfile {
-  id: string
-  email: string
-  name: string
-  role: string
-  avatar_url?: string
-  created_at: string
-  updated_at: string
-}
+import { useAuth } from '@/composables/useAuth'
 
 interface Props {
   showDropdown?: boolean
@@ -113,75 +102,8 @@ const emit = defineEmits<{
   logout: []
 }>()
 
-const profile = ref<UserProfile | null>(null)
+const { user, userProfile, logout: authLogout } = useAuth()
 const dropdownOpen = ref(false)
-const loading = ref(true)
-
-// Get current user ID from Firebase
-const getCurrentUserId = async (): Promise<string | null> => {
-  try {
-    const user = auth.currentUser
-    if (!user) {
-      console.log('No user authenticated')
-      return null
-    }
-    console.log('Firebase auth state:', user)
-    console.log('User ID:', user.uid)
-    console.log('User email:', user.email)
-    return user.uid
-  } catch (error) {
-    console.error('Error in getCurrentUserId:', error)
-    return null
-  }
-}
-
-// Fetch user profile from Supabase
-const fetchUserProfile = async () => {
-  try {
-    loading.value = true
-    console.log('=== FETCHING USER PROFILE ===')
-    
-    const userId = await getCurrentUserId()
-    console.log('User ID obtained:', userId)
-    
-    if (!userId) {
-      console.log('No user authenticated - stopping')
-      return
-    }
-
-    console.log('Fetching profile for user:', userId)
-    
-    // Primero probar una consulta simple
-    const { data: testData, error: testError } = await supabase
-      .from('profiles')
-      .select('*')
-      .limit(5)
-    
-    console.log('Test query result:', testData)
-    console.log('Test query error:', testError)
-    
-    // Ahora la consulta real - buscar por ID de Supabase
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-
-    if (error) {
-      console.error('Supabase error:', error)
-      console.error('Error details:', error.message)
-      return
-    }
-
-    console.log('User profile loaded successfully:', data)
-    profile.value = data
-  } catch (error) {
-    console.error('Error in fetchUserProfile:', error)
-  } finally {
-    loading.value = false
-    console.log('=== FETCH COMPLETE ===')
-  }
-}
 
 // Toggle dropdown
 const toggleDropdown = () => {
@@ -197,11 +119,8 @@ const closeDropdown = () => {
 const handleLogout = async () => {
   try {
     console.log('=== USER PROFILE LOGOUT START ===')
-    console.log('Current user before logout:', auth.currentUser)
     
-    await signOut(auth)
-    
-    profile.value = null
+    await authLogout()
     emit('logout')
     closeDropdown()
     
@@ -221,7 +140,6 @@ const handleClickOutside = (event: Event) => {
 }
 
 onMounted(() => {
-  fetchUserProfile()
   document.addEventListener('click', handleClickOutside)
 })
 
