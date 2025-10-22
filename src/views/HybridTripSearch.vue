@@ -48,13 +48,13 @@
                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   O selecciona una ciudad del extrarradio:
                 </label>
-                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
                   <button
                     v-for="city in madridCities"
                     :key="city"
                     @click="selectOriginFromList(city)"
                     :class="[
-                      'p-3 rounded-lg border text-center transition-all duration-200',
+                      'p-2 sm:p-3 rounded-lg border text-center transition-all duration-200',
                       searchForm.origin === city
                         ? 'border-primary bg-primary text-white'
                         : 'border-stroke bg-white hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:hover:bg-gray-700'
@@ -91,13 +91,13 @@
                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   O selecciona un destino popular:
                 </label>
-                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
                   <button
                     v-for="destination in madridDestinations"
                     :key="destination"
                     @click="selectDestinationFromList(destination)"
                     :class="[
-                      'p-3 rounded-lg border text-center transition-all duration-200',
+                      'p-2 sm:p-3 rounded-lg border text-center transition-all duration-200',
                       searchForm.destination === destination
                         ? 'border-primary bg-primary text-white'
                         : 'border-stroke bg-white hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:hover:bg-gray-700'

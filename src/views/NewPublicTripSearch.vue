@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-50">
     <!-- Header -->
     <header class="bg-white shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div class="flex justify-between items-center py-4">
           <div class="flex items-center">
             <img src="/images/logo/Compartalia2.png" alt="Compartalia Logo" class="h-8 w-auto object-contain" />
@@ -103,7 +103,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
       <!-- Hero Section -->
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">
@@ -115,10 +115,10 @@
       </div>
 
       <!-- Search Form -->
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
         <h2 class="text-xl font-semibold mb-4">📝 Información del Viaje</h2>
         
-        <form @submit.prevent="searchTrips" class="space-y-6">
+        <form @submit.prevent="searchTrips" class="space-y-4 sm:space-y-6">
           <!-- Origen -->
           <div class="form-group">
             <label class="block text-sm font-medium text-gray-700 mb-2">📍 Origen</label>
@@ -126,13 +126,13 @@
             <!-- Opciones predefinidas -->
             <div class="mb-3">
               <p class="text-sm text-gray-600 mb-2">Ciudades del extrarradio de Madrid:</p>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                 <button
                   v-for="city in madridCities.slice(0, 16)"
                   :key="city.name"
                   @click="selectPredefinedOrigin(city)"
                   type="button"
-                  class="text-xs px-3 py-2 bg-gray-100 hover:bg-green-100 text-gray-700 rounded-lg transition-colors"
+                  class="text-xs px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-100 hover:bg-green-100 text-gray-700 rounded-lg transition-colors"
                 >
                   {{ city.name.split(',')[0] }}
                 </button>
@@ -158,13 +158,13 @@
             <!-- Opciones predefinidas -->
             <div class="mb-3">
               <p class="text-sm text-gray-600 mb-2">Destinos populares en Madrid:</p>
-              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                 <button
                   v-for="destination in madridDestinations"
                   :key="destination.name"
                   @click="selectPredefinedDestination(destination)"
                   type="button"
-                  class="text-xs px-3 py-2 bg-gray-100 hover:bg-green-100 text-gray-700 rounded-lg transition-colors"
+                  class="text-xs px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-100 hover:bg-green-100 text-gray-700 rounded-lg transition-colors"
                 >
                   {{ destination.name }}
                 </button>
