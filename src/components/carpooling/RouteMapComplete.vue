@@ -576,7 +576,7 @@ const loadGoogleMaps = () => {
   console.log('📡 Cargando Google Maps API desde:', `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=geometry`);
   
   const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=geometry`;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=geometry&loading=async`;
   script.onload = () => {
     console.log('✅ Google Maps API cargado exitosamente');
     initGoogleMap();
