@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen overflow-hidden">
+  <div class="flex h-screen overflow-hidden new-search-page">
     <!-- Sidebar -->
     <AppSidebar />
     
@@ -488,3 +488,154 @@ const searchTrips = async () => {
   }
 }
 </script>
+
+<style scoped>
+/* Estilos específicos para la nueva página de búsqueda */
+.new-search-page {
+  /* Asegurar que no hay interferencia de CSS global */
+}
+
+.new-search-page .grid {
+  /* Forzar el comportamiento del grid */
+  display: grid !important;
+}
+
+.new-search-page .grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+}
+
+.new-search-page .grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.new-search-page .grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.new-search-page .grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+.new-search-page .gap-3 {
+  gap: 0.75rem !important;
+}
+
+.new-search-page .gap-4 {
+  gap: 1rem !important;
+}
+
+.new-search-page .gap-6 {
+  gap: 1.5rem !important;
+}
+
+.new-search-page .p-4 {
+  padding: 1rem !important;
+}
+
+.new-search-page .p-6 {
+  padding: 1.5rem !important;
+}
+
+.new-search-page .px-3 {
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+}
+
+.new-search-page .px-5 {
+  padding-left: 1.25rem !important;
+  padding-right: 1.25rem !important;
+}
+
+.new-search-page .py-2 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.new-search-page .py-3 {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+.new-search-page .mb-4 {
+  margin-bottom: 1rem !important;
+}
+
+.new-search-page .mb-6 {
+  margin-bottom: 1.5rem !important;
+}
+
+/* Responsive overrides */
+@media (min-width: 640px) {
+  .new-search-page .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  
+  .new-search-page .sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  
+  .new-search-page .sm\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  
+  .new-search-page .sm\:gap-3 {
+    gap: 0.75rem !important;
+  }
+  
+  .new-search-page .sm\:px-3 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  .new-search-page .sm\:px-5 {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+  
+  .new-search-page .sm\:py-2 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  
+  .new-search-page .sm\:py-3 {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+  
+  .new-search-page .sm\:mb-4 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .new-search-page .sm\:mb-6 {
+    margin-bottom: 1.5rem !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .new-search-page .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  
+  .new-search-page .md\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .new-search-page .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  
+  .new-search-page .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  
+  .new-search-page .lg\:col-span-1 {
+    grid-column: span 1 / span 1 !important;
+  }
+  
+  .new-search-page .lg\:col-span-2 {
+    grid-column: span 2 / span 2 !important;
+  }
+}
+</style>
