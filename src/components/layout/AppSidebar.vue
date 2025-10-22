@@ -253,7 +253,7 @@ const menuGroups = [
             {
               icon: SearchTripIcon,
               name: "Buscar Viajes",
-              path: "/carpooling/search-trips",
+              path: "/carpooling/buscar-viajes-hibrido",
             },
             {
               icon: GridIcon,
