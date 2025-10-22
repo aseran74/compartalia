@@ -441,7 +441,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridService'
-import DatePicker from '@/components/common/DatePicker.vue'
+import DatePicker from '@/components/DatePicker.vue'
 import { useSidebar } from '@/composables/useSidebar'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
