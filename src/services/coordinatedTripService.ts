@@ -3,7 +3,7 @@
  * Maneja la coordinación entre viajes semanales/mensuales y búsquedas por fecha específica
  */
 
-import { supabase } from '@/config/supabaseClean'
+import { supabaseClean } from '@/config/supabaseClean'
 import TripPricingService, { type TripSearchContext, type TripPricing } from './tripPricingService'
 
 export interface CoordinatedTripResult {
@@ -81,7 +81,7 @@ export class CoordinatedTripService {
     const startOfDay = new Date(searchDateObj.setHours(0, 0, 0, 0));
     const endOfDay = new Date(searchDateObj.setHours(23, 59, 59, 999));
     
-    let query = supabase
+    let query = supabaseClean
       .from('trips')
       .select('*')
       .eq('status', 'active')
@@ -205,7 +205,7 @@ export class CoordinatedTripService {
   } | null> {
     try {
       // Buscar información adicional del viaje
-      const { data: tripData, error } = await supabase
+      const { data: tripData, error } = await supabaseClean
         .from('trips')
         .select('start_date, end_date, days_of_week, trip_type')
         .eq('id', trip.id)
