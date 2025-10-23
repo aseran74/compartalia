@@ -243,6 +243,113 @@
     </div>
   </section>
 
+  <!-- Nueva sección: Viajes Semanales y Mensuales -->
+  <section class="py-24 bg-gradient-to-br from-green-50 to-blue-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <span class="text-sm font-semibold text-green-600 uppercase tracking-wider">Flexibilidad Total</span>
+        <h2 class="text-4xl font-extrabold text-gray-900 mt-2 mb-4">Viajes Semanales y Mensuales</h2>
+        <p class="text-xl text-gray-500 max-w-3xl mx-auto">Adapta tu movilidad a tu estilo de vida. Desde viajes puntuales hasta rutinas establecidas.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+        <!-- Conductor -->
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mr-4">
+              <span class="text-white text-2xl">🚗</span>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold text-gray-900">Como Conductor</h3>
+              <p class="text-gray-600">Maximiza tus ingresos y reduce costes</p>
+            </div>
+          </div>
+          
+          <div class="space-y-6">
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span class="text-green-600 font-bold">📅</span>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-2">Viajes Semanales</h4>
+                <p class="text-gray-600">Establece rutas fijas de lunes a viernes. Los pasajeros se reservan con antelación y tienes ingresos garantizados.</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span class="text-blue-600 font-bold">🗓️</span>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-2">Viajes Mensuales</h4>
+                <p class="text-gray-600">Planifica rutas mensuales con descuentos especiales. Ideal para trabajadores con horarios fijos.</p>
+              </div>
+            </div>
+            
+            <div class="bg-green-50 p-4 rounded-lg">
+              <p class="text-sm text-green-800 font-medium">💰 <strong>Beneficio:</strong> Puedes ganar hasta 300€/mes cubriendo solo tus gastos de combustible.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pasajero -->
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center mr-4">
+              <span class="text-white text-2xl">👥</span>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold text-gray-900">Como Pasajero</h3>
+              <p class="text-gray-600">Ahorra dinero y tiempo en tus desplazamientos</p>
+            </div>
+          </div>
+          
+          <div class="space-y-6">
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span class="text-green-600 font-bold">📅</span>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-2">Viajes Semanales</h4>
+                <p class="text-gray-600">Reserva tu plaza para toda la semana. Precio fijo y garantía de disponibilidad en tu ruta habitual.</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span class="text-blue-600 font-bold">🗓️</span>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-2">Viajes Mensuales</h4>
+                <p class="text-gray-600">Descuentos especiales por reservas mensuales. Perfecto para trabajadores con horarios regulares.</p>
+              </div>
+            </div>
+            
+            <div class="bg-purple-50 p-4 rounded-lg">
+              <p class="text-sm text-purple-800 font-medium">💡 <strong>Beneficio:</strong> Ahorra hasta 200€/mes comparado con transporte público o taxi.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA para crear viaje -->
+      <div class="text-center">
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 max-w-2xl mx-auto">
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">¿Listo para empezar?</h3>
+          <p class="text-gray-600 mb-6">Crea tu primer viaje semanal o mensual y comienza a ahorrar desde el primer día.</p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <router-link to="/carpooling/create-trip" class="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors">
+              🚗 Crear Viaje
+            </router-link>
+            <router-link to="/buscar-viajes" class="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+              🔍 Buscar Viajes
+            </router-link>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="beneficios" class="py-24 bg-blue-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16">
@@ -317,6 +424,179 @@
           <span class="mt-4 inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
             ¡Más control de tu tiempo!
           </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sección de Testimonios -->
+  <section class="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <span class="text-sm font-semibold text-blue-600 uppercase tracking-wider">Historias Reales</span>
+        <h2 class="text-4xl font-extrabold text-gray-900 mt-2 mb-4">Testimonios de Nuestros Usuarios</h2>
+        <p class="text-xl text-gray-500 max-w-3xl mx-auto">Descubre cómo Compartalia está cambiando la forma de moverse por Madrid.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Testimonio 1: Torrejón a Hospital La Paz -->
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 transform hover:shadow-2xl transition duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center mr-4">
+              <span class="text-white text-2xl">👩‍⚕️</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900">María González</h4>
+              <p class="text-sm text-gray-600">Enfermera, Hospital La Paz</p>
+              <div class="flex text-yellow-400 mt-1">
+                ⭐⭐⭐⭐⭐
+              </div>
+            </div>
+          </div>
+          <blockquote class="text-gray-700 italic mb-4">
+            "Gracias a Compartalia, mi viaje desde Torrejón al Hospital La Paz es mucho más cómodo y económico. 
+            He conocido a compañeros de trabajo increíbles y ahorro 180€ al mes. ¡Es una maravilla!"
+          </blockquote>
+          <div class="flex items-center text-sm text-gray-500">
+            <span class="mr-2">📍</span>
+            <span>Torrejón de Ardoz → Hospital La Paz</span>
+          </div>
+        </div>
+
+        <!-- Testimonio 2: Las Rozas a Universidad -->
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 transform hover:shadow-2xl transition duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mr-4">
+              <span class="text-white text-2xl">👨‍🎓</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900">Carlos Ruiz</h4>
+              <p class="text-sm text-gray-600">Estudiante, Universidad Complutense</p>
+              <div class="flex text-yellow-400 mt-1">
+                ⭐⭐⭐⭐⭐
+              </div>
+            </div>
+          </div>
+          <blockquote class="text-gray-700 italic mb-4">
+            "Como estudiante, el ahorro es fundamental. Compartalia me permite ir desde Las Rozas a la universidad 
+            por solo 3€ al día. He hecho amigos increíbles y el conductor es súper puntual."
+          </blockquote>
+          <div class="flex items-center text-sm text-gray-500">
+            <span class="mr-2">📍</span>
+            <span>Las Rozas → Universidad Complutense</span>
+          </div>
+        </div>
+
+        <!-- Testimonio 3: Conductor desde Alcorcón -->
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 transform hover:shadow-2xl transition duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center mr-4">
+              <span class="text-white text-2xl">👨‍💼</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900">David Martín</h4>
+              <p class="text-sm text-gray-600">Conductor, Alcorcón → AZCA</p>
+              <div class="flex text-yellow-400 mt-1">
+                ⭐⭐⭐⭐⭐
+              </div>
+            </div>
+          </div>
+          <blockquote class="text-gray-700 italic mb-4">
+            "Ser conductor en Compartalia ha sido una experiencia increíble. Cubro mis gastos de combustible 
+            y además gano 250€ extra al mes. Los pasajeros son geniales y siempre puntuales."
+          </blockquote>
+          <div class="flex items-center text-sm text-gray-500">
+            <span class="mr-2">📍</span>
+            <span>Alcorcón → AZCA (Madrid Centro)</span>
+          </div>
+        </div>
+
+        <!-- Testimonio 4: Fuenlabrada a Hospital Ramón y Cajal -->
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 transform hover:shadow-2xl transition duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center mr-4">
+              <span class="text-white text-2xl">👨‍⚕️</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900">Antonio López</h4>
+              <p class="text-sm text-gray-600">Médico, Hospital Ramón y Cajal</p>
+              <div class="flex text-yellow-400 mt-1">
+                ⭐⭐⭐⭐⭐
+              </div>
+            </div>
+          </div>
+          <blockquote class="text-gray-700 italic mb-4">
+            "Los turnos en el hospital son impredecibles, pero con Compartalia siempre encuentro un viaje. 
+            He conocido a otros profesionales sanitarios y el networking ha sido increíble."
+          </blockquote>
+          <div class="flex items-center text-sm text-gray-500">
+            <span class="mr-2">📍</span>
+            <span>Fuenlabrada → Hospital Ramón y Cajal</span>
+          </div>
+        </div>
+
+        <!-- Testimonio 5: Getafe a Cuatro Torres -->
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 transform hover:shadow-2xl transition duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-full flex items-center justify-center mr-4">
+              <span class="text-white text-2xl">👩‍💻</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900">Laura Sánchez</h4>
+              <p class="text-sm text-gray-600">Desarrolladora, Cuatro Torres</p>
+              <div class="flex text-yellow-400 mt-1">
+                ⭐⭐⭐⭐⭐
+              </div>
+            </div>
+          </div>
+          <blockquote class="text-gray-700 italic mb-4">
+            "Trabajo en las Cuatro Torres y desde Getafe es un viaje largo. Con Compartalia no solo ahorro dinero, 
+            sino que puedo trabajar en el coche con el WiFi. ¡Es productivo y económico!"
+          </blockquote>
+          <div class="flex items-center text-sm text-gray-500">
+            <span class="mr-2">📍</span>
+            <span>Getafe → Cuatro Torres</span>
+          </div>
+        </div>
+
+        <!-- Testimonio 6: Móstoles a Universidad Politécnica -->
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 transform hover:shadow-2xl transition duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-700 rounded-full flex items-center justify-center mr-4">
+              <span class="text-white text-2xl">👨‍🔬</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900">Roberto García</h4>
+              <p class="text-sm text-gray-600">Investigador, Universidad Politécnica</p>
+              <div class="flex text-yellow-400 mt-1">
+                ⭐⭐⭐⭐⭐
+              </div>
+            </div>
+          </div>
+          <blockquote class="text-gray-700 italic mb-4">
+            "Como investigador, el horario es flexible pero el presupuesto no. Compartalia me permite llegar 
+            a la universidad de forma económica y he conocido a otros investigadores. ¡Excelente comunidad!"
+          </blockquote>
+          <div class="flex items-center text-sm text-gray-500">
+            <span class="mr-2">📍</span>
+            <span>Móstoles → Universidad Politécnica</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA final -->
+      <div class="text-center mt-16">
+        <div class="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 text-white">
+          <h3 class="text-2xl font-bold mb-4">¿Quieres ser el próximo testimonio de éxito?</h3>
+          <p class="text-lg mb-6 opacity-90">Únete a miles de madrileños que ya ahorran tiempo y dinero con Compartalia</p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <router-link to="/register" class="px-8 py-3 bg-white text-green-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+              🚀 Regístrate Gratis
+            </router-link>
+            <router-link to="/buscar-viajes" class="px-8 py-3 bg-transparent border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-colors">
+              🔍 Ver Viajes Disponibles
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
