@@ -487,7 +487,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridService'
+import { HybridTripService, type SearchResult } from '@/services/hybridTripService'
 import AutocompleteInput from '@/components/AutocompleteInput.vue'
 import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
 import { GeolocationService } from '@/services/geolocation'
@@ -501,7 +501,7 @@ const router = useRouter()
 const { isExpanded } = useSidebar()
 
 // Servicios
-const hybridService = new SimpleHybridService()
+const hybridService = new HybridTripService()
 const autocompleteService = new SimpleAutocompleteService()
 const geolocationService = new GeolocationService()
 
