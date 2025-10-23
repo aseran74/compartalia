@@ -53,11 +53,14 @@
                     <label class="mb-2 block text-sm font-medium text-black dark:text-white">
                       Escribe una dirección exacta:
                     </label>
-                    <input
+                    <AutocompleteInput
                       v-model="searchForm.origin"
-                      type="text"
                       placeholder="📍 Ej: Calle Gran Vía, 1, Madrid"
-                      class="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                      :suggestions="originSuggestions"
+                      :is-loading="isLoadingOrigin"
+                      @input="handleOriginInput"
+                      @select="handleOriginSelect"
+                      input-class="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
                   </div>
 
@@ -95,11 +98,14 @@
                     <label class="mb-2 block text-sm font-medium text-black dark:text-white">
                       Escribe una dirección exacta:
                     </label>
-                    <input
+                    <AutocompleteInput
                       v-model="searchForm.destination"
-                      type="text"
                       placeholder="📍 Ej: Plaza Mayor, Madrid"
-                      class="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                      :suggestions="destinationSuggestions"
+                      :is-loading="isLoadingDestination"
+                      @input="handleDestinationInput"
+                      @select="handleDestinationSelect"
+                      input-class="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
                   </div>
 
@@ -235,15 +241,13 @@
                 🗺️ Mapa Interactivo
               </h3>
               
-              <!-- Mapa placeholder -->
-              <div class="h-96 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:bg-gray-800 dark:border-gray-600">
-                <div class="text-center">
-                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7"/>
-                  </svg>
-                  <p class="mt-2 text-sm text-gray-500">Mapa interactivo</p>
-                  <p class="text-xs text-gray-400">Se mostrará aquí cuando se implemente</p>
-                </div>
+              <!-- Mapa de Google Maps -->
+              <div class="h-96 rounded-lg overflow-hidden border border-stroke dark:border-strokedark">
+                <div 
+                  id="map" 
+                  class="w-full h-full"
+                  style="min-height: 384px;"
+                ></div>
               </div>
               
               <!-- Resultados de búsqueda -->
@@ -269,13 +273,13 @@
                 
                 <div v-else class="space-y-3">
                   <div
-                    v-for="trip in searchResults"
-                    :key="trip.id"
+                    v-for="result in searchResults"
+                    :key="result.trip.id"
                     class="rounded-lg border border-stroke p-3 hover:shadow-md transition-shadow dark:border-strokedark"
                   >
                     <div class="flex items-center justify-between mb-2">
-                      <span class="text-xs font-medium text-primary">{{ trip.tripType || 'Diario' }}</span>
-                      <span class="text-sm font-bold text-black dark:text-white">{{ trip.price }}€</span>
+                      <span class="text-xs font-medium text-primary">Diario</span>
+                      <span class="text-sm font-bold text-black dark:text-white">{{ result.trip.price_per_seat }}€</span>
                     </div>
                     
                     <div class="space-y-1">
@@ -283,21 +287,29 @@
                         <svg class="h-3 w-3 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        {{ trip.origin }}
+                        {{ result.trip.origin_name }}
                       </div>
                       <div class="flex items-center text-xs text-body-color">
                         <svg class="h-3 w-3 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        {{ trip.destination }}
+                        {{ result.trip.destination_name }}
                       </div>
                     </div>
                     
                     <div class="mt-2 flex items-center justify-between">
-                      <span class="text-xs text-body-color">{{ trip.date }}</span>
+                      <span class="text-xs text-body-color">{{ result.trip.departure_time }}</span>
                       <button class="text-xs text-primary hover:underline">
                         Ver en mapa
                       </button>
+                    </div>
+                    
+                    <div v-if="result.trip.driver_id" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Conductor: {{ result.trip.driver_id }}
+                    </div>
+                    
+                    <div v-if="result.trip.available_seats" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      {{ result.trip.available_seats }} asientos disponibles
                     </div>
                   </div>
                 </div>
@@ -318,15 +330,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridService'
+import AutocompleteInput from '@/components/AutocompleteInput.vue'
+import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
+import { GeolocationService } from '@/services/geolocation'
 import { useSidebar } from '@/composables/useSidebar'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 
+// Declaraciones de tipos para Google Maps
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 // Router y sidebar
 const router = useRouter()
 const { isExpanded } = useSidebar()
+
+// Servicios
+const hybridService = new SimpleHybridService()
+const autocompleteService = new SimpleAutocompleteService()
+const geolocationService = new GeolocationService()
 
 // Formulario de búsqueda
 const searchForm = reactive({
@@ -340,9 +368,21 @@ const searchForm = reactive({
 })
 
 // Estados de la búsqueda
-const searchResults = ref<any[]>([])
+const searchResults = ref<SearchResult[]>([])
 const isSearching = ref(false)
 const hasSearched = ref(false)
+
+// Autocompletado
+const originSuggestions = ref<AutocompleteSuggestion[]>([])
+const destinationSuggestions = ref<AutocompleteSuggestion[]>([])
+const isLoadingOrigin = ref(false)
+const isLoadingDestination = ref(false)
+
+// Mapa
+const map = ref<any>(null)
+const markers = ref<any[]>([])
+const directionsService = ref<any>(null)
+const directionsRenderer = ref<any>(null)
 
 // Fecha actual
 const today = new Date().toISOString().split('T')[0]
@@ -390,13 +430,230 @@ const madridDestinations = [
   'Ciudad financiera BBVA (Las Tablas)'
 ]
 
+// Funciones de autocompletado
+const handleOriginInput = async (value: string) => {
+  if (value.length >= 2) {
+    try {
+      // Intentar usar Google Places API primero
+      const googleResults = await geolocationService.autocompleteAddress(value)
+      if (googleResults.length > 0) {
+        originSuggestions.value = googleResults
+        return
+      }
+    } catch (error) {
+      console.warn('Google Places API falló, usando fallback:', error)
+    }
+    
+    // Fallback a servicio simple
+    originSuggestions.value = autocompleteService.searchSuggestions(value, 8)
+  } else {
+    originSuggestions.value = []
+  }
+}
+
+const handleDestinationInput = async (value: string) => {
+  if (value.length >= 2) {
+    try {
+      // Intentar usar Google Places API primero
+      const googleResults = await geolocationService.autocompleteAddress(value)
+      if (googleResults.length > 0) {
+        destinationSuggestions.value = googleResults
+        return
+      }
+    } catch (error) {
+      console.warn('Google Places API falló, usando fallback:', error)
+    }
+    
+    // Fallback a servicio simple
+    destinationSuggestions.value = autocompleteService.searchSuggestions(value, 8)
+  } else {
+    destinationSuggestions.value = []
+  }
+}
+
+const handleOriginSelect = (suggestion: AutocompleteSuggestion) => {
+  searchForm.origin = suggestion.name
+  originSuggestions.value = []
+  console.log('Origen seleccionado:', suggestion)
+}
+
+const handleDestinationSelect = (suggestion: AutocompleteSuggestion) => {
+  searchForm.destination = suggestion.name
+  destinationSuggestions.value = []
+  console.log('Destino seleccionado:', suggestion)
+}
+
 // Selección desde listas predefinidas
 const selectOriginFromList = (city: string) => {
   searchForm.origin = city
+  originSuggestions.value = []
 }
 
 const selectDestinationFromList = (destination: string) => {
   searchForm.destination = destination
+  destinationSuggestions.value = []
+}
+
+// Inicializar mapa
+const initMap = () => {
+  if (typeof window.google === 'undefined' || !window.google.maps) {
+    console.error('Google Maps no está cargado')
+    return
+  }
+
+  const mapElement = document.getElementById('map')
+  if (!mapElement) {
+    console.error('Elemento del mapa no encontrado')
+    return
+  }
+
+  // Centro en Madrid
+  const madrid = { lat: 40.4168, lng: -3.7038 }
+  
+  map.value = new window.google.maps.Map(mapElement, {
+    zoom: 10,
+    center: madrid,
+    mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+    styles: [
+      {
+        featureType: 'poi',
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }]
+      }
+    ]
+  })
+
+  directionsService.value = new window.google.maps.DirectionsService()
+  directionsRenderer.value = new window.google.maps.DirectionsRenderer({
+    draggable: false,
+    suppressMarkers: true
+  })
+  
+  directionsRenderer.value.setMap(map.value)
+  
+  console.log('✅ Mapa inicializado correctamente')
+}
+
+// Limpiar marcadores
+const clearMarkers = () => {
+  markers.value.forEach((marker: any) => marker.setMap(null))
+  markers.value = []
+}
+
+// Añadir marcador (usando AdvancedMarkerElement si está disponible)
+const addMarker = (position: { lat: number; lng: number }, title: string, color: string = '#3B82F6') => {
+  if (!map.value) return
+
+  // Intentar usar AdvancedMarkerElement si está disponible
+  if (window.google.maps.marker && window.google.maps.marker.AdvancedMarkerElement) {
+    const marker = new window.google.maps.marker.AdvancedMarkerElement({
+      position,
+      map: map.value,
+      title,
+      content: createMarkerContent(color)
+    })
+    
+    markers.value.push(marker)
+    return marker
+  } else {
+    // Fallback a Marker tradicional
+    const marker = new window.google.maps.Marker({
+      position,
+      map: map.value,
+      title,
+      icon: {
+        path: window.google.maps.SymbolPath.CIRCLE,
+        scale: 8,
+        fillColor: color,
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2
+      }
+    })
+
+    markers.value.push(marker)
+    return marker
+  }
+}
+
+// Crear contenido HTML para AdvancedMarkerElement
+const createMarkerContent = (color: string) => {
+  const div = document.createElement('div')
+  div.style.width = '16px'
+  div.style.height = '16px'
+  div.style.borderRadius = '50%'
+  div.style.backgroundColor = color
+  div.style.border = '2px solid #ffffff'
+  div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)'
+  return div
+}
+
+// Mostrar ruta en el mapa
+const showRoute = (origin: { lat: number; lng: number }, destination: { lat: number; lng: number }) => {
+  if (!directionsService.value || !directionsRenderer.value) return
+
+  directionsService.value.route({
+    origin,
+    destination,
+    travelMode: window.google.maps.TravelMode.DRIVING
+  }, (result: any, status: any) => {
+    if (status === 'OK' && result) {
+      directionsRenderer.value?.setDirections(result)
+    } else {
+      console.error('Error al calcular la ruta:', status)
+    }
+  })
+}
+
+// Actualizar mapa con resultados
+const updateMapWithResults = () => {
+  if (!map.value || searchResults.value.length === 0) return
+
+  clearMarkers()
+  
+  // Añadir marcador de origen
+  if (searchForm.origin) {
+    // Usar coordenadas del primer resultado como ejemplo
+    const firstResult = searchResults.value[0]
+    if (firstResult) {
+      addMarker(
+        { lat: firstResult.trip.origin_lat, lng: firstResult.trip.origin_lng },
+        `Origen: ${firstResult.trip.origin_name}`,
+        '#10B981'
+      )
+    }
+  }
+
+  // Añadir marcador de destino
+  if (searchForm.destination) {
+    const firstResult = searchResults.value[0]
+    if (firstResult) {
+      addMarker(
+        { lat: firstResult.trip.destination_lat, lng: firstResult.trip.destination_lng },
+        `Destino: ${firstResult.trip.destination_name}`,
+        '#EF4444'
+      )
+    }
+  }
+
+  // Añadir marcadores para todos los viajes
+  searchResults.value.forEach((result, index) => {
+    const color = index === 0 ? '#3B82F6' : '#6B7280'
+    addMarker(
+      { lat: result.trip.origin_lat, lng: result.trip.origin_lng },
+      `${result.trip.origin_name} → ${result.trip.destination_name} (${result.trip.price_per_seat}€)`,
+      color
+    )
+  })
+
+  // Mostrar ruta si hay origen y destino
+  if (searchForm.origin && searchForm.destination && searchResults.value.length > 0) {
+    const firstResult = searchResults.value[0]
+    showRoute(
+      { lat: firstResult.trip.origin_lat, lng: firstResult.trip.origin_lng },
+      { lat: firstResult.trip.destination_lat, lng: firstResult.trip.destination_lng }
+    )
+  }
 }
 
 // Búsqueda de viajes
@@ -410,32 +667,23 @@ const searchTrips = async () => {
   hasSearched.value = true
 
   try {
-    console.log('🔍 Iniciando búsqueda en mapa...', searchForm)
+    console.log('🔍 Iniciando búsqueda híbrida en mapa...', searchForm)
     
-    // Simular búsqueda
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Resultados de ejemplo
-    searchResults.value = [
+    const results = await hybridService.searchTrips(
+      searchForm.origin,
+      searchForm.destination,
       {
-        id: 1,
-        origin: searchForm.origin,
-        destination: searchForm.destination,
-        date: searchForm.date,
-        price: '15',
-        tripType: 'Diario'
-      },
-      {
-        id: 2,
-        origin: searchForm.origin,
-        destination: searchForm.destination,
-        date: searchForm.date,
-        price: '12',
-        tripType: 'Semanal'
+        useGeolocation: true,
+        maxDistanceKm: 50,
+        limit: 20
       }
-    ]
+    )
+
+    console.log('✅ Búsqueda completada:', results)
+    searchResults.value = results
     
-    console.log('✅ Búsqueda completada:', searchResults.value)
+    // Actualizar mapa con los resultados
+    updateMapWithResults()
   } catch (error) {
     console.error('❌ Error en la búsqueda:', error)
     alert('Error al buscar viajes. Inténtalo de nuevo.')
@@ -444,4 +692,20 @@ const searchTrips = async () => {
     isSearching.value = false
   }
 }
+
+// Inicializar mapa cuando el componente se monte
+onMounted(async () => {
+  // Esperar a que Google Maps esté disponible
+  const checkGoogleMaps = () => {
+    if (typeof window.google !== 'undefined' && window.google.maps) {
+      nextTick(() => {
+        initMap()
+      })
+    } else {
+      setTimeout(checkGoogleMaps, 100)
+    }
+  }
+  
+  checkGoogleMaps()
+})
 </script>

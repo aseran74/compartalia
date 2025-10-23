@@ -247,8 +247,8 @@ const menuGroups = [
     items: [
       {
         icon: CarIcon,
-        name: "Crear Viaje Mensual",
-        path: "/carpooling/create-trip-madrid",
+        name: "Crear Viaje",
+        path: "/carpooling/create-trip",
       },
             {
               icon: SearchTripIcon,
@@ -264,6 +264,11 @@ const menuGroups = [
         icon: UserCircleIcon,
         name: "Mis Viajes",
         path: "/carpooling/my-trips",
+      },
+      {
+        icon: GridIcon,
+        name: "Gestión de Viajes",
+        path: "/carpooling/trip-management",
       },
             {
               icon: UserGroupIcon,

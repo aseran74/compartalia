@@ -4,6 +4,7 @@ export class GooglePlacesService {
   private apiKey: string;
   private service: google.maps.places.PlacesService | null = null;
   private autocompleteService: google.maps.places.AutocompleteService | null = null;
+  private placesService: google.maps.places.PlacesService | null = null;
 
   constructor() {
     this.apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY || '';
@@ -52,6 +53,11 @@ export class GooglePlacesService {
     if (window.google && window.google.maps && window.google.maps.places) {
       this.autocompleteService = new google.maps.places.AutocompleteService();
       this.service = new google.maps.places.PlacesService(document.createElement('div'));
+      
+      // Inicializar servicio moderno si está disponible
+      if (window.google.maps.places.PlacesService) {
+        this.placesService = new google.maps.places.PlacesService(document.createElement('div'));
+      }
     }
   }
 

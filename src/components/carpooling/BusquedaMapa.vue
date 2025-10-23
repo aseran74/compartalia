@@ -1,53 +1,77 @@
 <template>
-  <div class="p-6 max-w-7xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6">🗺️ Búsqueda de Viajes por Mapa</h1>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div class="p-6 max-w-7xl mx-auto">
+      <!-- Header mejorado -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+          🗺️ Búsqueda de Viajes por Mapa
+        </h1>
+        <p class="text-gray-600 text-lg">Encuentra viajes compartidos y visualiza rutas en tiempo real</p>
+      </div>
     
-    <!-- Panel de filtros -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 class="text-xl font-semibold mb-4">📍 Configuración de Búsqueda</h2>
+    <!-- Panel de filtros mejorado -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-8 mb-8">
+      <div class="flex items-center mb-6">
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+          <span class="text-2xl">🔍</span>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900">Configuración de Búsqueda</h2>
+          <p class="text-gray-600">Personaliza tu búsqueda de viajes</p>
+        </div>
+      </div>
       
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <!-- Origen -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">🚗 Origen</label>
-          <div class="relative">
+        <!-- Origen mejorado -->
+        <div class="space-y-2">
+          <label class="flex items-center text-sm font-semibold text-gray-700">
+            <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2 text-xs">🚗</span>
+            Origen
+          </label>
+          <div class="relative group">
             <input
               v-model="origen"
               @input="buscarOrigen"
               @focus="showOrigenSuggestions = true"
               @blur="hideOrigenSuggestions"
               type="text"
-              placeholder="Selecciona o busca un origen..."
-              class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Busca tu origen..."
+              class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white"
             />
             <button
               @click="abrirModalOrigen"
               type="button"
-              class="absolute right-2 top-2 p-1 text-gray-400 hover:text-blue-500 transition-colors"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200"
               title="Seleccionar de orígenes comunes"
             >
-              📍
+              <span class="text-lg">📍</span>
             </button>
-            <div v-if="showOrigenSuggestions && origenSuggestions.length > 0" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-              <div
-                v-for="(suggestion, index) in origenSuggestions"
-                :key="index"
-                @click="seleccionarOrigen(suggestion)"
-                class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-              >
-                <div class="font-medium text-gray-900">{{ suggestion.main_text }}</div>
-                <div class="text-sm text-gray-600">{{ suggestion.secondary_text }}</div>
+            <!-- Sugerencias mejoradas -->
+            <div v-if="showOrigenSuggestions && origenSuggestions.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+              <div class="p-2">
+                <div
+                  v-for="(suggestion, index) in origenSuggestions"
+                  :key="index"
+                  @click="seleccionarOrigen(suggestion)"
+                  class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors duration-150 border-b border-gray-100 last:border-b-0 group"
+                >
+                  <div class="font-semibold text-gray-900 group-hover:text-blue-700">{{ suggestion.main_text }}</div>
+                  <div class="text-sm text-gray-500 group-hover:text-blue-600">{{ suggestion.secondary_text }}</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
         
-        <!-- Rango de horarios -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">🕐 Rango de horarios</label>
+        <!-- Rango de horarios mejorado -->
+        <div class="space-y-2">
+          <label class="flex items-center text-sm font-semibold text-gray-700">
+            <span class="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center mr-2 text-xs">🕐</span>
+            Horarios
+          </label>
           <select
             v-model="rangoHorarios"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition-all duration-200 bg-gray-50 focus:bg-white"
           >
             <option value="mañana">🌅 Mañana (6:00 - 12:00)</option>
             <option value="tarde">🌞 Tarde (12:00 - 18:00)</option>
@@ -56,12 +80,15 @@
           </select>
         </div>
         
-        <!-- Intervalo de tiempo -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">⏱️ Intervalo</label>
+        <!-- Intervalo de tiempo mejorado -->
+        <div class="space-y-2">
+          <label class="flex items-center text-sm font-semibold text-gray-700">
+            <span class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-2 text-xs">⏱️</span>
+            Intervalo
+          </label>
           <select
             v-model="intervalo"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white"
           >
             <option value="15">Cada 15 minutos</option>
             <option value="30">Cada 30 minutos</option>
@@ -70,132 +97,204 @@
           </select>
         </div>
         
-        <!-- Botón de búsqueda -->
+        <!-- Botón de búsqueda mejorado -->
         <div class="flex items-end">
           <button
             @click="buscarViajes"
             :disabled="!origen || loading"
-            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold"
           >
-            {{ loading ? 'Buscando...' : '🔍 Buscar Viajes' }}
+            <div class="flex items-center justify-center">
+              <div v-if="loading" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+              <span v-else class="mr-2">🔍</span>
+              {{ loading ? 'Buscando...' : 'Buscar Viajes' }}
+            </div>
           </button>
         </div>
       </div>
       
-      <!-- Horarios personalizados -->
-      <div v-if="rangoHorarios === 'personalizado'" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">🕐 Hora inicio</label>
-          <input
-            v-model="horaInicio"
-            type="time"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">🕐 Hora fin</label>
-          <input
-            v-model="horaFin"
-            type="time"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+      <!-- Horarios personalizados mejorados -->
+      <div v-if="rangoHorarios === 'personalizado'" class="mt-6 p-6 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-200">
+        <h3 class="text-lg font-semibold text-orange-800 mb-4 flex items-center">
+          <span class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">⚙️</span>
+          Configuración Personalizada
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="flex items-center text-sm font-semibold text-orange-700">
+              <span class="w-6 h-6 bg-orange-200 rounded-full flex items-center justify-center mr-2 text-xs">🕐</span>
+              Hora de inicio
+            </label>
+            <input
+              v-model="horaInicio"
+              type="time"
+              class="w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition-all duration-200 bg-white"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="flex items-center text-sm font-semibold text-orange-700">
+              <span class="w-6 h-6 bg-orange-200 rounded-full flex items-center justify-center mr-2 text-xs">🕐</span>
+              Hora de fin
+            </label>
+            <input
+              v-model="horaFin"
+              type="time"
+              class="w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition-all duration-200 bg-white"
+            />
+          </div>
         </div>
       </div>
       
-      <!-- Orígenes predefinidos -->
-      <div class="mt-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-3">📍 Orígenes más comunes</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
+      <!-- Orígenes predefinidos mejorados -->
+      <div class="mt-8">
+        <div class="flex items-center mb-4">
+          <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">📍</span>
+          <h3 class="text-xl font-bold text-gray-900">Orígenes más comunes</h3>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
           <button
             v-for="origenComun in origenesComunes"
             :key="origenComun.nombre"
             @click="seleccionarOrigenComun(origenComun)"
             :class="[
-              'px-3 py-2 text-sm rounded-md border transition-colors',
+              'px-4 py-3 text-sm rounded-xl border-2 transition-all duration-200 transform hover:scale-105',
               origen === origenComun.nombre
-                ? 'bg-blue-100 border-blue-300 text-blue-800'
-                : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-500 border-blue-500 text-white shadow-lg'
+                : 'bg-white border-gray-200 text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 shadow-sm hover:shadow-md'
             ]"
           >
-            <div class="font-medium">{{ origenComun.nombre.split(',')[0] }}</div>
-            <div class="text-xs text-gray-500">{{ origenComun.poblacion }} hab.</div>
+            <div class="font-semibold">{{ origenComun.nombre.split(',')[0] }}</div>
+            <div class="text-xs opacity-75">{{ origenComun.poblacion }} hab.</div>
           </button>
         </div>
       </div>
     </div>
     
-    <!-- Estadísticas -->
-    <div v-if="estadisticas.totalViajes > 0" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-blue-50 rounded-lg p-4">
-        <div class="text-2xl font-bold text-blue-600">{{ estadisticas.totalViajes }}</div>
-        <div class="text-sm text-blue-600">Total Viajes</div>
+    <!-- Estadísticas mejoradas -->
+    <div v-if="estadisticas.totalViajes > 0" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-3xl font-bold text-blue-600">{{ estadisticas.totalViajes }}</div>
+            <div class="text-sm font-semibold text-blue-700">Total Viajes</div>
+          </div>
+          <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center">
+            <span class="text-2xl">🚗</span>
+          </div>
+        </div>
       </div>
-      <div class="bg-green-50 rounded-lg p-4">
-        <div class="text-2xl font-bold text-green-600">{{ estadisticas.destinosUnicos }}</div>
-        <div class="text-sm text-green-600">Destinos Únicos</div>
+      <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200 shadow-lg hover:shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-3xl font-bold text-green-600">{{ estadisticas.destinosUnicos }}</div>
+            <div class="text-sm font-semibold text-green-700">Destinos Únicos</div>
+          </div>
+          <div class="w-12 h-12 bg-green-200 rounded-xl flex items-center justify-center">
+            <span class="text-2xl">📍</span>
+          </div>
+        </div>
       </div>
-      <div class="bg-purple-50 rounded-lg p-4">
-        <div class="text-2xl font-bold text-purple-600">{{ estadisticas.conductoresActivos }}</div>
-        <div class="text-sm text-purple-600">Conductores</div>
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-3xl font-bold text-purple-600">{{ estadisticas.conductoresActivos }}</div>
+            <div class="text-sm font-semibold text-purple-700">Conductores</div>
+          </div>
+          <div class="w-12 h-12 bg-purple-200 rounded-xl flex items-center justify-center">
+            <span class="text-2xl">👤</span>
+          </div>
+        </div>
       </div>
-      <div class="bg-orange-50 rounded-lg p-4">
-        <div class="text-2xl font-bold text-orange-600">{{ estadisticas.plazasDisponibles }}</div>
-        <div class="text-sm text-orange-600">Plazas Disponibles</div>
+      <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200 shadow-lg hover:shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-3xl font-bold text-orange-600">{{ estadisticas.plazasDisponibles }}</div>
+            <div class="text-sm font-semibold text-orange-700">Plazas Disponibles</div>
+          </div>
+          <div class="w-12 h-12 bg-orange-200 rounded-xl flex items-center justify-center">
+            <span class="text-2xl">💺</span>
+          </div>
+        </div>
       </div>
     </div>
     
-    <!-- Mapa y lista de viajes -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Mapa -->
-      <div class="bg-white rounded-lg shadow-md">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-semibold">🗺️ Mapa de Destinos</h3>
+    <!-- Mapa y lista de viajes mejorados -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Mapa mejorado -->
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div class="px-6 py-5 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+          <div class="flex items-center">
+            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
+              <span class="text-xl">🗺️</span>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-gray-900">Mapa de Destinos</h3>
+              <p class="text-sm text-gray-600">Visualiza las rutas disponibles</p>
+            </div>
+          </div>
         </div>
-        <div class="p-4">
-          <div id="mapa" ref="mapContainer" class="w-full h-[600px] bg-gray-100 rounded-lg">
+        <div class="p-6">
+          <div id="mapa" ref="mapContainer" class="w-full h-[600px] bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden border border-gray-200">
             <div v-if="!mapaCargado" class="h-full flex items-center justify-center">
               <div class="text-center">
-                <div class="text-4xl mb-2">🗺️</div>
-                <p class="text-gray-600">Cargando mapa...</p>
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+                <p class="text-gray-600 font-medium">Cargando mapa...</p>
               </div>
             </div>
             <div v-else-if="viajes.length === 0" class="h-full flex items-center justify-center">
               <div class="text-center">
-                <div class="text-4xl mb-2">📍</div>
-                <p class="text-gray-600">Selecciona un origen para ver los destinos</p>
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span class="text-3xl">📍</span>
+                </div>
+                <p class="text-gray-600 font-medium">Selecciona un origen para ver los destinos</p>
               </div>
             </div>
           </div>
           
-          <!-- Leyenda del mapa -->
-          <div v-if="viajes.length > 0" class="mt-4 flex flex-wrap gap-2">
-            <div class="flex items-center space-x-2">
-              <div class="w-4 h-4 bg-blue-500 rounded-full"></div>
-              <span class="text-sm text-gray-600">Origen</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <div class="w-4 h-4 bg-green-500 rounded-full"></div>
-              <span class="text-sm text-gray-600">Destinos</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <div class="w-4 h-4 bg-red-500 rounded-full"></div>
-              <span class="text-sm text-gray-600">Viajes seleccionados</span>
+          <!-- Leyenda del mapa mejorada -->
+          <div v-if="viajes.length > 0" class="mt-6 p-4 bg-gray-50 rounded-xl">
+            <h4 class="text-sm font-semibold text-gray-700 mb-3">Leyenda del mapa</h4>
+            <div class="flex flex-wrap gap-4">
+              <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-blue-500 rounded-full shadow-sm"></div>
+                <span class="text-sm text-gray-600 font-medium">Origen</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-green-500 rounded-full shadow-sm"></div>
+                <span class="text-sm text-gray-600 font-medium">Destinos</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-red-500 rounded-full shadow-sm"></div>
+                <span class="text-sm text-gray-600 font-medium">Viajes seleccionados</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
       
-      <!-- Lista de viajes -->
-      <div class="bg-white rounded-lg shadow-md">
-        <div class="px-6 py-4 border-b border-gray-200">
+      <!-- Lista de viajes mejorada -->
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div class="px-6 py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold">🚗 Viajes Disponibles</h3>
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mr-3">
+                <span class="text-xl">🚗</span>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-900">Viajes Disponibles</h3>
+                <p class="text-sm text-gray-600">{{ viajesFiltrados.length }} viajes encontrados</p>
+              </div>
+            </div>
             <div class="flex items-center space-x-2">
               <button
                 @click="ordenarPor = 'hora'"
                 :class="[
-                  'px-3 py-1 rounded-md text-sm',
-                  ordenarPor === 'hora' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
+                  'px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200',
+                  ordenarPor === 'hora' 
+                    ? 'bg-blue-500 text-white shadow-lg' 
+                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:border-blue-300'
                 ]"
               >
                 🕐 Hora
@@ -203,8 +302,10 @@
               <button
                 @click="ordenarPor = 'destino'"
                 :class="[
-                  'px-3 py-1 rounded-md text-sm',
-                  ordenarPor === 'destino' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
+                  'px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200',
+                  ordenarPor === 'destino' 
+                    ? 'bg-blue-500 text-white shadow-lg' 
+                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:border-blue-300'
                 ]"
               >
                 📍 Destino
@@ -212,8 +313,10 @@
               <button
                 @click="ordenarPor = 'precio'"
                 :class="[
-                  'px-3 py-1 rounded-md text-sm',
-                  ordenarPor === 'precio' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
+                  'px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200',
+                  ordenarPor === 'precio' 
+                    ? 'bg-blue-500 text-white shadow-lg' 
+                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:border-blue-300'
                 ]"
               >
                 💰 Precio
@@ -223,9 +326,12 @@
         </div>
         
         <div class="max-h-96 overflow-y-auto">
-          <div v-if="viajesFiltrados.length === 0" class="p-6 text-center">
-            <div class="text-4xl mb-2">🚗</div>
-            <p class="text-gray-600">No se encontraron viajes</p>
+          <div v-if="viajesFiltrados.length === 0" class="p-8 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-3xl">🚗</span>
+            </div>
+            <p class="text-gray-600 font-medium">No se encontraron viajes</p>
+            <p class="text-sm text-gray-500 mt-1">Intenta ajustar los filtros de búsqueda</p>
           </div>
           
           <div
@@ -233,59 +339,81 @@
             :key="viaje.id"
             @click="seleccionarViaje(viaje)"
             :class="[
-              'p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50',
-              viajeSeleccionado?.id === viaje.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+              'p-6 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:shadow-md',
+              viajeSeleccionado?.id === viaje.id 
+                ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-l-blue-500 shadow-lg' 
+                : 'hover:border-l-4 hover:border-l-blue-300'
             ]"
           >
             <div class="flex items-center justify-between">
               <div class="flex-1">
-                <div class="flex items-center space-x-3 mb-2">
-                  <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-4 mb-4">
+                  <div class="flex items-center space-x-3">
                     <img
                       :src="viaje.conductor.avatar || '/images/user/default-avatar.png'"
                       :alt="viaje.conductor.nombre"
-                      class="h-8 w-8 rounded-full object-cover"
+                      class="h-12 w-12 rounded-full object-cover border-2 border-white shadow-md"
                     />
                     <div>
-                      <p class="text-sm font-medium text-gray-900">{{ viaje.conductor.nombre }}</p>
+                      <p class="text-base font-semibold text-gray-900">{{ viaje.conductor.nombre }}</p>
                       <div class="flex items-center">
-                        <span class="text-yellow-400">⭐</span>
-                        <span class="text-sm text-gray-600 ml-1">{{ viaje.conductor.rating }}</span>
+                        <span class="text-yellow-400 text-lg">⭐</span>
+                        <span class="text-sm font-medium text-gray-600 ml-1">{{ viaje.conductor.rating }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span class="font-medium text-gray-700">🕐 Hora:</span>
-                    <span class="text-gray-600">{{ formatTime(viaje.horaSalida) }}</span>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span class="text-xs">🕐</span>
+                    </div>
+                    <div>
+                      <span class="font-semibold text-gray-700">Hora:</span>
+                      <span class="text-gray-600 ml-1">{{ formatTime(viaje.horaSalida) }}</span>
+                    </div>
                   </div>
-                  <div>
-                    <span class="font-medium text-gray-700">📍 Destino:</span>
-                    <span class="text-gray-600">{{ viaje.destino }}</span>
+                  <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <span class="text-xs">📍</span>
+                    </div>
+                    <div>
+                      <span class="font-semibold text-gray-700">Destino:</span>
+                      <span class="text-gray-600 ml-1">{{ viaje.destino }}</span>
+                    </div>
                   </div>
-                  <div>
-                    <span class="font-medium text-gray-700">💰 Precio:</span>
-                    <span class="text-gray-600">{{ viaje.precio }}€</span>
+                  <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center">
+                      <span class="text-xs">💰</span>
+                    </div>
+                    <div>
+                      <span class="font-semibold text-gray-700">Precio:</span>
+                      <span class="text-gray-600 ml-1 font-bold text-green-600">{{ viaje.precio }}€</span>
+                    </div>
                   </div>
-                  <div>
-                    <span class="font-medium text-gray-700">👥 Plazas:</span>
-                    <span class="text-gray-600">{{ viaje.plazasDisponibles }}/{{ viaje.plazasTotales }}</span>
+                  <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                      <span class="text-xs">👥</span>
+                    </div>
+                    <div>
+                      <span class="font-semibold text-gray-700">Plazas:</span>
+                      <span class="text-gray-600 ml-1">{{ viaje.plazasDisponibles }}/{{ viaje.plazasTotales }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div class="flex flex-col items-end space-y-2">
+              <div class="flex flex-col items-end space-y-3">
                 <button
                   @click.stop="verDetallesViaje(viaje)"
-                  class="px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                  class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
                 >
-                  👁️ Ver
+                  👁️ Ver Detalles
                 </button>
                 <button
                   @click.stop="contactarConductor(viaje)"
-                  class="px-3 py-1 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
+                  class="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl text-sm font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
                 >
                   💬 Contactar
                 </button>
@@ -295,6 +423,7 @@
         </div>
       </div>
     </div>
+  </div>
     
     <!-- Modal de detalles del viaje -->
     <div
@@ -444,6 +573,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { supabase } from '@/config/supabase';
+import { GooglePlacesService } from '@/services/googlePlacesService';
 
 // Interfaces
 interface Viaje {
@@ -483,6 +613,9 @@ const loading = ref(false);
 const showOrigenSuggestions = ref(false);
 const origenSuggestions = ref<any[]>([]);
 const showOrigenModal = ref(false);
+
+// Google Places Service
+const googlePlacesService = new GooglePlacesService();
 
 // Orígenes más comunes del extrarradio de Madrid
 const origenesComunes = [
@@ -660,23 +793,44 @@ const estadisticas = computed(() => {
 });
 
 // Métodos
-function buscarOrigen() {
-  // Simular búsqueda de lugares
-  const lugares = [
-    { main_text: 'Torrejón de Ardoz', secondary_text: 'Madrid, España' },
-    { main_text: 'Torrejón de Ardoz, Madrid', secondary_text: 'Comunidad de Madrid, España' },
-    { main_text: 'Torrejón de Ardoz Centro', secondary_text: 'Torrejón de Ardoz, Madrid' }
-  ];
-  
-  origenSuggestions.value = lugares.filter(lugar =>
-    lugar.main_text.toLowerCase().includes(origen.value.toLowerCase())
-  );
+async function buscarOrigen() {
+  if (origen.value.length < 3) {
+    origenSuggestions.value = [];
+    return;
+  }
+
+  try {
+    const suggestions = await googlePlacesService.autocompleteAddress(origen.value);
+    
+    origenSuggestions.value = suggestions.map(location => ({
+      main_text: location.name,
+      secondary_text: location.address,
+      place_id: location.id,
+      coordinates: location.coordinates
+    }));
+  } catch (error) {
+    // Fallback a búsqueda local
+    const lugares = [
+      { main_text: 'Torrejón de Ardoz', secondary_text: 'Madrid, España' },
+      { main_text: 'Torrejón de Ardoz, Madrid', secondary_text: 'Comunidad de Madrid, España' },
+      { main_text: 'Torrejón de Ardoz Centro', secondary_text: 'Torrejón de Ardoz, Madrid' }
+    ];
+    
+    origenSuggestions.value = lugares.filter(lugar =>
+      lugar.main_text.toLowerCase().includes(origen.value.toLowerCase())
+    );
+  }
 }
 
-function seleccionarOrigen(suggestion: any) {
+async function seleccionarOrigen(suggestion: any) {
   origen.value = suggestion.main_text;
   showOrigenSuggestions.value = false;
   origenSuggestions.value = [];
+  
+  // Si tenemos coordenadas de Google Places, las usamos
+  if (suggestion.coordinates && suggestion.coordinates.lat !== 0) {
+    // Aquí podrías actualizar el mapa directamente con las coordenadas
+  }
 }
 
 function hideOrigenSuggestions() {
@@ -701,8 +855,6 @@ async function buscarViajes() {
   loading.value = true;
   
   try {
-    console.log('🔍 Buscando viajes reales desde Supabase...');
-    
     // Buscar viajes reales de Supabase
     const { data, error } = await supabase
       .from('trips')
@@ -713,11 +865,9 @@ async function buscarViajes() {
       .limit(20);
 
     if (error) {
-      console.error('❌ Error buscando viajes:', error);
       // Fallback a datos de ejemplo si hay error
       viajes.value = viajesEjemplo;
     } else {
-      console.log(`✅ Encontrados ${data?.length || 0} viajes reales`);
       
       // Convertir datos de Supabase al formato esperado
       viajes.value = data?.map(trip => ({
@@ -749,7 +899,6 @@ async function buscarViajes() {
       inicializarMapa();
     });
   } catch (error) {
-    console.error('❌ Error en buscarViajes:', error);
     // Fallback a datos de ejemplo
     viajes.value = viajesEjemplo;
     mapaCargado.value = true;
@@ -763,13 +912,11 @@ async function buscarViajes() {
 
 function inicializarMapa() {
   if (!mapContainer.value || !window.google) {
-    console.log('Google Maps no está disponible');
     return;
   }
 
   // Verificar que el elemento del mapa existe y es válido
   if (!mapContainer.value || !(mapContainer.value instanceof HTMLElement)) {
-    console.error('El contenedor del mapa no es válido');
     return;
   }
 
@@ -918,21 +1065,17 @@ function formatTime(date: Date): string {
 
 // Función de callback para Google Maps
 (window as any).initGoogleMaps = () => {
-  console.log('Google Maps inicializado correctamente');
+  // Google Maps inicializado correctamente
 };
 
 // Inicialización
 onMounted(() => {
-  console.log('Componente BusquedaMapa montado');
-  
   // Esperar a que Google Maps esté cargado
   const checkGoogleMaps = () => {
     if (window.google && window.google.maps) {
-      console.log('Google Maps cargado correctamente');
       // Cargar viajes por defecto
       buscarViajes();
     } else {
-      console.log('Esperando Google Maps...');
       setTimeout(checkGoogleMaps, 100);
     }
   };

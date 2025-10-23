@@ -75,10 +75,17 @@ const emit = defineEmits<{
 
 const showSuggestions = ref(false)
 const selectedIndex = ref(-1)
+const sessionToken = ref<string | undefined>(undefined)
 
 const handleInput = (event: Event) => {
   const target = event.target as HTMLInputElement
   const value = target.value
+  
+  // Generar sessionToken si no existe (para facturación correcta de Google Places)
+  if (!sessionToken.value) {
+    sessionToken.value = new google.maps.places.AutocompleteSessionToken().toString()
+  }
+  
   emit('update:modelValue', value)
   emit('input', value)
   showSuggestions.value = true

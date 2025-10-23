@@ -48,11 +48,14 @@
                   <label class="mb-2.5 block text-black dark:text-white">
                     Escribe una dirección exacta:
                   </label>
-                  <input
+                  <AutocompleteInput
                     v-model="searchForm.origin"
-                    type="text"
                     placeholder="📍 Ej: Calle Gran Vía, 1, Madrid"
-                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    :suggestions="originSuggestions"
+                    :is-loading="isLoadingOrigin"
+                    @input="handleOriginInput"
+                    @select="handleOriginSelect"
+                    input-class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   />
                 </div>
 
@@ -90,11 +93,14 @@
                   <label class="mb-2.5 block text-black dark:text-white">
                     Escribe una dirección exacta:
                   </label>
-                  <input
+                  <AutocompleteInput
                     v-model="searchForm.destination"
-                    type="text"
                     placeholder="📍 Ej: Plaza Mayor, Madrid"
-                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    :suggestions="destinationSuggestions"
+                    :is-loading="isLoadingDestination"
+                    @input="handleDestinationInput"
+                    @select="handleDestinationSelect"
+                    input-class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   />
                 </div>
 
@@ -132,11 +138,11 @@
                     <label class="mb-2.5 block text-black dark:text-white">
                       Fecha *
                     </label>
-                    <input
+                    <DatePicker
                       v-model="searchForm.date"
-                      type="date"
-                      :min="today"
-                      class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                      :min-date="today"
+                      placeholder="Selecciona una fecha"
+                      class="w-full"
                     />
                   </div>
                   
@@ -253,34 +259,99 @@
               
               <div v-else class="space-y-4">
                 <div
-                  v-for="trip in searchResults"
-                  :key="trip.id"
-                  class="rounded-lg border border-stroke p-4 hover:shadow-md transition-shadow dark:border-strokedark"
+                  v-for="result in searchResults"
+                  :key="result.trip.id"
+                  class="rounded-lg border border-stroke bg-white p-4 hover:shadow-lg transition-all duration-200 dark:border-strokedark dark:bg-boxdark"
                 >
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-primary">{{ trip.tripType || 'Diario' }}</span>
-                    <span class="text-sm font-bold text-black dark:text-white">{{ trip.price }}€</span>
-                  </div>
-                  
-                  <div class="space-y-1">
-                    <div class="flex items-center text-sm text-body-color">
-                      <svg class="h-4 w-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                      </svg>
-                      {{ trip.origin }}
+                  <!-- Header con precio y tipo -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                      <span class="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                        {{ result.trip.trip_type || 'Diario' }}
+                      </span>
+                      <span class="text-xs text-body-color">{{ result.trip.available_seats }} asientos</span>
                     </div>
-                    <div class="flex items-center text-sm text-body-color">
-                      <svg class="h-4 w-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                      </svg>
-                      {{ trip.destination }}
+                    <div class="text-right">
+                      <div class="text-lg font-bold text-black dark:text-white">{{ result.trip.price_per_seat }}€</div>
+                      <div class="text-xs text-body-color">por asiento</div>
                     </div>
                   </div>
                   
-                  <div class="mt-3 flex items-center justify-between">
-                    <span class="text-xs text-body-color">{{ trip.date }}</span>
-                    <button class="text-xs text-primary hover:underline">
-                      Ver detalles
+                  <!-- Ruta -->
+                  <div class="space-y-2 mb-3">
+                    <div class="flex items-center text-sm">
+                      <div class="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+                        <svg class="h-3 w-3 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                      </div>
+                      <div class="ml-3 flex-1">
+                        <div class="font-medium text-black dark:text-white">{{ result.trip.origin_name }}</div>
+                        <div class="text-xs text-body-color">Origen</div>
+                      </div>
+                    </div>
+                    
+                    <div class="ml-3 border-l-2 border-dashed border-stroke dark:border-strokedark pl-3">
+                      <div class="flex items-center text-sm">
+                        <div class="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
+                          <svg class="h-3 w-3 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                          </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                          <div class="font-medium text-black dark:text-white">{{ result.trip.destination_name }}</div>
+                          <div class="text-xs text-body-color">Destino</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Información del conductor -->
+                  <div class="mb-3 flex items-center space-x-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                      <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-sm font-medium text-black dark:text-white">Conductor</div>
+                      <div class="text-xs text-body-color">ID: {{ result.trip.driver_id }}</div>
+                    </div>
+                    <div class="flex items-center space-x-1 text-xs text-green-600 dark:text-green-400">
+                      <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                      <span>Verificado</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Fecha y hora -->
+                  <div class="mb-3 flex items-center justify-between text-sm">
+                    <div class="flex items-center space-x-2">
+                      <svg class="h-4 w-4 text-body-color" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                      <span class="text-body-color">{{ result.trip.departure_time }}</span>
+                    </div>
+                    <div class="text-xs text-body-color">
+                      {{ result.matchType === 'exact_text' ? 'Coincidencia exacta' : 'Cerca de tu búsqueda' }}
+                    </div>
+                  </div>
+                  
+                  <!-- Botones de acción -->
+                  <div class="flex space-x-2">
+                    <button class="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors">
+                      Reservar
+                    </button>
+                    <button class="rounded-lg border border-stroke px-4 py-2 text-sm font-medium text-body-color hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-800 transition-colors">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+                      </svg>
+                    </button>
+                    <button class="rounded-lg border border-stroke px-4 py-2 text-sm font-medium text-body-color hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-800 transition-colors">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -296,13 +367,23 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridService'
+import AutocompleteInput from '@/components/AutocompleteInput.vue'
+import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
+import { GeolocationService } from '@/services/geolocation'
 import { useSidebar } from '@/composables/useSidebar'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
+import DatePicker from '@/components/common/DatePicker.vue'
 
 // Router y sidebar
 const router = useRouter()
 const { isExpanded } = useSidebar()
+
+// Servicios
+const hybridService = new SimpleHybridService()
+const autocompleteService = new SimpleAutocompleteService()
+const geolocationService = new GeolocationService()
 
 // Formulario de búsqueda
 const searchForm = reactive({
@@ -316,9 +397,15 @@ const searchForm = reactive({
 })
 
 // Estados de la búsqueda
-const searchResults = ref<any[]>([])
+const searchResults = ref<SearchResult[]>([])
 const isSearching = ref(false)
 const hasSearched = ref(false)
+
+// Autocompletado
+const originSuggestions = ref<AutocompleteSuggestion[]>([])
+const destinationSuggestions = ref<AutocompleteSuggestion[]>([])
+const isLoadingOrigin = ref(false)
+const isLoadingDestination = ref(false)
 
 // Fecha actual
 const today = new Date().toISOString().split('T')[0]
@@ -375,6 +462,59 @@ const selectDestinationFromList = (destination: string) => {
   searchForm.destination = destination
 }
 
+// Funciones de autocompletado
+const handleOriginInput = async (value: string) => {
+  if (value.length >= 2) {
+    try {
+      // Intentar usar Google Places API primero
+      const googleResults = await geolocationService.autocompleteAddress(value)
+      if (googleResults.length > 0) {
+        originSuggestions.value = googleResults
+        return
+      }
+    } catch (error) {
+      console.warn('Google Places API falló, usando fallback:', error)
+    }
+    
+    // Fallback a servicio simple
+    originSuggestions.value = autocompleteService.searchSuggestions(value, 8)
+  } else {
+    originSuggestions.value = []
+  }
+}
+
+const handleDestinationInput = async (value: string) => {
+  if (value.length >= 2) {
+    try {
+      // Intentar usar Google Places API primero
+      const googleResults = await geolocationService.autocompleteAddress(value)
+      if (googleResults.length > 0) {
+        destinationSuggestions.value = googleResults
+        return
+      }
+    } catch (error) {
+      console.warn('Google Places API falló, usando fallback:', error)
+    }
+    
+    // Fallback a servicio simple
+    destinationSuggestions.value = autocompleteService.searchSuggestions(value, 8)
+  } else {
+    destinationSuggestions.value = []
+  }
+}
+
+const handleOriginSelect = (suggestion: AutocompleteSuggestion) => {
+  searchForm.origin = suggestion.name
+  originSuggestions.value = []
+  console.log('Origen seleccionado:', suggestion)
+}
+
+const handleDestinationSelect = (suggestion: AutocompleteSuggestion) => {
+  searchForm.destination = suggestion.name
+  destinationSuggestions.value = []
+  console.log('Destino seleccionado:', suggestion)
+}
+
 // Búsqueda de viajes
 const searchTrips = async () => {
   if (!searchForm.origin || !searchForm.destination) {
@@ -386,24 +526,20 @@ const searchTrips = async () => {
   hasSearched.value = true
 
   try {
-    console.log('🔍 Iniciando búsqueda...', searchForm)
+    console.log('🔍 Iniciando búsqueda híbrida...', searchForm)
     
-    // Simular búsqueda
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Resultados de ejemplo
-    searchResults.value = [
+    const results = await hybridService.searchTrips(
+      searchForm.origin,
+      searchForm.destination,
       {
-        id: 1,
-        origin: searchForm.origin,
-        destination: searchForm.destination,
-        date: searchForm.date,
-        price: '15',
-        tripType: 'Diario'
+        useGeolocation: true,
+        maxDistanceKm: 50,
+        limit: 20
       }
-    ]
-    
-    console.log('✅ Búsqueda completada:', searchResults.value)
+    )
+
+    console.log('✅ Búsqueda completada:', results)
+    searchResults.value = results
   } catch (error) {
     console.error('❌ Error en la búsqueda:', error)
     alert('Error al buscar viajes. Inténtalo de nuevo.')

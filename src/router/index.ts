@@ -263,14 +263,6 @@ const router = createRouter({
         },
       },
       {
-        path: '/carpooling/create-trip',
-        name: 'Create Trip',
-        component: () => import('../components/carpooling/CreateTripForm.vue'),
-        meta: {
-          title: 'Crear Viaje',
-        },
-      },
-      {
         path: '/carpooling/test-form',
         name: 'Test Form',
         component: () => import('../components/carpooling/TestForm.vue'),
@@ -332,6 +324,14 @@ const router = createRouter({
       component: () => import('../views/Carpooling/TripDetails.vue'),
       meta: {
         title: 'Detalles del Viaje',
+      },
+    },
+    {
+      path: '/carpooling/trip-management',
+      name: 'Trip Management',
+      component: () => import('../views/Carpooling/TripManagement.vue'),
+      meta: {
+        title: 'Gestión de Viajes y Reservas',
       },
     },
     {

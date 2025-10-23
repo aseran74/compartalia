@@ -7,7 +7,7 @@
       Gestiona tus viajes compartidos y conecta con otros usuarios del extrarradio de Madrid.
     </p>
     <a
-      href="/carpooling/create-trip-madrid"
+      href="/carpooling/create-trip"
       class="flex items-center justify-center p-3 font-medium text-white rounded-lg bg-green-600 text-theme-sm hover:bg-green-700"
     >
       Crear Viaje

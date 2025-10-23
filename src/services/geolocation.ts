@@ -1,15 +1,15 @@
 import type { Location } from '@/types/carpooling';
-import { GooglePlacesService } from './googlePlacesService';
+import { GooglePlacesServiceModern } from './googlePlacesServiceModern';
 
 export class GeolocationService {
   private googlePlacesApiKey: string;
   private nominatimApiUrl: string;
-  private googlePlacesService: GooglePlacesService;
+  private googlePlacesService: GooglePlacesServiceModern;
 
   constructor() {
     this.googlePlacesApiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY || '';
     this.nominatimApiUrl = import.meta.env.VITE_NOMINATIM_API_URL || 'https://nominatim.openstreetmap.org';
-    this.googlePlacesService = new GooglePlacesService();
+    this.googlePlacesService = new GooglePlacesServiceModern();
   }
 
   /**
@@ -123,6 +123,25 @@ export class GeolocationService {
       coordinates: { lat: 40.4168, lng: -3.7038 }, // Madrid Centro como fallback
       type: 'origin' as const
     }));
+  }
+
+  /**
+   * Obtiene los detalles de un lugar por su Place ID (más eficiente que geocoding)
+   */
+  async getPlaceDetails(placeId: string, sessionToken?: string): Promise<Location | null> {
+    // Intentar usar Google Places API primero
+    if (this.googlePlacesApiKey) {
+      try {
+        console.log('🌍 Obteniendo detalles con Google Places API...');
+        return await this.googlePlacesService.getPlaceDetails(placeId, sessionToken);
+      } catch (error) {
+        console.warn('⚠️ Google Places getDetails falló:', error);
+      }
+    }
+    
+    // Si no hay API key o falló, no podemos hacer fallback por Place ID
+    console.warn('⚠️ No se puede obtener detalles sin Google Places API');
+    return null;
   }
 
   /**
