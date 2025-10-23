@@ -483,8 +483,15 @@
               </div>
             </div>
 
-            <!-- Botón de reserva -->
-            <div class="flex justify-end">
+            <!-- Botones de acción -->
+            <div class="flex justify-between items-center">
+              <button
+                @click="viewTripDetails(result.trip.id)"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              >
+                Ver Detalles
+              </button>
+              
               <button
                 v-if="!result.bookingInfo || result.bookingInfo.remaining_seats > 0"
                 @click="openBookingModal(result.trip, result.bookingInfo)"
@@ -595,6 +602,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { HybridTripService, type SearchResult } from '@/services/hybridTripService'
 import { supabase } from '@/config/supabase'
 import type { User } from '@supabase/supabase-js'
@@ -604,6 +612,9 @@ import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/servic
 import { GeolocationService } from '@/services/geolocation'
 import { GooglePlacesService } from '@/services/googlePlacesService'
 import BookingModal from '@/components/carpooling/BookingModal.vue'
+
+// Router
+const router = useRouter()
 
 // Formulario de búsqueda
 const searchForm = reactive({
@@ -887,6 +898,11 @@ const closeBookingModal = () => {
 const onBookingConfirmed = (booking: any) => {
   console.log('Reserva confirmada:', booking)
   closeBookingModal()
+}
+
+// Función para ver detalles del viaje
+const viewTripDetails = (tripId: string) => {
+  router.push(`/viaje/${tripId}`)
 }
 
 // Función para formatear tiempo

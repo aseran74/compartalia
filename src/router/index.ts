@@ -87,6 +87,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/viaje/:id',
+      name: 'TripDetails',
+      component: () => import('../views/TripDetails.vue'),
+      meta: {
+        title: 'Detalles del Viaje - Compartalia',
+      },
+    },
+    {
       path: '/test-hybrid',
       name: 'TestHybrid',
       component: () => import('../views/TestHybrid.vue'),
