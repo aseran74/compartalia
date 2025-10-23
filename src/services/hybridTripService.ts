@@ -159,6 +159,13 @@ export class HybridTripService {
 
       console.log(`✅ Búsqueda por texto: ${data?.length || 0} viajes encontrados`)
       console.log('📊 Datos encontrados:', data)
+      
+      // Debug específico para verificar si el JOIN funciona
+      if (data && data.length > 0) {
+        console.log('🔍 Primer viaje con JOIN:', data[0])
+        console.log('🔍 Profiles del primer viaje:', data[0].profiles)
+      }
+      
       return data || []
     } catch (error) {
       console.error('❌ Error en searchByText:', error)
