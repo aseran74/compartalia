@@ -856,7 +856,8 @@ const searchTrips = async () => {
       {
         useGeolocation: true,
         maxDistanceKm: 50,
-        limit: 20
+        limit: 20,
+        date: searchForm.date
       }
     )
     

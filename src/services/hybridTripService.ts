@@ -53,6 +53,7 @@ export class HybridTripService {
       useGeolocation?: boolean
       maxDistanceKm?: number
       limit?: number
+      date?: string
     } = {}
   ): Promise<SearchResult[]> {
     const { useGeolocation = true, maxDistanceKm = 10, limit = 50 } = options
@@ -65,7 +66,7 @@ export class HybridTripService {
       const results: SearchResult[] = []
 
       // 1. Búsqueda por texto directo (siempre)
-      const textResults = await this.searchByText(origin, destination, limit)
+      const textResults = await this.searchByText(origin, destination, limit, options.date)
       results.push(...textResults.map(trip => ({
         trip,
         matchType: 'exact_text' as const,
@@ -98,7 +99,7 @@ export class HybridTripService {
   /**
    * Búsqueda por texto directo
    */
-  private async searchByText(origin?: string, destination?: string, limit: number = 50): Promise<Trip[]> {
+  private async searchByText(origin?: string, destination?: string, limit: number = 50, date?: string): Promise<Trip[]> {
     try {
       console.log('🔍 HybridTripService.searchByText - Iniciando búsqueda:', { origin, destination, limit })
       
@@ -106,8 +107,22 @@ export class HybridTripService {
         .from('trips')
         .select('*')
         .eq('status', 'active')
-        .gte('departure_time', new Date().toISOString())
         .limit(limit)
+
+      // Filtrar por fecha si se proporciona
+      if (date) {
+        const searchDate = new Date(date)
+        const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0))
+        const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999))
+        
+        console.log('🔍 Filtrando por fecha:', { date, startOfDay, endOfDay })
+        query = query
+          .gte('departure_time', startOfDay.toISOString())
+          .lte('departure_time', endOfDay.toISOString())
+      } else {
+        // Si no se proporciona fecha, filtrar por fecha actual o futura
+        query = query.gte('departure_time', new Date().toISOString())
+      }
 
       // Aplicar filtros de texto
       if (origin) {
