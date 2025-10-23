@@ -1046,6 +1046,17 @@ const handleGoogleLogin = async () => {
   }
 }
 
+/* Ajuste específico para tablet 768x1024 */
+@media (max-width: 1024px) and (min-width: 768px) and (max-height: 1024px) {
+  .hero-image {
+    margin-top: 220px;
+  }
+  
+  .scene-2 {
+    transform: scale(1.1) translateX(0px) translateY(220px) !important;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-section {
     min-height: 400px;
