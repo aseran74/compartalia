@@ -118,10 +118,43 @@
       <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
         <h2 class="text-xl font-semibold mb-4">📝 Información del Viaje</h2>
         
+        <!-- Selector de tipo de búsqueda -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-3">🔍 Tipo de búsqueda</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              @click="searchType = 'municipality'"
+              type="button"
+              :class="[
+                'px-4 py-3 rounded-lg border-2 transition-colors text-center',
+                searchType === 'municipality' 
+                  ? 'bg-green-50 border-green-300 text-green-700' 
+                  : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+              ]"
+            >
+              🏙️ Por Municipio
+            </button>
+            <button
+              @click="searchType = 'address'"
+              type="button"
+              :class="[
+                'px-4 py-3 rounded-lg border-2 transition-colors text-center',
+                searchType === 'address' 
+                  ? 'bg-blue-50 border-blue-300 text-blue-700' 
+                  : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+              ]"
+            >
+              📍 Por Dirección Específica
+            </button>
+          </div>
+        </div>
+
         <form @submit.prevent="searchTrips" class="space-y-4 sm:space-y-6">
-          <!-- Origen -->
-          <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700 mb-2">📍 Origen</label>
+          <!-- Búsqueda por Municipio -->
+          <div v-if="searchType === 'municipality'">
+            <!-- Origen -->
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-2">📍 Origen</label>
             
             <!-- Botón para abrir modal de ciudades -->
             <div class="mb-3">
@@ -171,6 +204,78 @@
               @select="handleDestinationSelect"
               input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
+          </div>
+          </div>
+
+          <!-- Búsqueda por Dirección Específica -->
+          <div v-if="searchType === 'address'">
+            <!-- Origen Específico -->
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-2">📍 Origen Específico</label>
+              <div class="relative">
+                <input
+                  v-model="specificOrigin"
+                  @input="handleSpecificOriginInput"
+                  @focus="showOriginSuggestionsSpecific = true"
+                  @blur="hideOriginSuggestionsSpecific"
+                  type="text"
+                  placeholder="Ej: Calle Gran Vía 1, Madrid"
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <span class="text-gray-400">📍</span>
+                </div>
+                
+                <!-- Sugerencias de origen específico -->
+                <div v-if="showOriginSuggestionsSpecific && originSuggestionsSpecific.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <div class="p-2">
+                    <div
+                      v-for="(suggestion, index) in originSuggestionsSpecific"
+                      :key="index"
+                      @click="selectSpecificOrigin(suggestion)"
+                      class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <div class="font-semibold text-gray-900">{{ suggestion.main_text }}</div>
+                      <div class="text-sm text-gray-500">{{ suggestion.secondary_text }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Destino Específico -->
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-2">🎯 Destino Específico</label>
+              <div class="relative">
+                <input
+                  v-model="specificDestination"
+                  @input="handleSpecificDestinationInput"
+                  @focus="showDestinationSuggestionsSpecific = true"
+                  @blur="hideDestinationSuggestionsSpecific"
+                  type="text"
+                  placeholder="Ej: Hospital La Paz, Madrid"
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <span class="text-gray-400">🎯</span>
+                </div>
+                
+                <!-- Sugerencias de destino específico -->
+                <div v-if="showDestinationSuggestionsSpecific && destinationSuggestionsSpecific.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <div class="p-2">
+                    <div
+                      v-for="(suggestion, index) in destinationSuggestionsSpecific"
+                      :key="index"
+                      @click="selectSpecificDestination(suggestion)"
+                      class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <div class="font-semibold text-gray-900">{{ suggestion.main_text }}</div>
+                      <div class="text-sm text-gray-500">{{ suggestion.secondary_text }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Fecha y Hora -->
@@ -381,6 +486,7 @@ import DatePicker from '@/components/DatePicker.vue'
 import AutocompleteInput from '@/components/AutocompleteInput.vue'
 import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
 import { GeolocationService } from '@/services/geolocation'
+import { GooglePlacesService } from '@/services/googlePlacesService'
 import BookingModal from '@/components/carpooling/BookingModal.vue'
 
 // Formulario de búsqueda
@@ -410,6 +516,17 @@ const showBookingModal = ref(false)
 const selectedTrip = ref<any>(null)
 const selectedBookingInfo = ref<any>(null)
 
+// Estados del tipo de búsqueda
+const searchType = ref<'municipality' | 'address'>('municipality')
+const specificOrigin = ref('')
+const specificDestination = ref('')
+const originSuggestionsSpecific = ref<any[]>([])
+const destinationSuggestionsSpecific = ref<any[]>([])
+const isLoadingOriginSpecific = ref(false)
+const isLoadingDestinationSpecific = ref(false)
+const showOriginSuggestionsSpecific = ref(false)
+const showDestinationSuggestionsSpecific = ref(false)
+
 // Autocompletado
 const originSuggestions = ref<AutocompleteSuggestion[]>([])
 const destinationSuggestions = ref<AutocompleteSuggestion[]>([])
@@ -425,6 +542,7 @@ const hybridService = new HybridTripService()
 // Servicios de autocompletado
 const autocompleteService = new SimpleAutocompleteService()
 const geolocationService = new GeolocationService()
+const googlePlacesService = new GooglePlacesService()
 
 // Ciudades del extrarradio de Madrid
 const madridCities = ref([
@@ -499,9 +617,17 @@ const closeDestinationModal = () => {
 
 // Función de búsqueda
 const searchTrips = async () => {
-  if (!searchForm.origin || !searchForm.destination) {
-    alert('Por favor, completa todos los campos')
-    return
+  // Validar campos según el tipo de búsqueda
+  if (searchType.value === 'municipality') {
+    if (!searchForm.origin || !searchForm.destination) {
+      alert('Por favor, completa todos los campos')
+      return
+    }
+  } else {
+    if (!specificOrigin.value || !specificDestination.value) {
+      alert('Por favor, completa todos los campos')
+      return
+    }
   }
 
   isSearching.value = true
@@ -509,9 +635,14 @@ const searchTrips = async () => {
 
   try {
     console.log('🔍 Iniciando búsqueda híbrida...')
+    
+    // Usar los campos correctos según el tipo de búsqueda
+    const origin = searchType.value === 'municipality' ? searchForm.origin : specificOrigin.value
+    const destination = searchType.value === 'municipality' ? searchForm.destination : specificDestination.value
+    
     const results = await hybridService.searchTrips(
-      searchForm.origin,
-      searchForm.destination,
+      origin,
+      destination,
       true, // Usar geolocalización
       10   // Radio de 10km
     )
@@ -644,6 +775,79 @@ const fetchUserProfile = async (userId: string) => {
 // Funciones del dropdown del perfil
 const toggleProfileDropdown = () => {
   showProfileDropdown.value = !showProfileDropdown.value
+}
+
+// Funciones para búsqueda específica con Google Places
+const handleSpecificOriginInput = async () => {
+  if (specificOrigin.value.length < 3) {
+    originSuggestionsSpecific.value = []
+    return
+  }
+
+  try {
+    isLoadingOriginSpecific.value = true
+    const suggestions = await googlePlacesService.autocompleteAddress(specificOrigin.value)
+    originSuggestionsSpecific.value = suggestions.map(suggestion => ({
+      main_text: suggestion.name,
+      secondary_text: suggestion.address,
+      place_id: suggestion.place_id,
+      lat: suggestion.lat,
+      lng: suggestion.lng
+    }))
+  } catch (error) {
+    console.error('Error obteniendo sugerencias de origen específico:', error)
+    originSuggestionsSpecific.value = []
+  } finally {
+    isLoadingOriginSpecific.value = false
+  }
+}
+
+const handleSpecificDestinationInput = async () => {
+  if (specificDestination.value.length < 3) {
+    destinationSuggestionsSpecific.value = []
+    return
+  }
+
+  try {
+    isLoadingDestinationSpecific.value = true
+    const suggestions = await googlePlacesService.autocompleteAddress(specificDestination.value)
+    destinationSuggestionsSpecific.value = suggestions.map(suggestion => ({
+      main_text: suggestion.name,
+      secondary_text: suggestion.address,
+      place_id: suggestion.place_id,
+      lat: suggestion.lat,
+      lng: suggestion.lng
+    }))
+  } catch (error) {
+    console.error('Error obteniendo sugerencias de destino específico:', error)
+    destinationSuggestionsSpecific.value = []
+  } finally {
+    isLoadingDestinationSpecific.value = false
+  }
+}
+
+const selectSpecificOrigin = (suggestion: any) => {
+  specificOrigin.value = suggestion.main_text
+  originSuggestionsSpecific.value = []
+  showOriginSuggestionsSpecific.value = false
+}
+
+const selectSpecificDestination = (suggestion: any) => {
+  specificDestination.value = suggestion.main_text
+  destinationSuggestionsSpecific.value = []
+  showDestinationSuggestionsSpecific.value = false
+}
+
+const hideOriginSuggestionsSpecific = () => {
+  setTimeout(() => {
+    showOriginSuggestionsSpecific.value = false
+  }, 200)
+}
+
+const hideDestinationSuggestionsSpecific = () => {
+  setTimeout(() => {
+    showDestinationSuggestionsSpecific.value = false
+  }, 200)
 }
 
 const closeProfileDropdown = () => {
