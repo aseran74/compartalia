@@ -1125,7 +1125,8 @@ onMounted(() => {
   console.log('📋 Tipo de viaje inicial:', tripType.value)
   console.log('📍 showOriginSuggestions inicial:', showOriginSuggestions.value)
   console.log('📍 originSuggestions inicial:', originSuggestions.value)
-  console.log('🔑 API Key disponible:', !!import.meta.env.VITE_GOOGLE_PLACES_API_KEY)
+      console.log('🔑 API Key disponible:', !!import.meta.env.VITE_GOOGLE_PLACES_API_KEY)
+      console.log('🔑 API Key valor:', import.meta.env.VITE_GOOGLE_PLACES_API_KEY)
   console.log('🌐 Entorno:', import.meta.env.MODE)
   console.log('🔗 URL actual:', window.location.href)
   
