@@ -206,7 +206,6 @@
                   </div>
                 </div>
               </div>
-            </div>
 
             <!-- Destino Específico -->
             <div class="form-group">
@@ -901,9 +900,9 @@ const handleSpecificOriginInput = async () => {
     originSuggestionsSpecific.value = suggestions.map(suggestion => ({
       main_text: suggestion.name,
       secondary_text: suggestion.address,
-      place_id: suggestion.place_id,
-      lat: suggestion.lat,
-      lng: suggestion.lng
+      place_id: (suggestion as any).place_id,
+      lat: (suggestion as any).lat,
+      lng: (suggestion as any).lng
     }))
     
     console.log('📋 Sugerencias procesadas:', originSuggestionsSpecific.value)
@@ -944,9 +943,9 @@ const handleSpecificDestinationInput = async () => {
     destinationSuggestionsSpecific.value = suggestions.map(suggestion => ({
       main_text: suggestion.name,
       secondary_text: suggestion.address,
-      place_id: suggestion.place_id,
-      lat: suggestion.lat,
-      lng: suggestion.lng
+      place_id: (suggestion as any).place_id,
+      lat: (suggestion as any).lat,
+      lng: (suggestion as any).lng
     }))
     
     console.log('📋 Sugerencias procesadas:', destinationSuggestionsSpecific.value)
