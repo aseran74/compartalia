@@ -540,7 +540,6 @@ const handleDestinationSelect = (suggestion: AutocompleteSuggestion) => {
 // Búsqueda de viajes
 const searchTrips = async () => {
   if (!searchForm.origin || !searchForm.destination) {
-    alert('Por favor, completa el origen y destino')
     return
   }
 
@@ -564,7 +563,6 @@ const searchTrips = async () => {
     searchResults.value = results
   } catch (error) {
     console.error('❌ Error en la búsqueda:', error)
-    alert('Error al buscar viajes. Inténtalo de nuevo.')
     searchResults.value = []
   } finally {
     isSearching.value = false

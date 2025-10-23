@@ -820,7 +820,6 @@ const searchTrips = async () => {
   }
   
   if (!originValid || !destinationValid) {
-    alert('Por favor, completa todos los campos')
     return
   }
 
@@ -865,7 +864,6 @@ const searchTrips = async () => {
     console.log(`✅ Encontrados ${results.length} viajes`)
   } catch (error) {
     console.error('❌ Error al buscar viajes:', error)
-    alert('Error al buscar viajes. Por favor, intenta de nuevo.')
   } finally {
     isSearching.value = false
   }
@@ -888,7 +886,6 @@ const closeBookingModal = () => {
 // Función para confirmar reserva
 const onBookingConfirmed = (booking: any) => {
   console.log('Reserva confirmada:', booking)
-  alert(`¡Reserva confirmada! Has reservado ${booking.seats_requested} asiento${booking.seats_requested > 1 ? 's' : ''} por ${booking.total_price}€`)
   closeBookingModal()
 }
 
