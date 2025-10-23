@@ -123,20 +123,15 @@
           <div class="form-group">
             <label class="block text-sm font-medium text-gray-700 mb-2">📍 Origen</label>
             
-            <!-- Opciones predefinidas -->
+            <!-- Botón para abrir modal de ciudades -->
             <div class="mb-3">
-              <p class="text-sm text-gray-600 mb-2">Ciudades del extrarradio de Madrid:</p>
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                <button
-                  v-for="city in madridCities.slice(0, 16)"
-                  :key="city.name"
-                  @click="selectPredefinedOrigin(city)"
-                  type="button"
-                  class="text-xs px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-100 hover:bg-green-100 text-gray-700 rounded-lg transition-colors"
-                >
-                  {{ city.name.split(',')[0] }}
-                </button>
-              </div>
+              <button
+                @click="openOriginModal"
+                type="button"
+                class="w-full px-4 py-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg text-green-700 hover:bg-green-100 hover:border-green-400 transition-colors text-center"
+              >
+                🏙️ Seleccionar ciudad del extrarradio de Madrid
+              </button>
             </div>
             
             <!-- Input de origen -->
@@ -155,20 +150,15 @@
           <div class="form-group">
             <label class="block text-sm font-medium text-gray-700 mb-2">🎯 Destino</label>
             
-            <!-- Opciones predefinidas -->
+            <!-- Botón para abrir modal de destinos -->
             <div class="mb-3">
-              <p class="text-sm text-gray-600 mb-2">Destinos populares en Madrid:</p>
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-                <button
-                  v-for="destination in madridDestinations"
-                  :key="destination.name"
-                  @click="selectPredefinedDestination(destination)"
-                  type="button"
-                  class="text-xs px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-100 hover:bg-green-100 text-gray-700 rounded-lg transition-colors"
-                >
-                  {{ destination.name }}
-                </button>
-              </div>
+              <button
+                @click="openDestinationModal"
+                type="button"
+                class="w-full px-4 py-3 bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg text-blue-700 hover:bg-blue-100 hover:border-blue-400 transition-colors text-center"
+              >
+                🏢 Seleccionar destino en Madrid
+              </button>
             </div>
             
             <!-- Input de destino -->
@@ -276,6 +266,74 @@
         </div>
       </div>
     </main>
+
+    <!-- Modal de Ciudades de Origen -->
+    <div v-if="showOriginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <h3 class="text-2xl font-bold text-gray-900">🏙️ Ciudades del Extrarradio de Madrid</h3>
+            <button
+              @click="closeOriginModal"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <p class="text-gray-600 mt-2">Selecciona tu ciudad de origen</p>
+        </div>
+        
+        <div class="p-6 overflow-y-auto max-h-[60vh]">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <button
+              v-for="city in madridCities"
+              :key="city.name"
+              @click="selectPredefinedOrigin(city)"
+              class="p-4 bg-gray-50 hover:bg-green-50 border border-gray-200 hover:border-green-300 rounded-lg text-left transition-all duration-200 hover:shadow-md"
+            >
+              <div class="font-semibold text-gray-900 mb-1">{{ city.name.split(',')[0] }}</div>
+              <div class="text-sm text-gray-500">{{ city.name.split(',')[1]?.trim() }}</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Destinos en Madrid -->
+    <div v-if="showDestinationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <h3 class="text-2xl font-bold text-gray-900">🏢 Destinos en Madrid</h3>
+            <button
+              @click="closeDestinationModal"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <p class="text-gray-600 mt-2">Selecciona tu destino en Madrid</p>
+        </div>
+        
+        <div class="p-6 overflow-y-auto max-h-[60vh]">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <button
+              v-for="destination in madridDestinations"
+              :key="destination.name"
+              @click="selectPredefinedDestination(destination)"
+              class="p-4 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-lg text-left transition-all duration-200 hover:shadow-md"
+            >
+              <div class="font-semibold text-gray-900 mb-1">{{ destination.name }}</div>
+              <div class="text-sm text-gray-500">Madrid, España</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -306,6 +364,10 @@ const hasSearched = ref(false)
 const user = ref<User | null>(null)
 const userProfile = ref<any>(null)
 const showProfileDropdown = ref(false)
+
+// Estados del modal de localidades
+const showOriginModal = ref(false)
+const showDestinationModal = ref(false)
 
 // Autocompletado
 const originSuggestions = ref<AutocompleteSuggestion[]>([])
@@ -360,6 +422,8 @@ const madridDestinations = ref([
   { name: 'Universidad Complutense', lat: 40.4459, lng: -3.7297 },
   { name: 'Hospital La Paz', lat: 40.4720, lng: -3.6806 },
   { name: 'Madrid Centro', lat: 40.4168, lng: -3.7038 },
+  { name: 'Colón', lat: 40.4260, lng: -3.6900 },
+  { name: 'Velázquez', lat: 40.4300, lng: -3.6800 },
   { name: 'Ciudad financiera Santander (Boadilla)', lat: 40.4057, lng: -3.8753 },
   { name: 'Ciudad financiera BBVA (Las Tablas)', lat: 40.5475, lng: -3.6420 }
 ])
@@ -367,10 +431,29 @@ const madridDestinations = ref([
 // Funciones de selección
 const selectPredefinedOrigin = (city: any) => {
   searchForm.origin = city.name
+  showOriginModal.value = false
 }
 
 const selectPredefinedDestination = (destination: any) => {
   searchForm.destination = destination.name
+  showDestinationModal.value = false
+}
+
+// Funciones del modal
+const openOriginModal = () => {
+  showOriginModal.value = true
+}
+
+const openDestinationModal = () => {
+  showDestinationModal.value = true
+}
+
+const closeOriginModal = () => {
+  showOriginModal.value = false
+}
+
+const closeDestinationModal = () => {
+  showDestinationModal.value = false
 }
 
 // Función de búsqueda
