@@ -15,6 +15,7 @@ export class GooglePlacesService {
 
   private loadGoogleMapsAPI(): Promise<void> {
     return new Promise((resolve, reject) => {
+      // Verificar si Google Maps ya está cargado
       if (window.google && window.google.maps && window.google.maps.places) {
         console.log('✅ Google Maps ya está cargado');
         this.initializeServices();
@@ -22,30 +23,29 @@ export class GooglePlacesService {
         return;
       }
 
-      if (!this.apiKey) {
-        console.warn('VITE_GOOGLE_PLACES_API_KEY no está configurada. Google Places API no se cargará.');
-        reject(new Error('Google Places API Key missing.'));
-        return;
-      }
+      // Si no está cargado, esperar a que se cargue desde el HTML
+      console.log('⏳ Esperando a que Google Maps se cargue desde el HTML...');
+      
+      const checkGoogleMaps = () => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+          console.log('✅ Google Maps cargado desde el HTML');
+          this.initializeServices();
+          resolve();
+        } else {
+          // Esperar un poco más
+          setTimeout(checkGoogleMaps, 100);
+        }
+      };
 
-      console.log('📡 Cargando Google Maps API con Places...');
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKey}&libraries=places&language=es&region=ES&loading=async`;
-      script.async = true;
-      script.defer = true;
-      
-      script.onload = () => {
-        console.log('✅ Google Maps API cargado exitosamente');
-        this.initializeServices();
-        resolve();
-      };
-      
-      script.onerror = (error) => {
-        console.error('❌ Error cargando Google Maps API:', error);
-        reject(new Error('Error cargando Google Maps API'));
-      };
-      
-      document.head.appendChild(script);
+      // Esperar hasta 10 segundos
+      setTimeout(() => {
+        if (!window.google || !window.google.maps || !window.google.maps.places) {
+          console.error('❌ Google Maps no se cargó en 10 segundos');
+          reject(new Error('Google Maps no se cargó'));
+        }
+      }, 10000);
+
+      checkGoogleMaps();
     });
   }
 

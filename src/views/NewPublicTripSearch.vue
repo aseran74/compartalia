@@ -118,125 +118,91 @@
       <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
         <h2 class="text-xl font-semibold mb-4">📝 Información del Viaje</h2>
         
-        <!-- Selector de tipo de búsqueda -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-3">🔍 Tipo de búsqueda</label>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              @click="searchType = 'municipality'"
-              type="button"
-              :class="[
-                'px-4 py-3 rounded-lg border-2 transition-colors text-center',
-                searchType === 'municipality' 
-                  ? 'bg-green-50 border-green-300 text-green-700' 
-                  : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-              ]"
-            >
-              🏙️ Por Municipio
-            </button>
-            <button
-              @click="searchType = 'address'"
-              type="button"
-              :class="[
-                'px-4 py-3 rounded-lg border-2 transition-colors text-center',
-                searchType === 'address' 
-                  ? 'bg-blue-50 border-blue-300 text-blue-700' 
-                  : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-              ]"
-            >
-              📍 Por Dirección Específica
-            </button>
-          </div>
-        </div>
 
         <form @submit.prevent="searchTrips" class="space-y-4 sm:space-y-6">
-          <!-- Búsqueda por Municipio -->
-          <div v-if="searchType === 'municipality'">
-            <!-- Origen -->
-            <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 mb-2">📍 Origen</label>
-            
-            <!-- Botón para abrir modal de ciudades -->
-            <div class="mb-3">
-              <button
-                @click="openOriginModal"
-                type="button"
-                class="w-full px-4 py-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg text-green-700 hover:bg-green-100 hover:border-green-400 transition-colors text-center"
-              >
-                🏙️ Seleccionar ciudad del extrarradio de Madrid
-              </button>
-            </div>
-            
-            <!-- Input de origen -->
-            <AutocompleteInput
-              v-model="searchForm.origin"
-              placeholder="Escribe tu ciudad de origen..."
-              :suggestions="originSuggestions"
-              :is-loading="isLoadingOrigin"
-              @input="handleOriginInput"
-              @select="handleOriginSelect"
-              input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-
-          <!-- Destino -->
+          <!-- Origen Específico -->
           <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700 mb-2">🎯 Destino</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">📍 Origen</label>
             
-            <!-- Botón para abrir modal de destinos -->
+            <!-- Selector de tipo de origen -->
             <div class="mb-3">
-              <button
-                @click="openDestinationModal"
-                type="button"
-                class="w-full px-4 py-3 bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg text-blue-700 hover:bg-blue-100 hover:border-blue-400 transition-colors text-center"
-              >
-                🏢 Seleccionar destino en Madrid
-              </button>
-            </div>
-            
-            <!-- Input de destino -->
-            <AutocompleteInput
-              v-model="searchForm.destination"
-              placeholder="Escribe tu destino en Madrid..."
-              :suggestions="destinationSuggestions"
-              :is-loading="isLoadingDestination"
-              @input="handleDestinationInput"
-              @select="handleDestinationSelect"
-              input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-          </div>
-
-          <!-- Búsqueda por Dirección Específica -->
-          <div v-if="searchType === 'address'">
-            <!-- Origen Específico -->
-            <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 mb-2">📍 Origen Específico</label>
-              <div class="relative">
-                <input
-                  v-model="specificOrigin"
-                  @input="handleSpecificOriginInput"
-                  @focus="showOriginSuggestionsSpecific = true"
-                  @blur="hideOriginSuggestionsSpecific"
-                  type="text"
-                  placeholder="Ej: Calle Gran Vía 1, Madrid"
-                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <span class="text-gray-400">📍</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    @click="originType = 'predefined'"
+                    type="button"
+                    :class="[
+                      'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
+                      originType === 'predefined' 
+                        ? 'bg-green-50 border-green-300 text-green-700' 
+                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                    ]"
+                  >
+                    🏙️ Ciudad Extrarradio
+                  </button>
+                  <button
+                    @click="originType = 'specific'"
+                    type="button"
+                    :class="[
+                      'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
+                      originType === 'specific' 
+                        ? 'bg-blue-50 border-blue-300 text-blue-700' 
+                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                    ]"
+                  >
+                    📍 Dirección Específica
+                  </button>
                 </div>
+              </div>
+
+              <!-- Origen Predefinido -->
+              <div v-if="originType === 'predefined'">
+                <button
+                  @click="openOriginModal"
+                  type="button"
+                  class="w-full px-4 py-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg text-green-700 hover:bg-green-100 hover:border-green-400 transition-colors text-center mb-3"
+                >
+                  🏙️ Seleccionar ciudad del extrarradio de Madrid
+                </button>
                 
-                <!-- Sugerencias de origen específico -->
-                <div v-if="showOriginSuggestionsSpecific && originSuggestionsSpecific.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  <div class="p-2">
-                    <div
-                      v-for="(suggestion, index) in originSuggestionsSpecific"
-                      :key="index"
-                      @click="selectSpecificOrigin(suggestion)"
-                      class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors border-b border-gray-100 last:border-b-0"
-                    >
-                      <div class="font-semibold text-gray-900">{{ suggestion.main_text }}</div>
-                      <div class="text-sm text-gray-500">{{ suggestion.secondary_text }}</div>
+                <AutocompleteInput
+                  v-model="searchForm.origin"
+                  placeholder="Escribe tu ciudad de origen..."
+                  :suggestions="originSuggestions"
+                  :is-loading="isLoadingOrigin"
+                  @input="handleOriginInput"
+                  @select="handleOriginSelect"
+                  input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              <!-- Origen Específico -->
+              <div v-if="originType === 'specific'">
+                <div class="relative">
+                  <input
+                    v-model="specificOrigin"
+                    @input="handleSpecificOriginInput"
+                    @focus="showOriginSuggestionsSpecific = true"
+                    @blur="hideOriginSuggestionsSpecific"
+                    type="text"
+                    placeholder="Ej: Calle Gran Vía 1, Madrid"
+                    class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <span class="text-gray-400">📍</span>
+                  </div>
+                  
+                  <!-- Sugerencias de origen específico -->
+                  <div v-if="showOriginSuggestionsSpecific && originSuggestionsSpecific.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    <div class="p-2">
+                      <div
+                        v-for="(suggestion, index) in originSuggestionsSpecific"
+                        :key="index"
+                        @click="selectSpecificOrigin(suggestion)"
+                        class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors border-b border-gray-100 last:border-b-0"
+                      >
+                        <div class="font-semibold text-gray-900">{{ suggestion.main_text }}</div>
+                        <div class="text-sm text-gray-500">{{ suggestion.secondary_text }}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -245,32 +211,87 @@
 
             <!-- Destino Específico -->
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 mb-2">🎯 Destino Específico</label>
-              <div class="relative">
-                <input
-                  v-model="specificDestination"
-                  @input="handleSpecificDestinationInput"
-                  @focus="showDestinationSuggestionsSpecific = true"
-                  @blur="hideDestinationSuggestionsSpecific"
-                  type="text"
-                  placeholder="Ej: Hospital La Paz, Madrid"
-                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <span class="text-gray-400">🎯</span>
+              <label class="block text-sm font-medium text-gray-700 mb-2">🎯 Destino</label>
+              
+              <!-- Selector de tipo de destino -->
+              <div class="mb-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    @click="destinationType = 'predefined'"
+                    type="button"
+                    :class="[
+                      'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
+                      destinationType === 'predefined' 
+                        ? 'bg-green-50 border-green-300 text-green-700' 
+                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                    ]"
+                  >
+                    🏢 Destinos Madrid
+                  </button>
+                  <button
+                    @click="destinationType = 'specific'"
+                    type="button"
+                    :class="[
+                      'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
+                      destinationType === 'specific' 
+                        ? 'bg-blue-50 border-blue-300 text-blue-700' 
+                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                    ]"
+                  >
+                    📍 Dirección Específica
+                  </button>
                 </div>
+              </div>
+
+              <!-- Destino Predefinido -->
+              <div v-if="destinationType === 'predefined'">
+                <button
+                  @click="openDestinationModal"
+                  type="button"
+                  class="w-full px-4 py-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg text-green-700 hover:bg-green-100 hover:border-green-400 transition-colors text-center mb-3"
+                >
+                  🏢 Seleccionar destino en Madrid
+                </button>
                 
-                <!-- Sugerencias de destino específico -->
-                <div v-if="showDestinationSuggestionsSpecific && destinationSuggestionsSpecific.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  <div class="p-2">
-                    <div
-                      v-for="(suggestion, index) in destinationSuggestionsSpecific"
-                      :key="index"
-                      @click="selectSpecificDestination(suggestion)"
-                      class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors border-b border-gray-100 last:border-b-0"
-                    >
-                      <div class="font-semibold text-gray-900">{{ suggestion.main_text }}</div>
-                      <div class="text-sm text-gray-500">{{ suggestion.secondary_text }}</div>
+                <AutocompleteInput
+                  v-model="searchForm.destination"
+                  placeholder="Escribe tu destino en Madrid..."
+                  :suggestions="destinationSuggestions"
+                  :is-loading="isLoadingDestination"
+                  @input="handleDestinationInput"
+                  @select="handleDestinationSelect"
+                  input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              <!-- Destino Específico -->
+              <div v-if="destinationType === 'specific'">
+                <div class="relative">
+                  <input
+                    v-model="specificDestination"
+                    @input="handleSpecificDestinationInput"
+                    @focus="showDestinationSuggestionsSpecific = true"
+                    @blur="hideDestinationSuggestionsSpecific"
+                    type="text"
+                    placeholder="Ej: Hospital La Paz, Madrid"
+                    class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <span class="text-gray-400">🎯</span>
+                  </div>
+                  
+                  <!-- Sugerencias de destino específico -->
+                  <div v-if="showDestinationSuggestionsSpecific && destinationSuggestionsSpecific.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    <div class="p-2">
+                      <div
+                        v-for="(suggestion, index) in destinationSuggestionsSpecific"
+                        :key="index"
+                        @click="selectSpecificDestination(suggestion)"
+                        class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors border-b border-gray-100 last:border-b-0"
+                      >
+                        <div class="font-semibold text-gray-900">{{ suggestion.main_text }}</div>
+                        <div class="text-sm text-gray-500">{{ suggestion.secondary_text }}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -517,7 +538,7 @@ const selectedTrip = ref<any>(null)
 const selectedBookingInfo = ref<any>(null)
 
 // Estados del tipo de búsqueda
-const searchType = ref<'municipality' | 'address'>('municipality')
+const searchType = ref<'municipality' | 'address'>('address')
 const specificOrigin = ref('')
 const specificDestination = ref('')
 const originSuggestionsSpecific = ref<any[]>([])
@@ -526,6 +547,10 @@ const isLoadingOriginSpecific = ref(false)
 const isLoadingDestinationSpecific = ref(false)
 const showOriginSuggestionsSpecific = ref(false)
 const showDestinationSuggestionsSpecific = ref(false)
+
+// Estados para tipos de origen y destino
+const originType = ref<'predefined' | 'specific'>('predefined')
+const destinationType = ref<'predefined' | 'specific'>('predefined')
 
 // Autocompletado
 const originSuggestions = ref<AutocompleteSuggestion[]>([])
@@ -542,7 +567,51 @@ const hybridService = new HybridTripService()
 // Servicios de autocompletado
 const autocompleteService = new SimpleAutocompleteService()
 const geolocationService = new GeolocationService()
-const googlePlacesService = new GooglePlacesService()
+let googlePlacesService: GooglePlacesService | null = null
+
+// Inicializar Google Places Service de forma asíncrona
+const initGooglePlacesService = async () => {
+  try {
+    console.log('🔄 Inicializando Google Places Service...')
+    googlePlacesService = new GooglePlacesService()
+    console.log('✅ Google Places Service inicializado')
+  } catch (error) {
+    console.error('❌ Error inicializando Google Places Service:', error)
+    googlePlacesService = null
+  }
+}
+
+// Fallback local para cuando Google Places no esté disponible
+const getLocalSuggestions = (input: string, type: 'origin' | 'destination') => {
+  const localSuggestions = [
+    // Orígenes comunes
+    { main_text: 'Calle Gran Vía 1, Madrid', secondary_text: 'Madrid, España', place_id: 'granvia1', lat: 40.4194, lng: -3.7108 },
+    { main_text: 'Plaza de España, Madrid', secondary_text: 'Madrid, España', place_id: 'plazaespana', lat: 40.4236, lng: -3.7122 },
+    { main_text: 'Puerta del Sol, Madrid', secondary_text: 'Madrid, España', place_id: 'puertadelsol', lat: 40.4168, lng: -3.7038 },
+    { main_text: 'Plaza de Colón, Madrid', secondary_text: 'Madrid, España', place_id: 'plazacolon', lat: 40.4260, lng: -3.6900 },
+    { main_text: 'Calle Velázquez, Madrid', secondary_text: 'Madrid, España', place_id: 'velazquez', lat: 40.4300, lng: -3.6800 },
+    { main_text: 'Chamartín, Madrid', secondary_text: 'Madrid, España', place_id: 'chamartin', lat: 40.4720, lng: -3.6806 },
+    { main_text: 'Atocha, Madrid', secondary_text: 'Madrid, España', place_id: 'atocha', lat: 40.4075, lng: -3.6917 },
+    { main_text: 'Nuevos Ministerios, Madrid', secondary_text: 'Madrid, España', place_id: 'nuevosministerios', lat: 40.4459, lng: -3.6900 },
+    { main_text: 'Plaza de Castilla, Madrid', secondary_text: 'Madrid, España', place_id: 'plazacastilla', lat: 40.4669, lng: -3.6889 },
+    { main_text: 'Moncloa, Madrid', secondary_text: 'Madrid, España', place_id: 'moncloa', lat: 40.4350, lng: -3.7200 },
+    
+    // Destinos comunes
+    { main_text: 'Hospital La Paz, Madrid', secondary_text: 'Madrid, España', place_id: 'hospitallapaz', lat: 40.4720, lng: -3.6806 },
+    { main_text: 'Hospital Ramón y Cajal, Madrid', secondary_text: 'Madrid, España', place_id: 'hospitalryc', lat: 40.4500, lng: -3.6800 },
+    { main_text: 'Universidad Complutense, Madrid', secondary_text: 'Madrid, España', place_id: 'complutense', lat: 40.4459, lng: -3.7297 },
+    { main_text: 'Universidad Politécnica, Madrid', secondary_text: 'Madrid, España', place_id: 'upm', lat: 40.4500, lng: -3.7300 },
+    { main_text: 'AZCA, Madrid', secondary_text: 'Madrid, España', place_id: 'azca', lat: 40.4459, lng: -3.6900 },
+    { main_text: 'Cuatro Torres, Madrid', secondary_text: 'Madrid, España', place_id: 'cuatrotorres', lat: 40.4720, lng: -3.6806 },
+    { main_text: 'Centro Comercial La Vaguada, Madrid', secondary_text: 'Madrid, España', place_id: 'lavaguada', lat: 40.4663, lng: -3.6896 },
+    { main_text: 'Centro Comercial Príncipe Pío, Madrid', secondary_text: 'Madrid, España', place_id: 'principepio', lat: 40.4200, lng: -3.7200 },
+    { main_text: 'Aeropuerto Adolfo Suárez, Madrid', secondary_text: 'Madrid, España', place_id: 'aeropuerto', lat: 40.4839, lng: -3.5680 }
+  ]
+
+  return localSuggestions.filter(suggestion => 
+    suggestion.main_text.toLowerCase().includes(input.toLowerCase())
+  )
+}
 
 // Ciudades del extrarradio de Madrid
 const madridCities = ref([
@@ -617,17 +686,25 @@ const closeDestinationModal = () => {
 
 // Función de búsqueda
 const searchTrips = async () => {
-  // Validar campos según el tipo de búsqueda
-  if (searchType.value === 'municipality') {
-    if (!searchForm.origin || !searchForm.destination) {
-      alert('Por favor, completa todos los campos')
-      return
-    }
-  } else {
-    if (!specificOrigin.value || !specificDestination.value) {
-      alert('Por favor, completa todos los campos')
-      return
-    }
+  // Validar origen
+  let originValid = false
+  if (originType.value === 'predefined' && searchForm.origin) {
+    originValid = true
+  } else if (originType.value === 'specific' && specificOrigin.value) {
+    originValid = true
+  }
+  
+  // Validar destino
+  let destinationValid = false
+  if (destinationType.value === 'predefined' && searchForm.destination) {
+    destinationValid = true
+  } else if (destinationType.value === 'specific' && specificDestination.value) {
+    destinationValid = true
+  }
+  
+  if (!originValid || !destinationValid) {
+    alert('Por favor, completa todos los campos')
+    return
   }
 
   isSearching.value = true
@@ -636,15 +713,33 @@ const searchTrips = async () => {
   try {
     console.log('🔍 Iniciando búsqueda híbrida...')
     
-    // Usar los campos correctos según el tipo de búsqueda
-    const origin = searchType.value === 'municipality' ? searchForm.origin : specificOrigin.value
-    const destination = searchType.value === 'municipality' ? searchForm.destination : specificDestination.value
+    // Determinar origen y destino
+    let origin = ''
+    let destination = ''
+    
+    // Origen
+    if (originType.value === 'predefined') {
+      origin = searchForm.origin
+    } else {
+      origin = specificOrigin.value
+    }
+    
+    // Destino
+    if (destinationType.value === 'predefined') {
+      destination = searchForm.destination
+    } else {
+      destination = specificDestination.value
+    }
+    
+    console.log('📍 Búsqueda:', { origin, destination, originType: originType.value, destinationType: destinationType.value })
     
     const results = await hybridService.searchTrips(
       origin,
       destination,
-      true, // Usar geolocalización
-      10   // Radio de 10km
+      {
+        useGeolocation: true,
+        maxDistanceKm: 10
+      }
     )
     
     searchResults.value = results
@@ -785,8 +880,25 @@ const handleSpecificOriginInput = async () => {
   }
 
   try {
+    console.log('🔍 Buscando origen específico:', specificOrigin.value)
+    
+    // Verificar si el servicio está disponible
+    if (!googlePlacesService) {
+      console.log('⚠️ Google Places Service no está disponible, inicializando...')
+      await initGooglePlacesService()
+      
+      if (!googlePlacesService) {
+        console.error('❌ No se pudo inicializar Google Places Service')
+        originSuggestionsSpecific.value = []
+        return
+      }
+    }
+
     isLoadingOriginSpecific.value = true
+    console.log('📡 Llamando a Google Places API...')
     const suggestions = await googlePlacesService.autocompleteAddress(specificOrigin.value)
+    console.log('✅ Sugerencias recibidas:', suggestions)
+    
     originSuggestionsSpecific.value = suggestions.map(suggestion => ({
       main_text: suggestion.name,
       secondary_text: suggestion.address,
@@ -794,8 +906,10 @@ const handleSpecificOriginInput = async () => {
       lat: suggestion.lat,
       lng: suggestion.lng
     }))
+    
+    console.log('📋 Sugerencias procesadas:', originSuggestionsSpecific.value)
   } catch (error) {
-    console.error('Error obteniendo sugerencias de origen específico:', error)
+    console.error('❌ Error obteniendo sugerencias de origen específico:', error)
     originSuggestionsSpecific.value = []
   } finally {
     isLoadingOriginSpecific.value = false
@@ -809,8 +923,25 @@ const handleSpecificDestinationInput = async () => {
   }
 
   try {
+    console.log('🔍 Buscando destino específico:', specificDestination.value)
+    
+    // Verificar si el servicio está disponible
+    if (!googlePlacesService) {
+      console.log('⚠️ Google Places Service no está disponible, inicializando...')
+      await initGooglePlacesService()
+      
+      if (!googlePlacesService) {
+        console.error('❌ No se pudo inicializar Google Places Service')
+        destinationSuggestionsSpecific.value = []
+        return
+      }
+    }
+
     isLoadingDestinationSpecific.value = true
+    console.log('📡 Llamando a Google Places API...')
     const suggestions = await googlePlacesService.autocompleteAddress(specificDestination.value)
+    console.log('✅ Sugerencias recibidas:', suggestions)
+    
     destinationSuggestionsSpecific.value = suggestions.map(suggestion => ({
       main_text: suggestion.name,
       secondary_text: suggestion.address,
@@ -818,8 +949,10 @@ const handleSpecificDestinationInput = async () => {
       lat: suggestion.lat,
       lng: suggestion.lng
     }))
+    
+    console.log('📋 Sugerencias procesadas:', destinationSuggestionsSpecific.value)
   } catch (error) {
-    console.error('Error obteniendo sugerencias de destino específico:', error)
+    console.error('❌ Error obteniendo sugerencias de destino específico:', error)
     destinationSuggestionsSpecific.value = []
   } finally {
     isLoadingDestinationSpecific.value = false
@@ -881,6 +1014,9 @@ let authSubscription: any = null
 onMounted(async () => {
   searchForm.date = today
   await checkAuth()
+  
+  // Inicializar Google Places Service
+  await initGooglePlacesService()
   
   // Escuchar cambios de autenticación
   const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
