@@ -392,8 +392,8 @@
               <div class="flex items-center space-x-3">
                 <div class="relative">
                 <img 
-                  :src="(result.trip as any).driver_avatar || '/images/user/user-01.jpg'" 
-                  :alt="(result.trip as any).driver_name || 'Conductor'"
+                  :src="result.trip.profiles?.avatar_url || '/images/user/user-01.jpg'" 
+                  :alt="result.trip.profiles?.name || 'Conductor'"
                   class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-green-200"
                   @error="(event: any) => event.target.src = '/images/user/user-01.jpg'"
                 />
@@ -401,7 +401,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <h4 class="font-semibold text-gray-900 text-sm sm:text-base truncate">
-                    {{ (result.trip as any).driver_name || 'Conductor' }}
+                    {{ result.trip.profiles?.name || 'Conductor' }}
                   </h4>
                   <div class="flex items-center space-x-1 text-xs text-gray-500 mb-1">
                     <span>⭐</span>

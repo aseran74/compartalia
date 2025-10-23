@@ -22,6 +22,11 @@ export interface Trip {
   route_data: any
   created_at: string
   updated_at: string
+  // Datos del conductor desde el JOIN
+  profiles?: {
+    name: string
+    avatar_url: string | null
+  }
 }
 
 export interface SearchResult {
@@ -106,7 +111,13 @@ export class HybridTripService {
       
       let query = supabaseClean
         .from('trips')
-        .select('*')
+        .select(`
+          *,
+          profiles:driver_id (
+            name,
+            avatar_url
+          )
+        `)
         .eq('status', 'active')
         .limit(limit)
 
