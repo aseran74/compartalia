@@ -33,9 +33,9 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-5">
           <!-- Formulario de Búsqueda -->
-          <div class="lg:col-span-2">
+          <div class="lg:col-span-3">
             <form @submit.prevent="searchTrips" class="space-y-6">
               <!-- Sección de Origen -->
               <div class="rounded-sm border border-stroke bg-white p-4 sm:p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -241,7 +241,7 @@
           </div>
 
           <!-- Panel de Resultados -->
-          <div class="lg:col-span-1">
+          <div class="lg:col-span-2">
             <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
               <h3 class="mb-4 text-lg font-semibold text-black dark:text-white">
                 Resultados
