@@ -158,10 +158,7 @@
                 src="/images/Escenacoche.png" 
                 alt="Escena de coche" 
                 class="scroll-image scene-2" 
-                :style="{ 
-                  transform: `scale(1.05) translateX(${carPosition}px) translateY(${50}px)`,
-                  willChange: 'transform'
-                }"
+                :style="{ transform: `scale(1.1) translateX(${carPosition}px) translateY(50px)` }"
               />
             </div>
           </div>
@@ -530,37 +527,18 @@ const showAuthModal = ref(false);
 
 // Variable para el efecto de scroll del coche
 const carPosition = ref(0);
-const scrollY = ref(0);
 
 // Función para manejar el scroll
 function handleScroll() {
-  const currentScrollY = window.scrollY;
-  isScrolled.value = currentScrollY > 50;
+  isScrolled.value = window.scrollY > 50;
   
-  // Actualizar scrollY reactivo
-  scrollY.value = currentScrollY;
-  
-  // Efecto de movimiento del coche según el scroll (muy sutil)
+  // Efecto de movimiento del coche según el scroll
+  const scrollY = window.scrollY;
   const maxScroll = window.innerHeight;
-  const scrollPercentage = Math.min(currentScrollY / maxScroll, 1);
+  const scrollPercentage = Math.min(scrollY / maxScroll, 1);
   
-  // Movimiento sutil pero visible
-  const isMobile = window.innerWidth < 768;
-  const maxMovement = isMobile ? 20 : 60; // Movimiento más visible
-  
-  // Mapear el scroll a posición horizontal del coche (muy poco)
-  carPosition.value = (scrollPercentage - 0.5) * maxMovement;
-  
-  // Debug logs
-  if (currentScrollY % 100 < 10) { // Log cada 100px de scroll
-    console.log('Car effect debug:', {
-      scrollY: currentScrollY,
-      scrollPercentage: scrollPercentage.toFixed(2),
-      carPosition: carPosition.value.toFixed(1),
-      maxMovement,
-      isMobile
-    });
-  }
+  // Mapear el scroll a posición horizontal del coche (-100px a 100px)
+  carPosition.value = (scrollPercentage - 0.5) * 200;
 }
 
 // Funciones para el menú móvil
@@ -772,7 +750,7 @@ const handleGoogleLogin = async () => {
   /* Imagen superior con efecto de movimiento */
   transform-origin: center center;
   z-index: 9999;
-  transition: transform 0.3s ease-out;
+  transition: transform 0.1s ease-out;
 }
 
 
@@ -781,17 +759,16 @@ const handleGoogleLogin = async () => {
 @media (max-width: 768px) {
   .hero-section {
     min-height: 400px;
-    overflow: hidden; /* Evitar desbordamiento */
   }
   
   .hero-content {
-    padding: 40px 10px; /* Reducir padding */
+    padding: 60px 15px;
     min-height: 400px;
   }
   
   .hero-layout {
     grid-template-columns: 1fr;
-    gap: 30px; /* Reducir gap */
+    gap: 40px;
     text-align: center;
   }
   
@@ -800,28 +777,21 @@ const handleGoogleLogin = async () => {
   }
   
   .hero-text h1 {
-    font-size: 2.2rem; /* Reducir tamaño */
-    line-height: 1.2;
+    font-size: 2.5rem;
   }
   
   .hero-image {
-    height: 250px; /* Reducir altura */
+    height: 300px;
     order: -1;
-    margin-top: 10px; /* Reducir margen */
-    overflow: hidden; /* Evitar desbordamiento */
-  }
-  
-  .scroll-container {
-    overflow: hidden; /* Evitar desbordamiento */
+    margin-top: 20px;
   }
   
   .scene-1 {
-    transform: scale(0.9); /* Reducir escala */
+    transform: scale(1);
   }
   
   .scene-2 {
-    transform: scale(0.9) !important; /* Reducir escala y forzar */
-    transition: transform 0.2s ease-out; /* Suavizar transición */
+    transform: scale(1);
   }
 }
 </style>

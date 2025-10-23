@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex items-center justify-center px-2 sm:px-4 lg:px-8">
-    <div class="max-w-sm sm:max-w-md w-full space-y-6 sm:space-y-8">
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center px-1 sm:px-4 lg:px-8">
+    <div class="max-w-xs sm:max-w-md w-full space-y-6 sm:space-y-8">
       <div>
         <img class="mx-auto h-12 w-auto" src="/images/logo/Compartalia2.png" alt="Compartalia" />
         <h2 class="mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
@@ -24,7 +24,7 @@
               type="email"
               autocomplete="email"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-3 sm:py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 text-base sm:text-sm"
+              class="appearance-none rounded-none relative block w-full px-2 sm:px-3 py-3 sm:py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 text-base sm:text-sm"
               placeholder="Dirección de email"
             />
           </div>
@@ -37,7 +37,7 @@
               type="password"
               autocomplete="current-password"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-3 sm:py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 text-base sm:text-sm"
+              class="appearance-none rounded-none relative block w-full px-2 sm:px-3 py-3 sm:py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 text-base sm:text-sm"
               placeholder="Contraseña"
             />
           </div>
@@ -86,7 +86,7 @@
           <button
             type="submit"
             :disabled="isLoading"
-            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-base sm:text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            class="group relative w-full flex justify-center py-3 px-2 sm:px-4 border border-transparent text-base sm:text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           >
             <svg v-if="isLoading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -112,7 +112,7 @@
               @click="handleGoogleLogin"
               :disabled="isLoading"
               type="button"
-              class="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-base sm:text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              class="w-full inline-flex justify-center py-3 px-2 sm:px-4 border border-gray-300 rounded-md shadow-sm bg-white text-base sm:text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
               <svg v-if="isLoading" class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

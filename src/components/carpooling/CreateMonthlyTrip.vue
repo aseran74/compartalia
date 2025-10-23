@@ -936,7 +936,7 @@ async function createMonthlyTrip() {
       } else {
         // // addLog('❌ No se encontraron coordenadas para la ubicación')
       return
-      }
+    }
     } else {
       // // addLog('📍 Usando coordenadas de Google Places')
     }
