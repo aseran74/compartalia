@@ -384,64 +384,119 @@
           <div
             v-for="result in searchResults"
             :key="result.trip.id"
-            class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:border-green-300"
           >
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <div class="flex items-center space-x-2 mb-2">
-                  <span class="text-sm font-medium text-gray-500">📍</span>
-                  <span class="font-medium">{{ result.trip.origin_name }}</span>
-                  <span class="text-gray-400">→</span>
-                  <span class="font-medium">{{ result.trip.destination_name }}</span>
+            <!-- Header con conductor y precio -->
+            <div class="flex items-start justify-between mb-4">
+              <!-- Información del conductor -->
+              <div class="flex items-center space-x-3">
+                <div class="relative">
+                  <img 
+                    :src="(result.trip as any).driver_avatar || '/images/user/default-avatar.jpg'" 
+                    :alt="(result.trip as any).driver_name || 'Conductor'"
+                    class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-green-200"
+                    @error="(event: any) => event.target.src = '/images/user/default-avatar.jpg'"
+                  />
+                  <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                 </div>
-                
-                <div class="flex items-center space-x-4 text-sm text-gray-600">
-                  <span>🕐 {{ formatTime(result.trip.departure_time) }}</span>
-                  <span>💰 {{ result.trip.price_per_seat }}€/asiento</span>
-                  <span v-if="result.bookingInfo" class="flex items-center space-x-1">
-                    <span>🪑</span>
-                    <span class="font-medium">{{ result.bookingInfo.remaining_seats }}</span>
-                    <span class="text-gray-500">de {{ result.bookingInfo.total_seats }} disponibles</span>
-                  </span>
-                  <span v-else>🪑 {{ result.trip.available_seats }} asientos</span>
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                    {{ (result.trip as any).driver_name || 'Conductor' }}
+                  </h4>
+                  <div class="flex items-center space-x-1 text-xs text-gray-500">
+                    <span>⭐</span>
+                    <span>{{ (result.trip as any).driver_rating || '4.8' }}</span>
+                    <span>•</span>
+                    <span>{{ (result.trip as any).trips_completed || '50+' }} viajes</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Precio -->
+              <div class="text-right">
+                <div class="text-2xl sm:text-3xl font-bold text-green-600">
+                  {{ result.trip.price_per_seat }}€
+                </div>
+                <div class="text-xs text-gray-500">por asiento</div>
+              </div>
+            </div>
+
+            <!-- Ruta -->
+            <div class="mb-4">
+              <div class="flex items-center space-x-2 mb-2">
+                <div class="flex-shrink-0 w-3 h-3 bg-green-500 rounded-full"></div>
+                <span class="font-medium text-gray-900 text-sm sm:text-base">{{ result.trip.origin_name }}</span>
+              </div>
+              <div class="flex items-center space-x-2 ml-1.5">
+                <div class="w-px h-4 bg-gray-300 ml-1"></div>
+                <div class="flex-1 h-px bg-gray-300"></div>
+                <span class="text-gray-400 text-xs">→</span>
+                <div class="flex-1 h-px bg-gray-300"></div>
+              </div>
+              <div class="flex items-center space-x-2 mt-2">
+                <div class="flex-shrink-0 w-3 h-3 bg-red-500 rounded-full"></div>
+                <span class="font-medium text-gray-900 text-sm sm:text-base">{{ result.trip.destination_name }}</span>
+              </div>
+            </div>
+
+            <!-- Información del viaje -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              <div class="text-center sm:text-left">
+                <div class="text-xs text-gray-500 mb-1">🕐 Salida</div>
+                <div class="font-medium text-sm">{{ formatTime(result.trip.departure_time) }}</div>
+              </div>
+              <div class="text-center sm:text-left">
+                <div class="text-xs text-gray-500 mb-1">🪑 Asientos</div>
+                <div class="font-medium text-sm">
+                  <span v-if="result.bookingInfo">{{ result.bookingInfo.remaining_seats }}/{{ result.bookingInfo.total_seats }}</span>
+                  <span v-else>{{ result.trip.available_seats }}</span>
+                </div>
+              </div>
+              <div class="text-center sm:text-left">
+                <div class="text-xs text-gray-500 mb-1">📏 Distancia</div>
+                <div class="font-medium text-sm">
+                  <span v-if="result.distance">{{ result.distance.toFixed(1) }} km</span>
+                  <span v-else>N/A</span>
+                </div>
+              </div>
+              <div class="text-center sm:text-left">
+                <div class="text-xs text-gray-500 mb-1">Tipo</div>
+                <div class="font-medium text-sm">
                   <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                     {{ getTripTypeLabel(result.trip) }}
                   </span>
                 </div>
-                
-                <!-- Indicador de disponibilidad -->
-                <div v-if="result.bookingInfo" class="mt-2">
-                  <div v-if="result.bookingInfo.remaining_seats > 0" class="flex items-center space-x-2">
-                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span class="text-sm text-green-700 font-medium">
-                      {{ result.bookingInfo.remaining_seats }} asiento{{ result.bookingInfo.remaining_seats > 1 ? 's' : '' }} disponible{{ result.bookingInfo.remaining_seats > 1 ? 's' : '' }}
-                    </span>
-                  </div>
-                  <div v-else class="flex items-center space-x-2">
-                    <div class="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <span class="text-sm text-red-700 font-medium">Completamente ocupado</span>
-                  </div>
-                </div>
-                
-                <div v-if="result.distance" class="text-xs text-gray-500 mt-1">
-                  📏 Distancia: {{ result.distance.toFixed(1) }} km
-                </div>
               </div>
-              
-              <div class="ml-4">
-                <button
-                  v-if="!result.bookingInfo || result.bookingInfo.remaining_seats > 0"
-                  @click="openBookingModal(result.trip, result.bookingInfo)"
-                  class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm transition-colors"
-                >
-                  Reservar
-                </button>
-                <div
-                  v-else
-                  class="bg-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm cursor-not-allowed"
-                >
-                  Sin asientos
-                </div>
+            </div>
+
+            <!-- Indicador de disponibilidad -->
+            <div v-if="result.bookingInfo" class="mb-4">
+              <div v-if="result.bookingInfo.remaining_seats > 0" class="flex items-center space-x-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span class="text-sm text-green-700 font-medium">
+                  {{ result.bookingInfo.remaining_seats }} asiento{{ result.bookingInfo.remaining_seats > 1 ? 's' : '' }} disponible{{ result.bookingInfo.remaining_seats > 1 ? 's' : '' }}
+                </span>
+              </div>
+              <div v-else class="flex items-center space-x-2">
+                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                <span class="text-sm text-red-700 font-medium">Completamente ocupado</span>
+              </div>
+            </div>
+
+            <!-- Botón de reserva -->
+            <div class="flex justify-end">
+              <button
+                v-if="!result.bookingInfo || result.bookingInfo.remaining_seats > 0"
+                @click="openBookingModal(result.trip, result.bookingInfo)"
+                class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 text-sm font-medium transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              >
+                Reservar Ahora
+              </button>
+              <div
+                v-else
+                class="bg-gray-300 text-gray-600 px-6 py-3 rounded-lg text-sm cursor-not-allowed"
+              >
+                Sin asientos
               </div>
             </div>
           </div>
