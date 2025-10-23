@@ -100,6 +100,8 @@ export class HybridTripService {
    */
   private async searchByText(origin?: string, destination?: string, limit: number = 50): Promise<Trip[]> {
     try {
+      console.log('🔍 HybridTripService.searchByText - Iniciando búsqueda:', { origin, destination, limit })
+      
       let query = supabaseClean
         .from('trips')
         .select('*')
@@ -110,14 +112,17 @@ export class HybridTripService {
       // Aplicar filtros de texto
       if (origin) {
         const normalizedOrigin = this.normalizeMadridSearch(origin)
+        console.log('🔍 Aplicando filtro origen:', { original: origin, normalized: normalizedOrigin })
         query = query.ilike('origin_name', `%${normalizedOrigin}%`)
       }
       
       if (destination) {
         const normalizedDestination = this.normalizeMadridSearch(destination)
+        console.log('🔍 Aplicando filtro destino:', { original: destination, normalized: normalizedDestination })
         query = query.ilike('destination_name', `%${normalizedDestination}%`)
       }
 
+      console.log('🔍 Ejecutando query...')
       const { data, error } = await query
 
       if (error) {
@@ -125,7 +130,8 @@ export class HybridTripService {
         return []
       }
 
-      console.log(`✅ Búsqueda por texto: ${data?.length || 0} viajes`)
+      console.log(`✅ Búsqueda por texto: ${data?.length || 0} viajes encontrados`)
+      console.log('📊 Datos encontrados:', data)
       return data || []
     } catch (error) {
       console.error('❌ Error en searchByText:', error)
