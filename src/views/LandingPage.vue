@@ -1036,6 +1036,16 @@ const handleGoogleLogin = async () => {
 
 
 /* Responsive */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .hero-image {
+    margin-top: 80px;
+  }
+  
+  .scene-2 {
+    transform: scale(1.1) translateX(0px) translateY(80px) !important;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-section {
     min-height: 400px;
