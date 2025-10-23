@@ -669,8 +669,11 @@ function buscarOrigen() {
 
   // Intentar usar Google Places API primero
   if (window.google && window.google.maps && window.google.maps.places) {
+    console.log('🌐 Usando Google Places API...')
     const autocompleteService = new window.google.maps.places.AutocompleteService()
     const sessionToken = new window.google.maps.places.AutocompleteSessionToken()
+    
+    console.log('🔍 Buscando con:', tripForm.origin_name)
     
     autocompleteService.getPlacePredictions({
       input: tripForm.origin_name,
@@ -678,6 +681,8 @@ function buscarOrigen() {
       componentRestrictions: { country: 'es' }, // Limitar a España
       types: ['geocode', 'establishment'] // Incluir direcciones y establecimientos
     }, (predictions: any, status: any) => {
+      console.log('📊 Respuesta Google Places:', { status, predictions: predictions?.length || 0 })
+      
       if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
         const suggestions = predictions.map((prediction: any) => ({
           name: prediction.description,
@@ -688,16 +693,17 @@ function buscarOrigen() {
         }))
         
         originSuggestions.value = suggestions
-        console.log('📍 Sugerencias de Google Places:', suggestions)
+        console.log('✅ Sugerencias de Google Places:', suggestions)
         // // addLog(`📍 Origen: ${suggestions.length} sugerencias encontradas (Google Places)`)
       } else {
-        // // addLog(`⚠️ Error Google Places: ${status}`)
+        console.log('❌ Error Google Places:', status)
+        console.log('🔄 Usando fallback local...')
         // Fallback a datos locales
         buscarOrigenLocal()
       }
     })
   } else {
-    // // addLog('⚠️ Google Places no disponible, usando datos locales')
+    console.log('⚠️ Google Places no disponible, usando datos locales')
     // Fallback a datos locales
     buscarOrigenLocal()
   }
@@ -738,8 +744,11 @@ function buscarDestino() {
 
   // Intentar usar Google Places API primero
   if (window.google && window.google.maps && window.google.maps.places) {
+    console.log('🌐 Usando Google Places API para destino...')
     const autocompleteService = new window.google.maps.places.AutocompleteService()
     const sessionToken = new window.google.maps.places.AutocompleteSessionToken()
+    
+    console.log('🔍 Buscando destino con:', tripForm.destination_name)
     
     autocompleteService.getPlacePredictions({
       input: tripForm.destination_name,
@@ -747,6 +756,8 @@ function buscarDestino() {
       componentRestrictions: { country: 'es' }, // Limitar a España
       types: ['geocode', 'establishment'] // Incluir direcciones y establecimientos
     }, (predictions: any, status: any) => {
+      console.log('📊 Respuesta Google Places destino:', { status, predictions: predictions?.length || 0 })
+      
       if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
         const suggestions = predictions.map((prediction: any) => ({
           name: prediction.description,
@@ -757,16 +768,17 @@ function buscarDestino() {
         }))
         
         destinationSuggestions.value = suggestions
-        console.log('🎯 Sugerencias de Google Places:', suggestions)
+        console.log('✅ Sugerencias de Google Places destino:', suggestions)
         // // addLog(`🎯 Destino: ${suggestions.length} sugerencias encontradas (Google Places)`)
       } else {
-        // // addLog(`⚠️ Error Google Places: ${status}`)
+        console.log('❌ Error Google Places destino:', status)
+        console.log('🔄 Usando fallback local para destino...')
         // Fallback a datos locales
         buscarDestinoLocal()
       }
     })
   } else {
-    // // addLog('⚠️ Google Places no disponible, usando datos locales')
+    console.log('⚠️ Google Places no disponible para destino, usando datos locales')
     // Fallback a datos locales
     buscarDestinoLocal()
   }
