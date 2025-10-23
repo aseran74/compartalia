@@ -89,8 +89,10 @@ export class HybridTripService {
       const uniqueResults = this.removeDuplicates(results)
       
       // 4. Añadir información de reservas y filtrar viajes completamente ocupados
-      const resultsWithBookings = await this.addBookingInfo(uniqueResults)
-      const availableResults = resultsWithBookings.filter(result => !result.bookingInfo?.is_fully_booked)
+      // TEMPORAL: Comentado para evitar error de BookingService
+      // const resultsWithBookings = await this.addBookingInfo(uniqueResults)
+      // const availableResults = resultsWithBookings.filter(result => !result.bookingInfo?.is_fully_booked)
+      const availableResults = uniqueResults
       
       const sortedResults = availableResults.sort((a, b) => b.score - a.score)
 
