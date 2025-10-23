@@ -1038,22 +1038,22 @@ const handleGoogleLogin = async () => {
 /* Responsive */
 @media (max-width: 1024px) and (min-width: 769px) {
   .hero-image {
-    margin-top: 180px;
+    margin-top: 80px;
   }
   
   .scene-2 {
-    transform: scale(1.1) translateX(0px) translateY(180px) !important;
+    transform: scale(1.1) translateX(0px) translateY(-20px) !important;
   }
 }
 
 /* Ajuste específico para tablet 768x1024 */
 @media (max-width: 1024px) and (min-width: 768px) and (max-height: 1024px) {
   .hero-image {
-    margin-top: 220px;
+    margin-top: 60px;
   }
   
   .scene-2 {
-    transform: scale(1.1) translateX(0px) translateY(220px) !important;
+    transform: scale(1.1) translateX(0px) translateY(-40px) !important;
   }
 }
 
