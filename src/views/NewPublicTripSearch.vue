@@ -114,6 +114,48 @@
         </p>
       </div>
 
+      <!-- Call to Action Section -->
+      <div class="text-center mb-12">
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
+          <!-- Botón Regístrate -->
+          <router-link 
+            to="/register"
+            class="group relative px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 hover:scale-105"
+          >
+            <div class="flex items-center space-x-3">
+              <span class="text-2xl">🚀</span>
+              <span>Regístrate Gratis</span>
+              <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+              </svg>
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-r from-green-600 to-green-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </router-link>
+
+          <!-- Botón Buscar Viajes -->
+          <button 
+            @click="scrollToSearch"
+            class="group relative px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 hover:scale-105"
+          >
+            <div class="flex items-center space-x-3">
+              <span class="text-2xl">🔍</span>
+              <span>Buscar Viajes</span>
+              <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+              </svg>
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </button>
+        </div>
+        
+        <!-- Texto descriptivo -->
+        <p class="text-gray-600 mt-6 text-lg">
+          <span class="font-semibold text-green-600">Gratis</span> para empezar • 
+          <span class="font-semibold text-blue-600">Sin compromiso</span> • 
+          <span class="font-semibold text-purple-600">Ahorra dinero</span>
+        </p>
+      </div>
+
       <!-- Search Form -->
       <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
         <h2 class="text-xl font-semibold mb-4">📝 Información del Viaje</h2>
@@ -691,6 +733,17 @@ const closeOriginModal = () => {
 
 const closeDestinationModal = () => {
   showDestinationModal.value = false
+}
+
+// Función para hacer scroll al formulario de búsqueda
+const scrollToSearch = () => {
+  const searchForm = document.querySelector('.bg-white.rounded-lg.shadow-lg')
+  if (searchForm) {
+    searchForm.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    })
+  }
 }
 
 // Función de búsqueda
