@@ -33,9 +33,40 @@
           </div>
         </div>
 
+        <!-- Layout responsivo -->
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
-          <!-- Panel de Búsqueda -->
-          <div class="lg:col-span-1">
+          <!-- En móvil: Mapa de pantalla completa -->
+          <div class="lg:hidden">
+            <div class="fixed inset-0 bg-white dark:bg-boxdark z-10">
+              <!-- Header del mapa móvil -->
+              <div class="absolute top-0 left-0 right-0 z-20 bg-white dark:bg-boxdark shadow-sm p-4">
+                <div class="flex items-center justify-between">
+                  <h1 class="text-lg font-bold text-black dark:text-white">
+                    🗺️ Búsqueda por Mapa
+                  </h1>
+                  <button
+                    @click="$router.go(-1)"
+                    class="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Mapa de pantalla completa -->
+              <div class="absolute inset-0 pt-16">
+                <div 
+                  id="map-mobile" 
+                  class="w-full h-full"
+                  style="min-height: calc(100vh - 64px);"
+                ></div>
+              </div>
+            </div>
+          </div>
+          <!-- Panel de Búsqueda - Solo visible en escritorio -->
+          <div class="hidden lg:block lg:col-span-1">
             <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
               <h3 class="mb-4 text-lg font-semibold text-black dark:text-white">
                 🔍 Filtros de Búsqueda
@@ -234,7 +265,7 @@
             </div>
           </div>
 
-          <!-- Mapa y Resultados -->
+          <!-- Mapa y Resultados - Más grande en escritorio -->
           <div class="lg:col-span-3">
             <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
               <h3 class="mb-4 text-lg font-semibold text-black dark:text-white">
@@ -242,7 +273,7 @@
               </h3>
               
               <!-- Mapa de Google Maps -->
-              <div class="h-96 rounded-lg overflow-hidden border border-stroke dark:border-strokedark">
+              <div class="h-96 lg:h-[600px] rounded-lg overflow-hidden border border-stroke dark:border-strokedark">
                 <div 
                   id="map" 
                   class="w-full h-full"
@@ -324,6 +355,182 @@
             </div>
           </div>
         </div>
+
+        <!-- Panel de Filtros Flotante para Móvil -->
+        <div v-if="showFiltersMobile" class="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden">
+          <div class="absolute inset-0 bg-white dark:bg-boxdark overflow-y-auto">
+            <div class="p-4">
+              <!-- Header del panel móvil -->
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-black dark:text-white">
+                  🔍 Filtros de Búsqueda
+                </h3>
+                <button
+                  @click="showFiltersMobile = false"
+                  class="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Contenido del panel móvil (mismo que el panel de escritorio) -->
+              <form @submit.prevent="searchTrips" class="space-y-4">
+                <!-- Sección de Origen -->
+                <div class="rounded-sm border border-stroke bg-gray-50 p-4 dark:border-strokedark dark:bg-gray-800">
+                  <h4 class="mb-3 text-md font-semibold text-black dark:text-white">
+                    🚗 ¿Desde dónde viajas?
+                  </h4>
+                  
+                  <!-- Búsqueda por dirección exacta -->
+                  <div class="mb-3">
+                    <label class="mb-2 block text-sm font-medium text-black dark:text-white">
+                      Escribe una dirección exacta:
+                    </label>
+                    <AutocompleteInput
+                      v-model="searchForm.origin"
+                      placeholder="📍 Ej: Calle Gran Vía, 1, Madrid"
+                      :suggestions="originSuggestions"
+                      :is-loading="isLoadingOrigin"
+                      @input="handleOriginInput"
+                      @select="handleOriginSelect"
+                      input-class="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    />
+                  </div>
+
+                  <!-- Orígenes predefinidos -->
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-black dark:text-white">
+                      O selecciona una ciudad del extrarradio:
+                    </label>
+                    <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                      <button
+                        v-for="city in madridCities"
+                        :key="city"
+                        @click="selectOriginFromList(city)"
+                        :class="[
+                          'rounded-lg border px-2 py-1.5 text-center text-xs font-medium transition-all duration-200',
+                          searchForm.origin === city
+                            ? 'border-primary bg-primary text-white'
+                            : 'border-stroke bg-white text-body-color hover:border-primary hover:bg-primary/5 dark:border-strokedark dark:bg-boxdark dark:text-white'
+                        ]"
+                      >
+                        {{ city }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sección de Destino -->
+                <div class="rounded-sm border border-stroke bg-gray-50 p-4 dark:border-strokedark dark:bg-gray-800">
+                  <h4 class="mb-3 text-md font-semibold text-black dark:text-white">
+                    🎯 ¿A dónde vas?
+                  </h4>
+                  
+                  <!-- Búsqueda por dirección exacta -->
+                  <div class="mb-3">
+                    <label class="mb-2 block text-sm font-medium text-black dark:text-white">
+                      Escribe una dirección exacta:
+                    </label>
+                    <AutocompleteInput
+                      v-model="searchForm.destination"
+                      placeholder="📍 Ej: Plaza Mayor, Madrid"
+                      :suggestions="destinationSuggestions"
+                      :is-loading="isLoadingDestination"
+                      @input="handleDestinationInput"
+                      @select="handleDestinationSelect"
+                      input-class="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    />
+                  </div>
+
+                  <!-- Destinos predefinidos -->
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-black dark:text-white">
+                      O selecciona un destino en Madrid:
+                    </label>
+                    <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                      <button
+                        v-for="destination in madridDestinations"
+                        :key="destination"
+                        @click="selectDestinationFromList(destination)"
+                        :class="[
+                          'rounded-lg border px-2 py-1.5 text-center text-xs font-medium transition-all duration-200',
+                          searchForm.destination === destination
+                            ? 'border-primary bg-primary text-white'
+                            : 'border-stroke bg-white text-body-color hover:border-primary hover:bg-primary/5 dark:border-strokedark dark:bg-boxdark dark:text-white'
+                        ]"
+                      >
+                        {{ destination }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fecha y Hora -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-black dark:text-white">
+                      📅 Fecha
+                    </label>
+                    <input
+                      v-model="searchForm.date"
+                      type="date"
+                      :min="today"
+                      class="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-black dark:text-white">
+                      🕐 Hora
+                    </label>
+                    <input
+                      v-model="searchForm.time"
+                      type="time"
+                      class="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                <!-- Botón de búsqueda -->
+                <div class="flex space-x-2">
+                  <button
+                    type="submit"
+                    :disabled="isSearching"
+                    class="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                  >
+                    <svg v-if="isSearching" class="h-4 w-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    {{ isSearching ? 'Buscando...' : 'Buscar en Mapa' }}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    @click="showFiltersMobile = false"
+                    class="px-4 py-2 border border-stroke text-body-color rounded-lg hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-800 text-sm font-medium transition-colors"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón Flotante para Abrir Filtros en Móvil -->
+        <button
+          @click="showFiltersMobile = true"
+          class="fixed bottom-4 right-4 z-40 lg:hidden bg-primary text-white p-4 rounded-full shadow-lg hover:bg-primary/90 transition-colors"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+          </svg>
+        </button>
       </main>
     </div>
   </div>
@@ -371,6 +578,9 @@ const searchForm = reactive({
 const searchResults = ref<SearchResult[]>([])
 const isSearching = ref(false)
 const hasSearched = ref(false)
+
+// Estado para panel de filtros en móvil
+const showFiltersMobile = ref(false)
 
 // Autocompletado
 const originSuggestions = ref<AutocompleteSuggestion[]>([])

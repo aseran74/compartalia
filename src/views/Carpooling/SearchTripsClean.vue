@@ -64,19 +64,25 @@
                   <label class="mb-2.5 block text-black dark:text-white">
                     O selecciona una ciudad del extrarradio:
                   </label>
-                  <div class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
+                  <button
+                    @click="showOriginModal = true"
+                    type="button"
+                    class="w-full px-4 py-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg text-green-700 hover:bg-green-100 hover:border-green-400 transition-colors text-center mb-3"
+                  >
+                    🏙️ Seleccionar ciudad del extrarradio de Madrid
+                  </button>
+                  
+                  <!-- Mostrar ciudad seleccionada -->
+                  <div v-if="searchForm.origin" class="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
+                    <span class="text-green-700 font-medium">{{ searchForm.origin }}</span>
                     <button
-                      v-for="city in madridCities"
-                      :key="city"
-                      @click="selectOriginFromList(city)"
-                      :class="[
-                        'rounded-lg border px-2 py-1.5 sm:px-3 sm:py-2 text-center text-xs sm:text-sm font-medium transition-all duration-200',
-                        searchForm.origin === city
-                          ? 'border-primary bg-primary text-white'
-                          : 'border-stroke bg-white text-body-color hover:border-primary hover:bg-primary/5 dark:border-strokedark dark:bg-boxdark dark:text-white'
-                      ]"
+                      @click="searchForm.origin = ''"
+                      type="button"
+                      class="text-green-500 hover:text-green-700 transition-colors"
                     >
-                      {{ city }}
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -109,19 +115,25 @@
                   <label class="mb-2.5 block text-black dark:text-white">
                     O selecciona un destino popular:
                   </label>
-                  <div class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
+                  <button
+                    @click="showDestinationModal = true"
+                    type="button"
+                    class="w-full px-4 py-3 bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg text-blue-700 hover:bg-blue-100 hover:border-blue-400 transition-colors text-center mb-3"
+                  >
+                    🏢 Seleccionar destino en Madrid
+                  </button>
+                  
+                  <!-- Mostrar destino seleccionado -->
+                  <div v-if="searchForm.destination" class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <span class="text-blue-700 font-medium">{{ searchForm.destination }}</span>
                     <button
-                      v-for="destination in madridDestinations"
-                      :key="destination"
-                      @click="selectDestinationFromList(destination)"
-                      :class="[
-                        'rounded-lg border px-2 py-1.5 sm:px-3 sm:py-2 text-center text-xs sm:text-sm font-medium transition-all duration-200',
-                        searchForm.destination === destination
-                          ? 'border-primary bg-primary text-white'
-                          : 'border-stroke bg-white text-body-color hover:border-primary hover:bg-primary/5 dark:border-strokedark dark:bg-boxdark dark:text-white'
-                      ]"
+                      @click="searchForm.destination = ''"
+                      type="button"
+                      class="text-blue-500 hover:text-blue-700 transition-colors"
                     >
-                      {{ destination }}
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -403,6 +415,72 @@
         </div>
       </main>
     </div>
+
+    <!-- Modal de Ciudades de Origen -->
+    <div v-if="showOriginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <h3 class="text-2xl font-bold text-gray-900">🏙️ Ciudades del Extrarradio de Madrid</h3>
+            <button
+              @click="showOriginModal = false"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <p class="text-gray-600 mt-2">Selecciona tu ciudad de origen</p>
+        </div>
+        
+        <div class="p-6 overflow-y-auto max-h-[60vh]">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <button
+              v-for="city in madridCities"
+              :key="city"
+              @click="selectOriginFromList(city)"
+              class="px-4 py-3 rounded-lg border-2 border-gray-200 hover:border-green-300 hover:bg-green-50 text-gray-700 hover:text-green-700 transition-all duration-200 text-center font-medium"
+            >
+              {{ city }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Destinos en Madrid -->
+    <div v-if="showDestinationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <h3 class="text-2xl font-bold text-gray-900">🏢 Destinos en Madrid</h3>
+            <button
+              @click="showDestinationModal = false"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <p class="text-gray-600 mt-2">Selecciona tu destino en Madrid</p>
+        </div>
+        
+        <div class="p-6 overflow-y-auto max-h-[60vh]">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <button
+              v-for="destination in madridDestinations"
+              :key="destination"
+              @click="selectDestinationFromList(destination)"
+              class="px-4 py-3 rounded-lg border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-700 hover:text-blue-700 transition-all duration-200 text-center font-medium"
+            >
+              {{ destination }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -442,6 +520,10 @@ const searchForm = reactive({
 const searchResults = ref<SearchResult[]>([])
 const isSearching = ref(false)
 const hasSearched = ref(false)
+
+// Estados para modales
+const showOriginModal = ref(false)
+const showDestinationModal = ref(false)
 
 // Autocompletado
 const originSuggestions = ref<AutocompleteSuggestion[]>([])
@@ -498,10 +580,12 @@ const madridDestinations = [
 // Selección desde listas predefinidas
 const selectOriginFromList = (city: string) => {
   searchForm.origin = city
+  showOriginModal.value = false
 }
 
 const selectDestinationFromList = (destination: string) => {
   searchForm.destination = destination
+  showDestinationModal.value = false
 }
 
 // Funciones de autocompletado
