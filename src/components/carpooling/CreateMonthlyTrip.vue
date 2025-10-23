@@ -952,9 +952,9 @@ async function createMonthlyTrip() {
       // // addLog('⚠️ No se encontraron coordenadas precisas, usando fallback...')
       
       // Fallback a coordenadas predefinidas
-      const originCoords = coordinates[tripForm.origin_name as keyof typeof coordinates]
-      const destinationCoords = coordinates[tripForm.destination_name as keyof typeof coordinates]
-      
+    const originCoords = coordinates[tripForm.origin_name as keyof typeof coordinates]
+    const destinationCoords = coordinates[tripForm.destination_name as keyof typeof coordinates]
+
       if (originCoords && destinationCoords) {
         tripForm.origin_lat = originCoords.lat
         tripForm.origin_lng = originCoords.lng
@@ -963,7 +963,7 @@ async function createMonthlyTrip() {
         // // addLog('📍 Usando coordenadas de fallback')
       } else {
         // // addLog('❌ No se encontraron coordenadas para la ubicación')
-        return
+      return
       }
     } else {
       // // addLog('📍 Usando coordenadas de Google Places')
@@ -1115,21 +1115,26 @@ onMounted(() => {
   console.log('📋 Tipo de viaje inicial:', tripType.value)
   console.log('📍 showOriginSuggestions inicial:', showOriginSuggestions.value)
   console.log('📍 originSuggestions inicial:', originSuggestions.value)
-  // // addLog('🚀 Componente inicializado')
-  // // addLog(`📋 Tipo inicial: ${tripType.value}`)
-  // // addLog(`📍 Variables de autocompletado inicializadas`)
+  console.log('🔑 API Key disponible:', !!import.meta.env.VITE_GOOGLE_PLACES_API_KEY)
+  console.log('🌐 Entorno:', import.meta.env.MODE)
+  console.log('🔗 URL actual:', window.location.href)
   
   // Inicializar horarios especiales
   initializeSpecialSchedules()
   
   // Esperar a que Google Maps esté cargado
   const checkGoogleMaps = () => {
+    console.log('🔍 Verificando Google Maps...')
+    console.log('window.google:', !!window.google)
+    console.log('window.google.maps:', !!(window.google && window.google.maps))
+    console.log('window.google.maps.places:', !!(window.google && window.google.maps && window.google.maps.places))
+    
     if (window.google && window.google.maps && window.google.maps.places) {
       console.log('✅ Google Maps cargado, inicializando Places...')
       initializeGooglePlaces()
     } else {
       console.log('⏳ Esperando Google Maps...')
-      setTimeout(checkGoogleMaps, 100)
+      setTimeout(checkGoogleMaps, 1000) // Aumentar timeout para Netlify
     }
   }
   
