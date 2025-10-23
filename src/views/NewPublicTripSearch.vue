@@ -232,10 +232,29 @@
                 <div class="flex items-center space-x-4 text-sm text-gray-600">
                   <span>🕐 {{ formatTime(result.trip.departure_time) }}</span>
                   <span>💰 {{ result.trip.price_per_seat }}€/asiento</span>
-                  <span>🪑 {{ result.trip.available_seats }} asientos</span>
+                  <span v-if="result.bookingInfo" class="flex items-center space-x-1">
+                    <span>🪑</span>
+                    <span class="font-medium">{{ result.bookingInfo.remaining_seats }}</span>
+                    <span class="text-gray-500">de {{ result.bookingInfo.total_seats }} disponibles</span>
+                  </span>
+                  <span v-else>🪑 {{ result.trip.available_seats }} asientos</span>
                   <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                     {{ getTripTypeLabel(result.trip) }}
                   </span>
+                </div>
+                
+                <!-- Indicador de disponibilidad -->
+                <div v-if="result.bookingInfo" class="mt-2">
+                  <div v-if="result.bookingInfo.remaining_seats > 0" class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span class="text-sm text-green-700 font-medium">
+                      {{ result.bookingInfo.remaining_seats }} asiento{{ result.bookingInfo.remaining_seats > 1 ? 's' : '' }} disponible{{ result.bookingInfo.remaining_seats > 1 ? 's' : '' }}
+                    </span>
+                  </div>
+                  <div v-else class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span class="text-sm text-red-700 font-medium">Completamente ocupado</span>
+                  </div>
                 </div>
                 
                 <div v-if="result.distance" class="text-xs text-gray-500 mt-1">
@@ -245,11 +264,18 @@
               
               <div class="ml-4">
                 <button
-                  @click="contactDriver(result.trip)"
+                  v-if="!result.bookingInfo || result.bookingInfo.remaining_seats > 0"
+                  @click="openBookingModal(result.trip, result.bookingInfo)"
                   class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm transition-colors"
                 >
-                  Contactar
+                  Reservar
                 </button>
+                <div
+                  v-else
+                  class="bg-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm cursor-not-allowed"
+                >
+                  Sin asientos
+                </div>
               </div>
             </div>
           </div>
@@ -334,6 +360,15 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Reserva -->
+    <BookingModal
+      :is-open="showBookingModal"
+      :trip="selectedTrip"
+      :booking-info="selectedBookingInfo"
+      @close="closeBookingModal"
+      @booking-confirmed="onBookingConfirmed"
+    />
   </div>
 </template>
 
@@ -346,6 +381,7 @@ import DatePicker from '@/components/DatePicker.vue'
 import AutocompleteInput from '@/components/AutocompleteInput.vue'
 import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
 import { GeolocationService } from '@/services/geolocation'
+import BookingModal from '@/components/carpooling/BookingModal.vue'
 
 // Formulario de búsqueda
 const searchForm = reactive({
@@ -368,6 +404,11 @@ const showProfileDropdown = ref(false)
 // Estados del modal de localidades
 const showOriginModal = ref(false)
 const showDestinationModal = ref(false)
+
+// Estados del modal de reservas
+const showBookingModal = ref(false)
+const selectedTrip = ref<any>(null)
+const selectedBookingInfo = ref<any>(null)
 
 // Autocompletado
 const originSuggestions = ref<AutocompleteSuggestion[]>([])
@@ -485,14 +526,25 @@ const searchTrips = async () => {
   }
 }
 
-// Función para contactar conductor
-const contactDriver = (trip: any) => {
-  alert(
-    `Para contactar con el conductor de este viaje, necesitas registrarte primero.\n\n` +
-    `Viaje: ${trip.origin_name} → ${trip.destination_name}\n` +
-    `Precio: ${trip.price_per_seat}€ por asiento\n` +
-    `Asientos disponibles: ${trip.available_seats}`
-  )
+// Función para abrir modal de reserva
+const openBookingModal = (trip: any, bookingInfo?: any) => {
+  selectedTrip.value = trip
+  selectedBookingInfo.value = bookingInfo
+  showBookingModal.value = true
+}
+
+// Función para cerrar modal de reserva
+const closeBookingModal = () => {
+  showBookingModal.value = false
+  selectedTrip.value = null
+  selectedBookingInfo.value = null
+}
+
+// Función para confirmar reserva
+const onBookingConfirmed = (booking: any) => {
+  console.log('Reserva confirmada:', booking)
+  alert(`¡Reserva confirmada! Has reservado ${booking.seats_requested} asiento${booking.seats_requested > 1 ? 's' : ''} por ${booking.total_price}€`)
+  closeBookingModal()
 }
 
 // Función para formatear tiempo

@@ -1,6 +1,7 @@
 // Servicio híbrido que combina búsqueda por texto y geolocalización
 import { supabaseClean } from '@/config/supabaseClean'
 import { GeolocationService } from './geolocation'
+import { bookingService, type TripWithBookings } from './bookingService'
 
 export interface Trip {
   id: string
@@ -27,6 +28,12 @@ export interface SearchResult {
   matchType: 'exact_text' | 'proximity' | 'geolocation'
   distance?: number
   score: number
+  bookingInfo?: {
+    total_seats: number
+    confirmed_bookings: number
+    remaining_seats: number
+    is_fully_booked: boolean
+  }
 }
 
 export class HybridTripService {
@@ -73,9 +80,14 @@ export class HybridTripService {
 
       // 3. Eliminar duplicados y ordenar por score
       const uniqueResults = this.removeDuplicates(results)
-      const sortedResults = uniqueResults.sort((a, b) => b.score - a.score)
+      
+      // 4. Añadir información de reservas y filtrar viajes completamente ocupados
+      const resultsWithBookings = await this.addBookingInfo(uniqueResults)
+      const availableResults = resultsWithBookings.filter(result => !result.bookingInfo?.is_fully_booked)
+      
+      const sortedResults = availableResults.sort((a, b) => b.score - a.score)
 
-      console.log(`✅ HybridTripService - Encontrados ${sortedResults.length} viajes únicos`)
+      console.log(`✅ HybridTripService - Encontrados ${sortedResults.length} viajes únicos con asientos disponibles`)
       return sortedResults.slice(0, limit)
     } catch (error) {
       console.error('❌ Error en HybridTripService.searchTrips:', error)
@@ -289,6 +301,36 @@ export class HybridTripService {
       seen.add(result.trip.id)
       return true
     })
+  }
+
+  /**
+   * Añadir información de reservas a los resultados
+   */
+  private async addBookingInfo(results: SearchResult[]): Promise<SearchResult[]> {
+    try {
+      const tripIds = results.map(result => result.trip.id)
+      
+      // Obtener información de reservas para todos los viajes
+      const tripsWithBookings = await bookingService.getTripsWithBookingInfo()
+      const bookingMap = new Map(tripsWithBookings.map(trip => [trip.id, trip]))
+      
+      // Añadir información de reservas a cada resultado
+      return results.map(result => {
+        const bookingInfo = bookingMap.get(result.trip.id)
+        return {
+          ...result,
+          bookingInfo: bookingInfo ? {
+            total_seats: bookingInfo.total_seats,
+            confirmed_bookings: bookingInfo.confirmed_bookings,
+            remaining_seats: bookingInfo.remaining_seats,
+            is_fully_booked: bookingInfo.is_fully_booked
+          } : undefined
+        }
+      })
+    } catch (error) {
+      console.error('❌ Error añadiendo información de reservas:', error)
+      return results
+    }
   }
 
   /**
