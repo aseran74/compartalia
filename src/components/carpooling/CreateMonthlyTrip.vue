@@ -667,59 +667,57 @@ function buscarOrigen() {
     return
   }
 
-  // Intentar usar Google Places API primero
-  if (window.google && window.google.maps && window.google.maps.places) {
-    console.log('🌐 Usando Google Places API...')
-    const autocompleteService = new window.google.maps.places.AutocompleteService()
-    const sessionToken = new window.google.maps.places.AutocompleteSessionToken()
-    
-    console.log('🔍 Buscando con:', tripForm.origin_name)
-    
-    autocompleteService.getPlacePredictions({
-      input: tripForm.origin_name,
-      sessionToken: sessionToken
-      // Simplificado para evitar problemas de restricciones
-    }, (predictions: any, status: any) => {
-      console.log('📊 Respuesta Google Places:', { status, predictions: predictions?.length || 0 })
-      
-      if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-        const suggestions = predictions.map((prediction: any) => ({
-          name: prediction.description,
-          address: prediction.description,
-          place_id: prediction.place_id,
-          lat: 0, // Se llenará cuando se seleccione
-          lng: 0  // Se llenará cuando se seleccione
-        }))
-        
-        originSuggestions.value = suggestions
-        console.log('✅ Sugerencias de Google Places:', suggestions)
-        // // addLog(`📍 Origen: ${suggestions.length} sugerencias encontradas (Google Places)`)
-      } else {
-        console.log('❌ Error Google Places:', status)
-        console.log('🔄 Usando fallback local...')
-        // Fallback a datos locales
-        buscarOrigenLocal()
-      }
-    })
-  } else {
-    console.log('⚠️ Google Places no disponible, usando datos locales')
-    // Fallback a datos locales
-    buscarOrigenLocal()
-  }
+  // Usar fallback local directamente (más confiable)
+  console.log('🔄 Usando datos locales para origen...')
+  buscarOrigenLocal()
 }
 
 function buscarOrigenLocal() {
   const localSuggestions = [
+    // Ciudades del sur de Madrid
     { name: 'Móstoles, Madrid', address: 'Comunidad de Madrid, España', place_id: 'mostoles', lat: 40.3222, lng: -3.8647 },
-    { name: 'Alcalá de Henares, Madrid', address: 'Comunidad de Madrid, España', place_id: 'alcala', lat: 40.4817, lng: -3.3643 },
+    { name: 'Alcorcón, Madrid', address: 'Comunidad de Madrid, España', place_id: 'alcorcon', lat: 40.3478, lng: -3.8244 },
     { name: 'Fuenlabrada, Madrid', address: 'Comunidad de Madrid, España', place_id: 'fuenlabrada', lat: 40.2842, lng: -3.7942 },
     { name: 'Leganés, Madrid', address: 'Comunidad de Madrid, España', place_id: 'leganes', lat: 40.3277, lng: -3.7656 },
     { name: 'Getafe, Madrid', address: 'Comunidad de Madrid, España', place_id: 'getafe', lat: 40.3071, lng: -3.7332 },
-    { name: 'Alcorcón, Madrid', address: 'Comunidad de Madrid, España', place_id: 'alcorcon', lat: 40.3478, lng: -3.8244 },
-    { name: 'Torrejón de Ardoz, Madrid', address: 'Comunidad de Madrid, España', place_id: 'torrejon', lat: 40.4594, lng: -3.4697 },
     { name: 'Parla, Madrid', address: 'Comunidad de Madrid, España', place_id: 'parla', lat: 40.2361, lng: -3.7675 },
+    { name: 'Valdemoro, Madrid', address: 'Comunidad de Madrid, España', place_id: 'valdemoro', lat: 40.1908, lng: -3.6781 },
+    { name: 'Aranjuez, Madrid', address: 'Comunidad de Madrid, España', place_id: 'aranjuez', lat: 40.0311, lng: -3.6025 },
+    { name: 'Navalcarnero, Madrid', address: 'Comunidad de Madrid, España', place_id: 'navalcarnero', lat: 40.2881, lng: -4.0139 },
+    
+    // Ciudades del norte de Madrid
     { name: 'Alcobendas, Madrid', address: 'Comunidad de Madrid, España', place_id: 'alcobendas', lat: 40.5474, lng: -3.6420 },
-    { name: 'Las Rozas de Madrid, Madrid', address: 'Comunidad de Madrid, España', place_id: 'lasrozas', lat: 40.4929, lng: -3.8739 }
+    { name: 'San Sebastián de los Reyes, Madrid', address: 'Comunidad de Madrid, España', place_id: 'ssreyes', lat: 40.5447, lng: -3.6264 },
+    { name: 'Las Rozas de Madrid, Madrid', address: 'Comunidad de Madrid, España', place_id: 'lasrozas', lat: 40.4929, lng: -3.8739 },
+    { name: 'Pozuelo de Alarcón, Madrid', address: 'Comunidad de Madrid, España', place_id: 'pozuelo', lat: 40.4325, lng: -3.8136 },
+    { name: 'Boadilla del Monte, Madrid', address: 'Comunidad de Madrid, España', place_id: 'boadilla', lat: 40.4056, lng: -3.8769 },
+    { name: 'Majadahonda, Madrid', address: 'Comunidad de Madrid, España', place_id: 'majadahonda', lat: 40.4731, lng: -3.8719 },
+    { name: 'Villaviciosa de Odón, Madrid', address: 'Comunidad de Madrid, España', place_id: 'villaviciosa', lat: 40.3556, lng: -3.9008 },
+    { name: 'Torrelodones, Madrid', address: 'Comunidad de Madrid, España', place_id: 'torrelodones', lat: 40.5764, lng: -3.9269 },
+    { name: 'Collado Villalba, Madrid', address: 'Comunidad de Madrid, España', place_id: 'colladovillalba', lat: 40.6431, lng: -3.9908 },
+    
+    // Ciudades del este de Madrid
+    { name: 'Alcalá de Henares, Madrid', address: 'Comunidad de Madrid, España', place_id: 'alcala', lat: 40.4817, lng: -3.3643 },
+    { name: 'Torrejón de Ardoz, Madrid', address: 'Comunidad de Madrid, España', place_id: 'torrejon', lat: 40.4594, lng: -3.4697 },
+    { name: 'Arganda del Rey, Madrid', address: 'Comunidad de Madrid, España', place_id: 'arganda', lat: 40.3008, lng: -3.4375 },
+    { name: 'Rivas-Vaciamadrid, Madrid', address: 'Comunidad de Madrid, España', place_id: 'rivas', lat: 40.3319, lng: -3.5208 },
+    
+    // Madrid Centro y zonas importantes
+    { name: 'Madrid Centro', address: 'Madrid, España', place_id: 'madridcentro', lat: 40.4168, lng: -3.7038 },
+    { name: 'Chamartín, Madrid', address: 'Madrid, España', place_id: 'chamartin', lat: 40.4740, lng: -3.6827 },
+    { name: 'Atocha, Madrid', address: 'Madrid, España', place_id: 'atocha', lat: 40.4078, lng: -3.6893 },
+    { name: 'AZCA, Madrid', address: 'Madrid, España', place_id: 'azca', lat: 40.4500, lng: -3.6900 },
+    { name: 'Cuatro Torres, Madrid', address: 'Madrid, España', place_id: 'cuatrotorres', lat: 40.4500, lng: -3.6900 },
+    { name: 'Universidad Complutense, Madrid', address: 'Madrid, España', place_id: 'complutense', lat: 40.4495, lng: -3.7292 },
+    { name: 'Universidad Politécnica, Madrid', address: 'Madrid, España', place_id: 'upm', lat: 40.4500, lng: -3.7300 },
+    { name: 'Hospital La Paz, Madrid', address: 'Madrid, España', place_id: 'hospitalpaz', lat: 40.4790, lng: -3.6900 },
+    { name: 'Hospital Ramón y Cajal, Madrid', address: 'Madrid, España', place_id: 'hospitalryc', lat: 40.4500, lng: -3.6800 },
+    
+    // Otras ciudades importantes
+    { name: 'Toledo', address: 'Castilla-La Mancha, España', place_id: 'toledo', lat: 39.8628, lng: -4.0273 },
+    { name: 'Segovia', address: 'Castilla y León, España', place_id: 'segovia', lat: 40.9494, lng: -4.1192 },
+    { name: 'Ávila', address: 'Castilla y León, España', place_id: 'avila', lat: 40.6561, lng: -4.6817 },
+    { name: 'Guadalajara', address: 'Castilla-La Mancha, España', place_id: 'guadalajara', lat: 40.6289, lng: -3.1667 }
   ]
 
   const filteredSuggestions = localSuggestions.filter(suggestion => 
@@ -741,45 +739,9 @@ function buscarDestino() {
     return
   }
 
-  // Intentar usar Google Places API primero
-  if (window.google && window.google.maps && window.google.maps.places) {
-    console.log('🌐 Usando Google Places API para destino...')
-    const autocompleteService = new window.google.maps.places.AutocompleteService()
-    const sessionToken = new window.google.maps.places.AutocompleteSessionToken()
-    
-    console.log('🔍 Buscando destino con:', tripForm.destination_name)
-    
-    autocompleteService.getPlacePredictions({
-      input: tripForm.destination_name,
-      sessionToken: sessionToken
-      // Simplificado para evitar problemas de restricciones
-    }, (predictions: any, status: any) => {
-      console.log('📊 Respuesta Google Places destino:', { status, predictions: predictions?.length || 0 })
-      
-      if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-        const suggestions = predictions.map((prediction: any) => ({
-          name: prediction.description,
-          address: prediction.description,
-          place_id: prediction.place_id,
-          lat: 0, // Se llenará cuando se seleccione
-          lng: 0  // Se llenará cuando se seleccione
-        }))
-        
-        destinationSuggestions.value = suggestions
-        console.log('✅ Sugerencias de Google Places destino:', suggestions)
-        // // addLog(`🎯 Destino: ${suggestions.length} sugerencias encontradas (Google Places)`)
-      } else {
-        console.log('❌ Error Google Places destino:', status)
-        console.log('🔄 Usando fallback local para destino...')
-        // Fallback a datos locales
-        buscarDestinoLocal()
-      }
-    })
-  } else {
-    console.log('⚠️ Google Places no disponible para destino, usando datos locales')
-    // Fallback a datos locales
-    buscarDestinoLocal()
-  }
+  // Usar fallback local directamente (más confiable)
+  console.log('🔄 Usando datos locales para destino...')
+  buscarDestinoLocal()
 }
 
 function buscarDestinoLocal() {
