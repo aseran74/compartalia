@@ -609,7 +609,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { HybridTripService, type SearchResult } from '@/services/hybridTripService'
+import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridService'
 import { supabase } from '@/config/supabase'
 import type { User } from '@supabase/supabase-js'
 import DatePicker from '@/components/DatePicker.vue'
@@ -674,7 +674,7 @@ const isLoadingDestination = ref(false)
 const today = new Date().toISOString().split('T')[0]
 
 // Servicio de búsqueda híbrida
-const hybridService = new HybridTripService()
+const hybridService = new SimpleHybridService()
 
 // Servicios de autocompletado
 const autocompleteService = new SimpleAutocompleteService()
