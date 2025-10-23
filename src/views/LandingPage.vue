@@ -158,7 +158,10 @@
                 src="/images/Escenacoche.png" 
                 alt="Escena de coche" 
                 class="scroll-image scene-2" 
-                :style="{ transform: `scale(1.1) translateX(${carPosition}px) translateY(50px)` }"
+                :style="{ 
+                  transform: `scale(1.1) translateX(${carPosition}px) translateY(50px)`,
+                  willChange: 'transform'
+                }"
               />
             </div>
           </div>
@@ -532,13 +535,17 @@ const carPosition = ref(0);
 function handleScroll() {
   isScrolled.value = window.scrollY > 50;
   
-  // Efecto de movimiento del coche según el scroll
+  // Efecto de movimiento del coche según el scroll (reducido para móvil)
   const scrollY = window.scrollY;
   const maxScroll = window.innerHeight;
   const scrollPercentage = Math.min(scrollY / maxScroll, 1);
   
-  // Mapear el scroll a posición horizontal del coche (-100px a 100px)
-  carPosition.value = (scrollPercentage - 0.5) * 200;
+  // Reducir movimiento en móvil
+  const isMobile = window.innerWidth < 768;
+  const maxMovement = isMobile ? 50 : 200; // Menos movimiento en móvil
+  
+  // Mapear el scroll a posición horizontal del coche
+  carPosition.value = (scrollPercentage - 0.5) * maxMovement;
 }
 
 // Funciones para el menú móvil
@@ -759,16 +766,17 @@ const handleGoogleLogin = async () => {
 @media (max-width: 768px) {
   .hero-section {
     min-height: 400px;
+    overflow: hidden; /* Evitar desbordamiento */
   }
   
   .hero-content {
-    padding: 60px 15px;
+    padding: 40px 10px; /* Reducir padding */
     min-height: 400px;
   }
   
   .hero-layout {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 30px; /* Reducir gap */
     text-align: center;
   }
   
@@ -777,21 +785,28 @@ const handleGoogleLogin = async () => {
   }
   
   .hero-text h1 {
-    font-size: 2.5rem;
+    font-size: 2.2rem; /* Reducir tamaño */
+    line-height: 1.2;
   }
   
   .hero-image {
-    height: 300px;
+    height: 250px; /* Reducir altura */
     order: -1;
-    margin-top: 20px;
+    margin-top: 10px; /* Reducir margen */
+    overflow: hidden; /* Evitar desbordamiento */
+  }
+  
+  .scroll-container {
+    overflow: hidden; /* Evitar desbordamiento */
   }
   
   .scene-1 {
-    transform: scale(1);
+    transform: scale(0.9); /* Reducir escala */
   }
   
   .scene-2 {
-    transform: scale(1);
+    transform: scale(0.9) !important; /* Reducir escala y forzar */
+    transition: transform 0.2s ease-out; /* Suavizar transición */
   }
 }
 </style>
