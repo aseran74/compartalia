@@ -160,37 +160,37 @@
       <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
         <h2 class="text-xl font-semibold mb-4">📝 Información del Viaje</h2>
 
-        <form @submit.prevent="searchTrips" class="space-y-4 sm:space-y-6">
+        <form @submit.prevent="searchTrips" class="space-y-3 sm:space-y-4">
           <!-- Origen Específico -->
           <div class="form-group">
             <label class="block text-sm font-medium text-gray-700 mb-2">📍 Origen</label>
             
             <!-- Selector de tipo de origen -->
-            <div class="mb-3">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div class="mb-2">
+              <div class="grid grid-cols-2 gap-1">
                 <button
                   @click="originType = 'predefined'"
                   type="button"
                   :class="[
-                    'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
+                    'px-2 py-1.5 rounded-lg border-2 transition-colors text-center text-xs',
                     originType === 'predefined' 
                       ? 'bg-green-50 border-green-300 text-green-700' 
                       : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
                   ]"
                 >
-                  🏙️ Ciudad Extrarradio
+                  🏙️ Ciudad
                 </button>
                 <button
                   @click="originType = 'specific'"
                   type="button"
                   :class="[
-                    'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
+                    'px-2 py-1.5 rounded-lg border-2 transition-colors text-center text-xs',
                     originType === 'specific' 
                       ? 'bg-blue-50 border-blue-300 text-blue-700' 
                       : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
                   ]"
                 >
-                  📍 Dirección Específica
+                  📍 Dirección
                 </button>
               </div>
             </div>
@@ -254,31 +254,31 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">🎯 Destino</label>
               
               <!-- Selector de tipo de destino -->
-              <div class="mb-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div class="mb-2">
+                <div class="grid grid-cols-2 gap-1">
                   <button
                     @click="destinationType = 'predefined'"
                     type="button"
                     :class="[
-                      'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
+                      'px-2 py-1.5 rounded-lg border-2 transition-colors text-center text-xs',
                       destinationType === 'predefined' 
                         ? 'bg-green-50 border-green-300 text-green-700' 
                         : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
                     ]"
                   >
-                    🏢 Destinos Madrid
+                    🏢 Destino
                   </button>
                   <button
                     @click="destinationType = 'specific'"
                     type="button"
                     :class="[
-                      'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
+                      'px-2 py-1.5 rounded-lg border-2 transition-colors text-center text-xs',
                       destinationType === 'specific' 
                         ? 'bg-blue-50 border-blue-300 text-blue-700' 
                         : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
                     ]"
                   >
-                    📍 Dirección Específica
+                    📍 Dirección
                   </button>
                 </div>
               </div>
@@ -340,9 +340,9 @@
           </div>
 
           <!-- Fecha y Hora -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 mb-2">📅 Fecha</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">📅 Fecha</label>
               <DatePicker
                 v-model="searchForm.date"
                 :min-date="today"
@@ -351,11 +351,11 @@
             </div>
             
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 mb-2">🕐 Hora</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">🕐 Hora</label>
               <input
                 v-model="searchForm.time"
                 type="time"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -365,7 +365,7 @@
             <button
               type="submit"
               :disabled="isSearching"
-              class="bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-medium transition-colors"
+              class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
             >
               <span v-if="isSearching">🔍 Buscando...</span>
               <span v-else>🚗 Buscar Viajes</span>
