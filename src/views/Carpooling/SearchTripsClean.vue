@@ -261,80 +261,102 @@
                 <div
                   v-for="result in searchResults"
                   :key="result.trip.id"
-                  class="rounded-lg border border-stroke bg-white p-4 hover:shadow-lg transition-all duration-200 dark:border-strokedark dark:bg-boxdark"
+                  class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:border-green-300 dark:border-strokedark dark:bg-boxdark"
                 >
-                  <!-- Header con precio y tipo -->
-                  <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center space-x-2">
-                      <span class="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                        {{ result.trip.trip_type || 'Diario' }}
-                      </span>
-                      <span class="text-xs text-body-color">{{ result.trip.available_seats }} asientos</span>
-                    </div>
-                    <div class="text-right">
-                      <div class="text-lg font-bold text-black dark:text-white">{{ result.trip.price_per_seat }}€</div>
-                      <div class="text-xs text-body-color">por asiento</div>
-                    </div>
-                  </div>
-                  
-                  <!-- Ruta -->
-                  <div class="space-y-2 mb-3">
-                    <div class="flex items-center text-sm">
-                      <div class="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-                        <svg class="h-3 w-3 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
+                  <!-- Header con conductor y precio -->
+                  <div class="flex items-start justify-between mb-4">
+                    <!-- Información del conductor -->
+                    <div class="flex items-center space-x-3">
+                      <div class="relative">
+                        <img 
+                          :src="(result.trip as any).driver_avatar || '/images/user/default-avatar.jpg'" 
+                          :alt="(result.trip as any).driver_name || 'Conductor'"
+                          class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-green-200"
+                          @error="(event: any) => event.target.src = '/images/user/default-avatar.jpg'"
+                        />
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                       </div>
-                      <div class="ml-3 flex-1">
-                        <div class="font-medium text-black dark:text-white">{{ result.trip.origin_name }}</div>
-                        <div class="text-xs text-body-color">Origen</div>
+                      <div class="flex-1 min-w-0">
+                        <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
+                          {{ (result.trip as any).driver_name || 'Conductor' }}
+                        </h4>
+                        <div class="flex items-center space-x-1 text-xs text-gray-500 dark:text-body-color">
+                          <span>⭐</span>
+                          <span>{{ (result.trip as any).driver_rating || '4.8' }}</span>
+                          <span>•</span>
+                          <span>{{ (result.trip as any).trips_completed || '50+' }} viajes</span>
+                        </div>
                       </div>
                     </div>
                     
-                    <div class="ml-3 border-l-2 border-dashed border-stroke dark:border-strokedark pl-3">
-                      <div class="flex items-center text-sm">
-                        <div class="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
-                          <svg class="h-3 w-3 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                          </svg>
-                        </div>
-                        <div class="ml-3 flex-1">
-                          <div class="font-medium text-black dark:text-white">{{ result.trip.destination_name }}</div>
-                          <div class="text-xs text-body-color">Destino</div>
-                        </div>
+                    <!-- Precio y tipo de viaje -->
+                    <div class="text-right">
+                      <div class="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
+                        {{ result.trip.price_per_seat }}€
+                      </div>
+                      <div class="text-xs text-gray-500 dark:text-body-color mb-2">por asiento</div>
+                      <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+                        :class="getTripTypeClass(result.trip)">
+                        {{ getTripTypeLabel(result.trip) }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Ruta -->
+                  <div class="mb-4">
+                    <div class="flex items-center space-x-2 mb-2">
+                      <div class="flex-shrink-0 w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span class="font-medium text-gray-900 dark:text-white text-sm sm:text-base">{{ result.trip.origin_name }}</span>
+                    </div>
+                    <div class="flex items-center space-x-2 ml-1.5">
+                      <div class="w-px h-4 bg-gray-300 ml-1"></div>
+                      <div class="flex-1 h-px bg-gray-300"></div>
+                      <span class="text-gray-400 text-xs">→</span>
+                      <div class="flex-1 h-px bg-gray-300"></div>
+                    </div>
+                    <div class="flex items-center space-x-2 mt-2">
+                      <div class="flex-shrink-0 w-3 h-3 bg-red-500 rounded-full"></div>
+                      <span class="font-medium text-gray-900 dark:text-white text-sm sm:text-base">{{ result.trip.destination_name }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Información del viaje -->
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                    <div class="text-center sm:text-left">
+                      <div class="text-xs text-gray-500 dark:text-body-color mb-1">🕐 Salida</div>
+                      <div class="font-medium text-sm">{{ result.trip.departure_time }}</div>
+                    </div>
+                    <div class="text-center sm:text-left">
+                      <div class="text-xs text-gray-500 dark:text-body-color mb-1">🪑 Asientos</div>
+                      <div class="font-medium text-sm">{{ result.trip.available_seats }}</div>
+                    </div>
+                    <div class="text-center sm:text-left">
+                      <div class="text-xs text-gray-500 dark:text-body-color mb-1">📏 Distancia</div>
+                      <div class="font-medium text-sm">
+                        <span v-if="result.distance">{{ result.distance.toFixed(1) }} km</span>
+                        <span v-else>N/A</span>
+                      </div>
+                    </div>
+                    <div class="text-center sm:text-left">
+                      <div class="text-xs text-gray-500 dark:text-body-color mb-1">Tipo</div>
+                      <div class="font-medium text-sm">
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                          {{ getTripTypeLabel(result.trip) }}
+                        </span>
                       </div>
                     </div>
                   </div>
-                  
-                  <!-- Información del conductor -->
-                  <div class="mb-3 flex items-center space-x-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                      <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                      </svg>
-                    </div>
-                    <div class="flex-1">
-                      <div class="text-sm font-medium text-black dark:text-white">Conductor</div>
-                      <div class="text-xs text-body-color">ID: {{ result.trip.driver_id }}</div>
+
+                  <!-- Información adicional -->
+                  <div class="mb-4 flex items-center justify-between text-sm">
+                    <div class="flex items-center space-x-2">
+                      <span class="text-body-color">{{ result.matchType === 'exact_text' ? 'Coincidencia exacta' : 'Cerca de tu búsqueda' }}</span>
                     </div>
                     <div class="flex items-center space-x-1 text-xs text-green-600 dark:text-green-400">
                       <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                       </svg>
                       <span>Verificado</span>
-                    </div>
-                  </div>
-                  
-                  <!-- Fecha y hora -->
-                  <div class="mb-3 flex items-center justify-between text-sm">
-                    <div class="flex items-center space-x-2">
-                      <svg class="h-4 w-4 text-body-color" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                      </svg>
-                      <span class="text-body-color">{{ result.trip.departure_time }}</span>
-                    </div>
-                    <div class="text-xs text-body-color">
-                      {{ result.matchType === 'exact_text' ? 'Coincidencia exacta' : 'Cerca de tu búsqueda' }}
                     </div>
                   </div>
                   
@@ -546,6 +568,43 @@ const searchTrips = async () => {
     searchResults.value = []
   } finally {
     isSearching.value = false
+  }
+}
+
+// Funciones para el tipo de viaje
+const getTripTypeLabel = (trip: any) => {
+  const tripType = trip.trip_type || trip.trip_frequency || 'diario'
+  
+  switch (tripType.toLowerCase()) {
+    case 'daily':
+    case 'diario':
+      return 'Diario'
+    case 'weekly':
+    case 'semanal':
+      return 'Semanal'
+    case 'monthly':
+    case 'mensual':
+      return 'Mensual'
+    default:
+      return 'Diario'
+  }
+}
+
+const getTripTypeClass = (trip: any) => {
+  const tripType = trip.trip_type || trip.trip_frequency || 'diario'
+  
+  switch (tripType.toLowerCase()) {
+    case 'daily':
+    case 'diario':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+    case 'weekly':
+    case 'semanal':
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+    case 'monthly':
+    case 'mensual':
+      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+    default:
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
   }
 }
 </script>
