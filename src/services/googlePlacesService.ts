@@ -37,13 +37,13 @@ export class GooglePlacesService {
         }
       };
 
-      // Esperar hasta 10 segundos
+      // Esperar hasta 5 segundos
       setTimeout(() => {
         if (!window.google || !window.google.maps || !window.google.maps.places) {
-          console.error('❌ Google Maps no se cargó en 10 segundos');
-          reject(new Error('Google Maps no se cargó'));
+          console.log('⚠️ Google Maps no disponible, usando fallback local');
+          resolve(); // Resolver en lugar de rechazar para usar fallback
         }
-      }, 10000);
+      }, 5000);
 
       checkGoogleMaps();
     });
