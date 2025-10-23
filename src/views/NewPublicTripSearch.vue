@@ -571,7 +571,18 @@ let googlePlacesService: GooglePlacesService | null = null
 const initGooglePlacesService = async () => {
   try {
     console.log('🔄 Inicializando Google Places Service...')
+    console.log('🔍 Verificando Google Maps API:', {
+      google: !!window.google,
+      maps: !!window.google?.maps,
+      places: !!window.google?.maps?.places,
+      autocompleteService: !!window.google?.maps?.places?.AutocompleteService
+    })
+    
     googlePlacesService = new GooglePlacesService()
+    
+    // Esperar a que el servicio se inicialice completamente
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
     console.log('✅ Google Places Service inicializado')
   } catch (error) {
     console.error('❌ Error inicializando Google Places Service:', error)
@@ -886,29 +897,40 @@ const handleSpecificOriginInput = async () => {
       await initGooglePlacesService()
       
       if (!googlePlacesService) {
-        console.error('❌ No se pudo inicializar Google Places Service')
-        originSuggestionsSpecific.value = []
+        console.error('❌ No se pudo inicializar Google Places Service, usando fallback local')
+        originSuggestionsSpecific.value = getLocalSuggestions(specificOrigin.value, 'origin')
         return
       }
     }
 
     isLoadingOriginSpecific.value = true
     console.log('📡 Llamando a Google Places API...')
-    const suggestions = await googlePlacesService.autocompleteAddress(specificOrigin.value)
-    console.log('✅ Sugerencias recibidas:', suggestions)
     
-    originSuggestionsSpecific.value = suggestions.map(suggestion => ({
-      main_text: suggestion.name,
-      secondary_text: suggestion.address,
-      place_id: (suggestion as any).place_id,
-      lat: (suggestion as any).lat,
-      lng: (suggestion as any).lng
-    }))
+    try {
+      const suggestions = await googlePlacesService.autocompleteAddress(specificOrigin.value)
+      console.log('✅ Sugerencias recibidas:', suggestions)
+      
+      if (suggestions && suggestions.length > 0) {
+        originSuggestionsSpecific.value = suggestions.map(suggestion => ({
+          main_text: suggestion.name,
+          secondary_text: suggestion.address,
+          place_id: (suggestion as any).place_id,
+          lat: (suggestion as any).lat,
+          lng: (suggestion as any).lng
+        }))
+      } else {
+        console.log('⚠️ No se recibieron sugerencias de Google Places, usando fallback local')
+        originSuggestionsSpecific.value = getLocalSuggestions(specificOrigin.value, 'origin')
+      }
+    } catch (apiError) {
+      console.error('❌ Error con Google Places API, usando fallback local:', apiError)
+      originSuggestionsSpecific.value = getLocalSuggestions(specificOrigin.value, 'origin')
+    }
     
     console.log('📋 Sugerencias procesadas:', originSuggestionsSpecific.value)
   } catch (error) {
     console.error('❌ Error obteniendo sugerencias de origen específico:', error)
-    originSuggestionsSpecific.value = []
+    originSuggestionsSpecific.value = getLocalSuggestions(specificOrigin.value, 'origin')
   } finally {
     isLoadingOriginSpecific.value = false
   }
@@ -929,29 +951,40 @@ const handleSpecificDestinationInput = async () => {
       await initGooglePlacesService()
       
       if (!googlePlacesService) {
-        console.error('❌ No se pudo inicializar Google Places Service')
-        destinationSuggestionsSpecific.value = []
+        console.error('❌ No se pudo inicializar Google Places Service, usando fallback local')
+        destinationSuggestionsSpecific.value = getLocalSuggestions(specificDestination.value, 'destination')
         return
       }
     }
 
     isLoadingDestinationSpecific.value = true
     console.log('📡 Llamando a Google Places API...')
-    const suggestions = await googlePlacesService.autocompleteAddress(specificDestination.value)
-    console.log('✅ Sugerencias recibidas:', suggestions)
     
-    destinationSuggestionsSpecific.value = suggestions.map(suggestion => ({
-      main_text: suggestion.name,
-      secondary_text: suggestion.address,
-      place_id: (suggestion as any).place_id,
-      lat: (suggestion as any).lat,
-      lng: (suggestion as any).lng
-    }))
+    try {
+      const suggestions = await googlePlacesService.autocompleteAddress(specificDestination.value)
+      console.log('✅ Sugerencias recibidas:', suggestions)
+      
+      if (suggestions && suggestions.length > 0) {
+        destinationSuggestionsSpecific.value = suggestions.map(suggestion => ({
+          main_text: suggestion.name,
+          secondary_text: suggestion.address,
+          place_id: (suggestion as any).place_id,
+          lat: (suggestion as any).lat,
+          lng: (suggestion as any).lng
+        }))
+      } else {
+        console.log('⚠️ No se recibieron sugerencias de Google Places, usando fallback local')
+        destinationSuggestionsSpecific.value = getLocalSuggestions(specificDestination.value, 'destination')
+      }
+    } catch (apiError) {
+      console.error('❌ Error con Google Places API, usando fallback local:', apiError)
+      destinationSuggestionsSpecific.value = getLocalSuggestions(specificDestination.value, 'destination')
+    }
     
     console.log('📋 Sugerencias procesadas:', destinationSuggestionsSpecific.value)
   } catch (error) {
     console.error('❌ Error obteniendo sugerencias de destino específico:', error)
-    destinationSuggestionsSpecific.value = []
+    destinationSuggestionsSpecific.value = getLocalSuggestions(specificDestination.value, 'destination')
   } finally {
     isLoadingDestinationSpecific.value = false
   }
