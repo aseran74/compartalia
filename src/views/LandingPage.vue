@@ -1042,7 +1042,7 @@ const handleGoogleLogin = async () => {
   }
   
   .scene-2 {
-    transform: scale(1.1) translateX(0px) translateY(-20px) !important;
+    transform: scale(1.1) translateX(0px) translateY(0px) !important;
   }
 }
 
@@ -1053,7 +1053,7 @@ const handleGoogleLogin = async () => {
   }
   
   .scene-2 {
-    transform: scale(1.1) translateX(0px) translateY(-40px) !important;
+    transform: scale(1.1) translateX(0px) translateY(-10px) !important;
   }
 }
 
