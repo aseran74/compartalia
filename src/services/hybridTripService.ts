@@ -109,15 +109,15 @@ export class HybridTripService {
     try {
       console.log('🔍 HybridTripService.searchByText - Iniciando búsqueda:', { origin, destination, limit })
       
-      let query = supabaseClean
-        .from('trips')
-        .select(`
-          *,
-          profiles:driver_id (
-            name,
-            avatar_url
-          )
-        `)
+        let query = supabaseClean
+          .from('trips')
+          .select(`
+            *,
+            profiles!inner (
+              name,
+              avatar_url
+            )
+          `)
         .eq('status', 'active')
         .limit(limit)
 
