@@ -28,16 +28,16 @@
         </button>
         <!-- Botón de perfil o login -->
         <div class="hidden md:block relative">
-          <button 
+          <router-link 
             v-if="!isAuthenticated"
-            @click="openAuthModal" 
-            class="px-5 py-2.5 rounded-full shadow-md transition duration-150 ease-in-out font-semibold text-base transform hover:scale-105"
+            to="/login"
+            class="px-5 py-2.5 rounded-full shadow-md transition duration-150 ease-in-out font-semibold text-base transform hover:scale-105 inline-block"
             style="background-color: #4CAF50; color: white;"
             onmouseover="this.style.backgroundColor='#2a9235'"
             onmouseout="this.style.backgroundColor='#4CAF50'"
           >
             Acceder
-          </button>
+          </router-link>
           
           <!-- Icono de perfil cuando está autenticado -->
           <div v-else class="relative">
@@ -101,13 +101,14 @@
           <a href="#precios" @click="closeMobileMenu" class="text-gray-700 font-semibold hover:text-green-600 transition duration-150 ease-in-out py-3 px-4 rounded-lg hover:bg-green-50">Precios</a>
           <a href="#contacto" @click="closeMobileMenu" class="text-gray-700 font-semibold hover:text-green-600 transition duration-150 ease-in-out py-3 px-4 rounded-lg hover:bg-green-50">Contacto</a>
           <div class="pt-2">
-            <button 
-              @click="irAlDashboard; closeMobileMenu()" 
-              class="w-full px-5 py-3 rounded-full shadow-md transition duration-150 ease-in-out font-semibold text-base"
+            <router-link 
+              to="/login"
+              @click="closeMobileMenu()" 
+              class="w-full px-5 py-3 rounded-full shadow-md transition duration-150 ease-in-out font-semibold text-base text-center block"
               style="background-color: #4CAF50; color: white;"
             >
               Acceder
-            </button>
+            </router-link>
           </div>
         </nav>
       </div>
