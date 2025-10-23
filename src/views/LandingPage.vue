@@ -159,7 +159,7 @@
                 alt="Escena de coche" 
                 class="scroll-image scene-2" 
                 :style="{ 
-                  transform: `scale(1.05) translateX(${carPosition}px) translateY(${60 + Math.min(scrollY * 0.2, 40)}px)`,
+                  transform: `scale(1.05) translateX(${carPosition}px) translateY(${100 + Math.min(scrollY * 0.2, 40)}px)`,
                   willChange: 'transform'
                 }"
               />
