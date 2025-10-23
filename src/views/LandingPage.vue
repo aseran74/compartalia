@@ -256,8 +256,8 @@
         <!-- Conductor -->
         <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
           <div class="flex items-center mb-6">
-            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mr-4">
-              <span class="text-white text-2xl">🚗</span>
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mr-4 animate-bounce">
+              <span class="text-white text-2xl animate-pulse">🚗</span>
             </div>
             <div>
               <h3 class="text-2xl font-bold text-gray-900">Como Conductor</h3>
