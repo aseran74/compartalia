@@ -280,11 +280,17 @@
                         <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
                           {{ (result.trip as any).driver_name || 'Conductor' }}
                         </h4>
-                        <div class="flex items-center space-x-1 text-xs text-gray-500 dark:text-body-color">
+                        <div class="flex items-center space-x-1 text-xs text-gray-500 dark:text-body-color mb-1">
                           <span>⭐</span>
                           <span>{{ (result.trip as any).driver_rating || '4.8' }}</span>
                           <span>•</span>
                           <span>{{ (result.trip as any).trips_completed || '50+' }} viajes</span>
+                        </div>
+                        <div class="flex items-center space-x-1 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                          </svg>
+                          <span>{{ formatSearchDate(searchForm.date) }}</span>
                         </div>
                       </div>
                     </div>
@@ -621,6 +627,23 @@ const formatDateTime = (dateTime: string) => {
   } catch (error) {
     console.error('Error formateando fecha:', error)
     return dateTime
+  }
+}
+
+// Función para formatear la fecha de búsqueda
+const formatSearchDate = (dateString: string) => {
+  if (!dateString) return 'Hoy'
+  
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
+    })
+  } catch (error) {
+    console.error('Error formateando fecha de búsqueda:', error)
+    return dateString
   }
 }
 

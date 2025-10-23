@@ -2,6 +2,7 @@
 import { supabaseClean } from '@/config/supabaseClean'
 import { GeolocationService } from './geolocation'
 import { bookingService, type TripWithBookings } from './bookingService'
+import CoordinatedTripService, { type CoordinatedTripResult } from './coordinatedTripService'
 
 export interface Trip {
   id: string
