@@ -120,8 +120,8 @@
           <!-- Como Conductor -->
           <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div class="text-center mb-6">
-              <div class="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4 shadow-lg">
-                <span class="text-3xl">🚗</span>
+              <div class="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4 shadow-lg animate-bounce">
+                <span class="text-3xl animate-pulse">🚗</span>
               </div>
               <h3 class="text-2xl font-bold text-gray-900 mb-2">Como Conductor</h3>
               <p class="text-green-700 font-medium">Maximiza tus ingresos y reduce costes</p>
@@ -132,8 +132,8 @@
               <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
                 <div class="flex items-start space-x-4">
                   <div class="flex-shrink-0">
-                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <span class="text-2xl">📅</span>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
+                      <span class="text-2xl animate-spin">📅</span>
                     </div>
                   </div>
                   <div class="flex-1">
@@ -149,8 +149,8 @@
               <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
                 <div class="flex items-start space-x-4">
                   <div class="flex-shrink-0">
-                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <span class="text-2xl">🗓️</span>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
+                      <span class="text-2xl animate-bounce">🗓️</span>
                     </div>
                   </div>
                   <div class="flex-1">
@@ -165,8 +165,8 @@
               <!-- Beneficio -->
               <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
                 <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                    <span class="text-xl">💰</span>
+                  <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center hover:scale-125 transition-transform duration-300">
+                    <span class="text-xl animate-pulse">💰</span>
                   </div>
                   <div>
                     <p class="font-semibold text-lg">Beneficio</p>
@@ -180,8 +180,8 @@
           <!-- Como Pasajero -->
           <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div class="text-center mb-6">
-              <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-500 rounded-full mb-4 shadow-lg">
-                <span class="text-3xl">👥</span>
+              <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-500 rounded-full mb-4 shadow-lg animate-bounce">
+                <span class="text-3xl animate-pulse">👥</span>
               </div>
               <h3 class="text-2xl font-bold text-gray-900 mb-2">Como Pasajero</h3>
               <p class="text-blue-700 font-medium">Ahorra dinero y tiempo en tus desplazamientos</p>
@@ -192,8 +192,8 @@
               <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
                 <div class="flex items-start space-x-4">
                   <div class="flex-shrink-0">
-                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <span class="text-2xl">📅</span>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
+                      <span class="text-2xl animate-spin">📅</span>
                     </div>
                   </div>
                   <div class="flex-1">
@@ -209,8 +209,8 @@
               <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
                 <div class="flex items-start space-x-4">
                   <div class="flex-shrink-0">
-                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <span class="text-2xl">🗓️</span>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
+                      <span class="text-2xl animate-bounce">🗓️</span>
                     </div>
                   </div>
                   <div class="flex-1">
@@ -225,8 +225,8 @@
               <!-- Beneficio -->
               <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
                 <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                    <span class="text-xl">💡</span>
+                  <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center hover:scale-125 transition-transform duration-300">
+                    <span class="text-xl animate-pulse">💡</span>
                   </div>
                   <div>
                     <p class="font-semibold text-lg">Beneficio</p>
