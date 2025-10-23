@@ -159,7 +159,7 @@
                 alt="Escena de coche" 
                 class="scroll-image scene-2" 
                 :style="{ 
-                  transform: `scale(1.05) translateX(${carPosition}px) translateY(${60 + Math.min(window.scrollY * 0.2, 40)}px)`,
+                  transform: `scale(1.05) translateX(${carPosition}px) translateY(${60 + Math.min(scrollY * 0.2, 40)}px)`,
                   willChange: 'transform'
                 }"
               />
@@ -530,15 +530,19 @@ const showAuthModal = ref(false);
 
 // Variable para el efecto de scroll del coche
 const carPosition = ref(0);
+const scrollY = ref(0);
 
 // Función para manejar el scroll
 function handleScroll() {
-  isScrolled.value = window.scrollY > 50;
+  const currentScrollY = window.scrollY;
+  isScrolled.value = currentScrollY > 50;
+  
+  // Actualizar scrollY reactivo
+  scrollY.value = currentScrollY;
   
   // Efecto de movimiento del coche según el scroll (muy sutil)
-  const scrollY = window.scrollY;
   const maxScroll = window.innerHeight;
-  const scrollPercentage = Math.min(scrollY / maxScroll, 1);
+  const scrollPercentage = Math.min(currentScrollY / maxScroll, 1);
   
   // Movimiento sutil pero visible
   const isMobile = window.innerWidth < 768;
@@ -548,9 +552,9 @@ function handleScroll() {
   carPosition.value = (scrollPercentage - 0.5) * maxMovement;
   
   // Debug logs
-  if (scrollY % 100 < 10) { // Log cada 100px de scroll
+  if (currentScrollY % 100 < 10) { // Log cada 100px de scroll
     console.log('Car effect debug:', {
-      scrollY,
+      scrollY: currentScrollY,
       scrollPercentage: scrollPercentage.toFixed(2),
       carPosition: carPosition.value.toFixed(1),
       maxMovement,
