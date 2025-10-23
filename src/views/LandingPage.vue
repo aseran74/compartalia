@@ -159,7 +159,7 @@
                 alt="Escena de coche" 
                 class="scroll-image scene-2" 
                 :style="{ 
-                  transform: `scale(1.05) translateX(${carPosition}px) translateY(${Math.min(window.scrollY * 0.3, 80)}px)`,
+                  transform: `scale(1.05) translateX(${carPosition}px) translateY(${60 + Math.min(window.scrollY * 0.2, 40)}px)`,
                   willChange: 'transform'
                 }"
               />
@@ -540,12 +540,23 @@ function handleScroll() {
   const maxScroll = window.innerHeight;
   const scrollPercentage = Math.min(scrollY / maxScroll, 1);
   
-  // Movimiento muy sutil
+  // Movimiento sutil pero visible
   const isMobile = window.innerWidth < 768;
-  const maxMovement = isMobile ? 10 : 30; // Movimiento mínimo
+  const maxMovement = isMobile ? 20 : 60; // Movimiento más visible
   
   // Mapear el scroll a posición horizontal del coche (muy poco)
   carPosition.value = (scrollPercentage - 0.5) * maxMovement;
+  
+  // Debug logs
+  if (scrollY % 100 < 10) { // Log cada 100px de scroll
+    console.log('Car effect debug:', {
+      scrollY,
+      scrollPercentage: scrollPercentage.toFixed(2),
+      carPosition: carPosition.value.toFixed(1),
+      maxMovement,
+      isMobile
+    });
+  }
 }
 
 // Funciones para el menú móvil
