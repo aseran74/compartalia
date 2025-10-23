@@ -855,7 +855,8 @@ const searchTrips = async () => {
       destination,
       {
         useGeolocation: true,
-        maxDistanceKm: 10
+        maxDistanceKm: 50,
+        limit: 20
       }
     )
     
