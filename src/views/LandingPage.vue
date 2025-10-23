@@ -159,7 +159,7 @@
                 alt="Escena de coche" 
                 class="scroll-image scene-2" 
                 :style="{ 
-                  transform: `scale(1.1) translateX(${carPosition}px) translateY(50px)`,
+                  transform: `scale(1.05) translateX(${carPosition}px) translateY(${Math.min(window.scrollY * 0.3, 80)}px)`,
                   willChange: 'transform'
                 }"
               />
@@ -535,16 +535,16 @@ const carPosition = ref(0);
 function handleScroll() {
   isScrolled.value = window.scrollY > 50;
   
-  // Efecto de movimiento del coche según el scroll (reducido para móvil)
+  // Efecto de movimiento del coche según el scroll (muy sutil)
   const scrollY = window.scrollY;
   const maxScroll = window.innerHeight;
   const scrollPercentage = Math.min(scrollY / maxScroll, 1);
   
-  // Reducir movimiento en móvil
+  // Movimiento muy sutil
   const isMobile = window.innerWidth < 768;
-  const maxMovement = isMobile ? 50 : 200; // Menos movimiento en móvil
+  const maxMovement = isMobile ? 10 : 30; // Movimiento mínimo
   
-  // Mapear el scroll a posición horizontal del coche
+  // Mapear el scroll a posición horizontal del coche (muy poco)
   carPosition.value = (scrollPercentage - 0.5) * maxMovement;
 }
 
@@ -757,7 +757,7 @@ const handleGoogleLogin = async () => {
   /* Imagen superior con efecto de movimiento */
   transform-origin: center center;
   z-index: 9999;
-  transition: transform 0.1s ease-out;
+  transition: transform 0.3s ease-out;
 }
 
 
