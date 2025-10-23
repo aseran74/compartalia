@@ -677,9 +677,8 @@ function buscarOrigen() {
     
     autocompleteService.getPlacePredictions({
       input: tripForm.origin_name,
-      sessionToken: sessionToken,
-      componentRestrictions: { country: 'es' }, // Limitar a España
-      types: ['geocode', 'establishment'] // Incluir direcciones y establecimientos
+      sessionToken: sessionToken
+      // Simplificado para evitar problemas de restricciones
     }, (predictions: any, status: any) => {
       console.log('📊 Respuesta Google Places:', { status, predictions: predictions?.length || 0 })
       
@@ -752,9 +751,8 @@ function buscarDestino() {
     
     autocompleteService.getPlacePredictions({
       input: tripForm.destination_name,
-      sessionToken: sessionToken,
-      componentRestrictions: { country: 'es' }, // Limitar a España
-      types: ['geocode', 'establishment'] // Incluir direcciones y establecimientos
+      sessionToken: sessionToken
+      // Simplificado para evitar problemas de restricciones
     }, (predictions: any, status: any) => {
       console.log('📊 Respuesta Google Places destino:', { status, predictions: predictions?.length || 0 })
       
