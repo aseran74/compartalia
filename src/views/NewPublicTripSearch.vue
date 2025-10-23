@@ -391,12 +391,12 @@
               <!-- Información del conductor -->
               <div class="flex items-center space-x-3">
                 <div class="relative">
-                  <img 
-                    :src="(result.trip as any).driver_avatar || '/images/user/default-avatar.jpg'" 
-                    :alt="(result.trip as any).driver_name || 'Conductor'"
-                    class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-green-200"
-                    @error="(event: any) => event.target.src = '/images/user/default-avatar.jpg'"
-                  />
+                <img 
+                  :src="(result.trip as any).driver_avatar || '/images/user/user-01.jpg'" 
+                  :alt="(result.trip as any).driver_name || 'Conductor'"
+                  class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-green-200"
+                  @error="(event: any) => event.target.src = '/images/user/user-01.jpg'"
+                />
                   <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                 </div>
                 <div class="flex-1 min-w-0">

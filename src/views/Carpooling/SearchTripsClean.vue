@@ -269,10 +269,10 @@
                     <div class="flex items-center space-x-3">
                       <div class="relative">
                         <img 
-                          :src="(result.trip as any).driver_avatar || '/images/user/default-avatar.jpg'" 
+                          :src="(result.trip as any).driver_avatar || '/images/user/user-01.jpg'" 
                           :alt="(result.trip as any).driver_name || 'Conductor'"
                           class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-green-200"
-                          @error="(event: any) => event.target.src = '/images/user/default-avatar.jpg'"
+                          @error="(event: any) => event.target.src = '/images/user/user-01.jpg'"
                         />
                         <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                       </div>
@@ -324,7 +324,7 @@
                   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                     <div class="text-center sm:text-left">
                       <div class="text-xs text-gray-500 dark:text-body-color mb-1">🕐 Salida</div>
-                      <div class="font-medium text-sm">{{ result.trip.departure_time }}</div>
+                      <div class="font-medium text-sm">{{ formatDateTime(result.trip.departure_time) }}</div>
                     </div>
                     <div class="text-center sm:text-left">
                       <div class="text-xs text-gray-500 dark:text-body-color mb-1">🪑 Asientos</div>
@@ -605,6 +605,23 @@ const getTripTypeLabel = (trip: any) => {
 // Función para ver detalles del viaje
 const viewTripDetails = (tripId: string) => {
   router.push(`/viaje/${tripId}`)
+}
+
+// Función para formatear fecha y hora
+const formatDateTime = (dateTime: string) => {
+  try {
+    const date = new Date(dateTime)
+    return date.toLocaleString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch (error) {
+    console.error('Error formateando fecha:', error)
+    return dateTime
+  }
 }
 
 const getTripTypeClass = (trip: any) => {
