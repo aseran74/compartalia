@@ -117,7 +117,6 @@
       <!-- Search Form -->
       <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
         <h2 class="text-xl font-semibold mb-4">📝 Información del Viaje</h2>
-        
 
         <form @submit.prevent="searchTrips" class="space-y-4 sm:space-y-6">
           <!-- Origen Específico -->
@@ -126,57 +125,57 @@
             
             <!-- Selector de tipo de origen -->
             <div class="mb-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <button
-                    @click="originType = 'predefined'"
-                    type="button"
-                    :class="[
-                      'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
-                      originType === 'predefined' 
-                        ? 'bg-green-50 border-green-300 text-green-700' 
-                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-                    ]"
-                  >
-                    🏙️ Ciudad Extrarradio
-                  </button>
-                  <button
-                    @click="originType = 'specific'"
-                    type="button"
-                    :class="[
-                      'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
-                      originType === 'specific' 
-                        ? 'bg-blue-50 border-blue-300 text-blue-700' 
-                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-                    ]"
-                  >
-                    📍 Dirección Específica
-                  </button>
-                </div>
-              </div>
-
-              <!-- Origen Predefinido -->
-              <div v-if="originType === 'predefined'">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
-                  @click="openOriginModal"
+                  @click="originType = 'predefined'"
                   type="button"
-                  class="w-full px-4 py-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg text-green-700 hover:bg-green-100 hover:border-green-400 transition-colors text-center mb-3"
+                  :class="[
+                    'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
+                    originType === 'predefined' 
+                      ? 'bg-green-50 border-green-300 text-green-700' 
+                      : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                  ]"
                 >
-                  🏙️ Seleccionar ciudad del extrarradio de Madrid
+                  🏙️ Ciudad Extrarradio
                 </button>
-                
-                <AutocompleteInput
-                  v-model="searchForm.origin"
-                  placeholder="Escribe tu ciudad de origen..."
-                  :suggestions="originSuggestions"
-                  :is-loading="isLoadingOrigin"
-                  @input="handleOriginInput"
-                  @select="handleOriginSelect"
-                  input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
+                <button
+                  @click="originType = 'specific'"
+                  type="button"
+                  :class="[
+                    'px-3 py-2 rounded-lg border-2 transition-colors text-center text-sm',
+                    originType === 'specific' 
+                      ? 'bg-blue-50 border-blue-300 text-blue-700' 
+                      : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                  ]"
+                >
+                  📍 Dirección Específica
+                </button>
               </div>
+            </div>
 
-              <!-- Origen Específico -->
-              <div v-if="originType === 'specific'">
+            <!-- Origen Predefinido -->
+            <div v-if="originType === 'predefined'">
+              <button
+                @click="openOriginModal"
+                type="button"
+                class="w-full px-4 py-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg text-green-700 hover:bg-green-100 hover:border-green-400 transition-colors text-center mb-3"
+              >
+                🏙️ Seleccionar ciudad del extrarradio de Madrid
+              </button>
+              
+              <AutocompleteInput
+                v-model="searchForm.origin"
+                placeholder="Escribe tu ciudad de origen..."
+                :suggestions="originSuggestions"
+                :is-loading="isLoadingOrigin"
+                @input="handleOriginInput"
+                @select="handleOriginSelect"
+                input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+
+            <!-- Origen Específico -->
+            <div v-if="originType === 'specific'">
                 <div class="relative">
                   <input
                     v-model="specificOrigin"
