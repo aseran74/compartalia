@@ -139,7 +139,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const { login, loginWithGoogle, isLoading } = useAuth()
+const { login, loginWithGoogle } = useAuth()
 
 const form = reactive({
   email: '',
@@ -147,26 +147,39 @@ const form = reactive({
 })
 
 const errorMessage = ref('')
+const isLoading = ref(false)
 
 const handleLogin = async () => {
+  if (isLoading.value) return // Evitar múltiples llamadas
+  
   errorMessage.value = ''
+  isLoading.value = true
+  
   try {
     await login(form.email, form.password)
     router.push('/dashboard')
   } catch (error: any) {
     console.error('Login error:', error)
     errorMessage.value = error.message || 'Error al iniciar sesión'
+  } finally {
+    isLoading.value = false
   }
 }
 
 const handleGoogleLogin = async () => {
+  if (isLoading.value) return // Evitar múltiples llamadas
+  
   errorMessage.value = ''
+  isLoading.value = true
+  
   try {
     await loginWithGoogle()
     router.push('/dashboard')
   } catch (error: any) {
     console.error('Google login error:', error)
     errorMessage.value = error.message || 'Error al iniciar sesión con Google'
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
