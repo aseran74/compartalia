@@ -132,8 +132,9 @@ export class HybridTripService {
           .gte('departure_time', startOfDay.toISOString())
           .lte('departure_time', endOfDay.toISOString())
       } else {
-        // Si no se proporciona fecha, filtrar por fecha actual o futura
-        query = query.gte('departure_time', new Date().toISOString())
+        // Si no se proporciona fecha, mostrar todos los viajes activos (temporal para debug)
+        console.log('🔍 Sin filtro de fecha - mostrando todos los viajes activos')
+        // query = query.gte('departure_time', new Date().toISOString())
       }
 
       // Aplicar filtros de texto
