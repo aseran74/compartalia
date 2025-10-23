@@ -5,7 +5,9 @@ import {
   signOut, 
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 
@@ -25,6 +27,9 @@ class FirebaseAuthService {
   private authStateCallbacks: Array<(user: User | null, profile: UserProfile | null) => void> = [];
 
   constructor() {
+    // Check for redirect result first
+    this.handleRedirectResult();
+    
     // Listen to auth state changes
     onAuthStateChanged(auth, async (user) => {
       console.log('=== FIREBASE AUTH STATE CHANGE ===');
@@ -75,6 +80,19 @@ class FirebaseAuthService {
       });
       console.log('=== END FIREBASE AUTH STATE CHANGE ===');
     });
+  }
+
+  // Handle redirect result for mobile Google login
+  private async handleRedirectResult() {
+    try {
+      const result = await getRedirectResult(auth);
+      if (result) {
+        console.log('Redirect result received:', result);
+        // The auth state change will handle the rest
+      }
+    } catch (error) {
+      console.error('Error handling redirect result:', error);
+    }
   }
 
   // Subscribe to auth state changes
@@ -138,16 +156,34 @@ class FirebaseAuthService {
         prompt: 'select_account'
       });
       
-      console.log('Attempting Google Sign-In with popup...');
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      // Detectar si es móvil o desktop
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isSmallScreen = window.innerWidth < 768;
       
-      console.log('Firebase Google login successful:', user);
-      console.log('User display name:', user.displayName);
-      console.log('User email:', user.email);
-      console.log('User photo URL:', user.photoURL);
+      console.log('Device detection:', { isMobile, isSmallScreen, userAgent: navigator.userAgent });
       
-      return user;
+      let result;
+      
+      if (isMobile || isSmallScreen) {
+        // En móvil, usar redirect en lugar de popup
+        console.log('Using redirect for mobile device...');
+        await signInWithRedirect(auth, provider);
+        return null; // El redirect manejará el resultado
+      } else {
+        // En desktop, usar popup
+        console.log('Using popup for desktop...');
+        result = await signInWithPopup(auth, provider);
+      }
+      
+      if (result) {
+        const user = result.user;
+        console.log('Firebase Google login successful:', user);
+        console.log('User display name:', user.displayName);
+        console.log('User email:', user.email);
+        console.log('User photo URL:', user.photoURL);
+        return user;
+      }
+      
     } catch (error: any) {
       console.error('Firebase Google login error:', error);
       
@@ -160,6 +196,8 @@ class FirebaseAuthService {
         throw new Error('Dominio no autorizado. Contacta al administrador.');
       } else if (error.code === 'auth/operation-not-allowed') {
         throw new Error('Google Sign-In no está habilitado. Contacta al administrador.');
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        throw new Error('Solicitud de popup cancelada. Por favor, intenta de nuevo.');
       } else {
         throw new Error(error.message || 'Error al iniciar sesión con Google');
       }
