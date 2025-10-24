@@ -50,9 +50,15 @@ export function useSidebarProvider() {
   const toggleSidebar = () => {
     if (isMobile.value) {
       isMobileOpen.value = !isMobileOpen.value
+      // Si se abre la sidebar en móvil, iniciar timer de auto-ocultar
+      if (isMobileOpen.value) {
+        startAutoHideTimer()
+      } else {
+        clearAutoHideTimer()
+      }
     } else {
       isExpanded.value = !isExpanded.value
-      // Si se abre la sidebar, iniciar timer de auto-ocultar
+      // Si se abre la sidebar en desktop, iniciar timer de auto-ocultar
       if (isExpanded.value) {
         startAutoHideTimer()
       } else {
@@ -63,6 +69,12 @@ export function useSidebarProvider() {
 
   const toggleMobileSidebar = () => {
     isMobileOpen.value = !isMobileOpen.value
+    // Si se abre la sidebar en móvil, iniciar timer de auto-ocultar
+    if (isMobileOpen.value) {
+      startAutoHideTimer()
+    } else {
+      clearAutoHideTimer()
+    }
   }
 
   const setIsHovered = (value: boolean) => {
@@ -83,11 +95,15 @@ export function useSidebarProvider() {
       clearTimeout(autoHideTimeout.value)
     }
     
-    // Solo auto-ocultar en desktop y si no está siendo hovered
-    if (!isMobile.value && !isHovered.value) {
+    // Auto-ocultar en desktop y móvil
+    if (!isHovered.value) {
       autoHideTimeout.value = setTimeout(() => {
         if (!isHovered.value) {
-          isExpanded.value = false
+          if (isMobile.value) {
+            isMobileOpen.value = false
+          } else {
+            isExpanded.value = false
+          }
         }
       }, 2000) // 2 segundos
     }
