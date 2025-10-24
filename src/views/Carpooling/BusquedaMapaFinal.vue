@@ -838,12 +838,11 @@ const showTripOnMap = (result: SearchResult) => {
     avoidTolls: false
   }, (result, status) => {
     console.log('Estado de la ruta:', status)
-    console.log('Resultado:', result)
     if (status === 'OK') {
-      console.log('Ruta obtenida exitosamente')
+      console.log('✅ Ruta obtenida exitosamente - Directions API funcionando')
       directionsRenderer.setDirections(result)
     } else {
-      console.warn('Error al obtener ruta:', status)
+      console.warn('❌ Error al obtener ruta:', status)
       // Fallback a línea recta si falla la ruta
       const fallbackPolyline = new window.google.maps.Polyline({
         path: [
@@ -942,12 +941,11 @@ const showResultsOnMap = (results: SearchResult[]) => {
       avoidTolls: false
     }, (result, status) => {
       console.log('Estado de la ruta:', status)
-      console.log('Resultado:', result)
       if (status === 'OK') {
-        console.log('Ruta obtenida exitosamente')
+        console.log('✅ Ruta obtenida exitosamente - Directions API funcionando')
         directionsRenderer.setDirections(result)
       } else {
-        console.warn('Error al obtener ruta:', status)
+        console.warn('❌ Error al obtener ruta:', status)
         // Fallback a línea recta si falla la ruta
         const fallbackPolyline = new window.google.maps.Polyline({
           path: [
