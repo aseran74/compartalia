@@ -16,6 +16,7 @@ interface SidebarContextType {
   handleMouseLeave: () => void
   startAutoHideTimer: () => void
   clearAutoHideTimer: () => void
+  handleMobileNavigation: (item: string) => void
 }
 
 const SidebarSymbol = Symbol()
@@ -83,6 +84,11 @@ export function useSidebarProvider() {
 
   const setActiveItem = (item: string | null) => {
     activeItem.value = item
+    // En móvil, ocultar sidebar automáticamente al seleccionar un item
+    if (isMobile.value && isMobileOpen.value) {
+      clearAutoHideTimer()
+      isMobileOpen.value = false
+    }
   }
 
   const toggleSubmenu = (item: string) => {
@@ -126,6 +132,15 @@ export function useSidebarProvider() {
     startAutoHideTimer()
   }
 
+  const handleMobileNavigation = (item: string) => {
+    setActiveItem(item)
+    // En móvil, siempre cerrar sidebar después de navegar
+    if (isMobile.value) {
+      clearAutoHideTimer()
+      isMobileOpen.value = false
+    }
+  }
+
   const context: SidebarContextType = {
     isExpanded: computed(() => (isMobile.value ? false : isExpanded.value)),
     isMobileOpen,
@@ -141,6 +156,7 @@ export function useSidebarProvider() {
     handleMouseLeave,
     startAutoHideTimer,
     clearAutoHideTimer,
+    handleMobileNavigation,
   }
 
   provide(SidebarSymbol, context)

@@ -96,6 +96,7 @@
                 <router-link
                   v-else-if="item.path"
                   :to="item.path"
+                  @click="handleMobileNavigation(item.name)"
                   :class="[
                     'menu-item group',
                     {
@@ -138,6 +139,7 @@
                       <li v-for="subItem in item.subItems" :key="subItem.name">
                         <router-link
                           :to="subItem.path"
+                          @click="handleMobileNavigation(subItem.name)"
                           :class="[
                             'menu-dropdown-item',
                             {
@@ -229,7 +231,7 @@ import { useSidebar } from "@/composables/useSidebar";
 
 const route = useRoute();
 
-const { isExpanded, isMobileOpen, isHovered, openSubmenu, handleMouseEnter, handleMouseLeave } = useSidebar();
+const { isExpanded, isMobileOpen, isHovered, openSubmenu, handleMouseEnter, handleMouseLeave, handleMobileNavigation } = useSidebar();
 
 const menuGroups = [
   {
