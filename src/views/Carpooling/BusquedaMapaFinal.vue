@@ -827,23 +827,41 @@ const showTripOnMap = async (result: SearchResult) => {
   })
   currentMarkers.push(destinationMarker)
 
-  // Usar línea recta temporalmente hasta que se habiliten las APIs
-  console.log('🛣️ Dibujando línea recta (APIs de rutas no habilitadas)')
-  
-  const polyline = new google.maps.Polyline({
-    path: [
-      { lat: trip.origin_lat, lng: trip.origin_lng },
-      { lat: trip.destination_lat, lng: trip.destination_lng }
-    ],
-    map: map,
-    strokeColor: '#3B82F6',
-    strokeOpacity: 0.8,
-    strokeWeight: 4,
-    geodesic: true
-  })
-  currentPolylines.push(polyline)
-  
-  console.log('✅ Línea recta dibujada')
+  // Usar Routes API (New) ahora que está habilitada
+  try {
+    console.log('🛣️ Calculando ruta con Routes API (New)...')
+    const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
+    const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
+    
+    console.log('📍 Coordenadas:', { originCoords, destinationCoords })
+    
+    const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
+    console.log('✅ Ruta calculada exitosamente:', routeInfo)
+    
+    // Dibujar la ruta en el mapa
+    const routePolyline = routesApiService.drawRouteOnMap(map, originCoords, destinationCoords, routeInfo.polyline)
+    currentPolylines.push(routePolyline)
+    
+    console.log('✅ Ruta real dibujada en el mapa')
+    
+  } catch (error) {
+    console.error('❌ Error calculando ruta con Routes API:', error)
+    console.log('⚠️ Usando fallback a línea recta (Routes API falló)')
+    
+    // Fallback a línea recta
+    const fallbackPolyline = new google.maps.Polyline({
+      path: [
+        { lat: trip.origin_lat, lng: trip.origin_lng },
+        { lat: trip.destination_lat, lng: trip.destination_lng }
+      ],
+      map: map,
+      strokeColor: '#3B82F6',
+      strokeOpacity: 0.8,
+      strokeWeight: 4,
+      geodesic: true
+    })
+    currentPolylines.push(fallbackPolyline)
+  }
 
   // Ajustar la vista para mostrar el viaje
   const bounds = new google.maps.LatLngBounds()
@@ -898,23 +916,41 @@ const showResultsOnMap = async (results: SearchResult[]) => {
     })
     currentMarkers.push(destinationMarker)
 
-    // Usar línea recta temporalmente hasta que se habiliten las APIs
-    console.log('🛣️ Dibujando línea recta (APIs de rutas no habilitadas)')
-    
-    const polyline = new google.maps.Polyline({
-      path: [
-        { lat: trip.origin_lat, lng: trip.origin_lng },
-        { lat: trip.destination_lat, lng: trip.destination_lng }
-      ],
-      map: map,
-      strokeColor: '#3B82F6',
-      strokeOpacity: 0.8,
-      strokeWeight: 4,
-      geodesic: true
-    })
-    currentPolylines.push(polyline)
-    
-    console.log('✅ Línea recta dibujada')
+    // Usar Routes API (New) ahora que está habilitada
+    try {
+      console.log('🛣️ Calculando ruta con Routes API (New)...')
+      const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
+      const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
+      
+      console.log('📍 Coordenadas:', { originCoords, destinationCoords })
+      
+      const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
+      console.log('✅ Ruta calculada exitosamente:', routeInfo)
+      
+      // Dibujar la ruta en el mapa
+      const routePolyline = routesApiService.drawRouteOnMap(map, originCoords, destinationCoords, routeInfo.polyline)
+      currentPolylines.push(routePolyline)
+      
+      console.log('✅ Ruta real dibujada en el mapa')
+      
+    } catch (error) {
+      console.error('❌ Error calculando ruta con Routes API:', error)
+      console.log('⚠️ Usando fallback a línea recta (Routes API falló)')
+      
+      // Fallback a línea recta
+      const fallbackPolyline = new google.maps.Polyline({
+        path: [
+          { lat: trip.origin_lat, lng: trip.origin_lng },
+          { lat: trip.destination_lat, lng: trip.destination_lng }
+        ],
+        map: map,
+        strokeColor: '#3B82F6',
+        strokeOpacity: 0.8,
+        strokeWeight: 4,
+        geodesic: true
+      })
+      currentPolylines.push(fallbackPolyline)
+    }
   }
 
   // Ajustar la vista para mostrar todos los marcadores
