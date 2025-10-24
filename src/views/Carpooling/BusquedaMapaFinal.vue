@@ -822,12 +822,18 @@ const showTripOnMap = (result: SearchResult) => {
   directionsRenderer.setMap(map)
   currentPolylines.push(directionsRenderer)
 
+  console.log('Solicitando ruta de:', trip.origin_name, 'a', trip.destination_name)
+
   directionsService.route({
     origin: { lat: trip.origin_lat, lng: trip.origin_lng },
     destination: { lat: trip.destination_lat, lng: trip.destination_lng },
-    travelMode: window.google.maps.TravelMode.DRIVING
+    travelMode: window.google.maps.TravelMode.DRIVING,
+    avoidHighways: false,
+    avoidTolls: false
   }, (result, status) => {
+    console.log('Estado de la ruta:', status)
     if (status === 'OK') {
+      console.log('Ruta obtenida exitosamente')
       directionsRenderer.setDirections(result)
     } else {
       console.warn('Error al obtener ruta:', status)
@@ -838,7 +844,7 @@ const showTripOnMap = (result: SearchResult) => {
           { lat: trip.destination_lat, lng: trip.destination_lng }
         ],
         map: map,
-        strokeColor: '#3B82F6',
+        strokeColor: '#FF0000', // Rojo para distinguir del fallback
         strokeOpacity: 0.8,
         strokeWeight: 3
       })
@@ -913,12 +919,18 @@ const showResultsOnMap = (results: SearchResult[]) => {
     directionsRenderer.setMap(map)
     currentPolylines.push(directionsRenderer)
 
+    console.log('Solicitando ruta de:', trip.origin_name, 'a', trip.destination_name)
+
     directionsService.route({
       origin: { lat: trip.origin_lat, lng: trip.origin_lng },
       destination: { lat: trip.destination_lat, lng: trip.destination_lng },
-      travelMode: window.google.maps.TravelMode.DRIVING
+      travelMode: window.google.maps.TravelMode.DRIVING,
+      avoidHighways: false,
+      avoidTolls: false
     }, (result, status) => {
+      console.log('Estado de la ruta:', status)
       if (status === 'OK') {
+        console.log('Ruta obtenida exitosamente')
         directionsRenderer.setDirections(result)
       } else {
         console.warn('Error al obtener ruta:', status)
@@ -929,7 +941,7 @@ const showResultsOnMap = (results: SearchResult[]) => {
             { lat: trip.destination_lat, lng: trip.destination_lng }
           ],
           map: map,
-          strokeColor: '#3B82F6',
+          strokeColor: '#FF0000', // Rojo para distinguir del fallback
           strokeOpacity: 0.8,
           strokeWeight: 3
         })
