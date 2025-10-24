@@ -517,7 +517,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { HybridTripService, type SearchResult } from '@/services/hybridTripService'
 import AutocompleteInput from '@/components/AutocompleteInput.vue'
@@ -689,6 +689,9 @@ const searchTrips = async () => {
     
     searchResults.value = results
     console.log('Resultados de búsqueda:', results)
+    
+    // Mostrar resultados en el mapa
+    showResultsOnMap(results)
   } catch (error) {
     console.error('Error en búsqueda:', error)
     searchResults.value = []
@@ -710,6 +713,102 @@ const resetForm = () => {
   hasSearched.value = false
 }
 
+// Inicialización del mapa
+let mapMobile: any = null
+let mapDesktop: any = null
+
+const initializeMap = () => {
+  // Esperar a que Google Maps esté cargado
+  if (typeof window.google === 'undefined') {
+    setTimeout(initializeMap, 100)
+    return
+  }
+
+  // Inicializar mapa móvil
+  const mapMobileElement = document.getElementById('map-mobile')
+  if (mapMobileElement && !mapMobile) {
+    mapMobile = new window.google.maps.Map(mapMobileElement, {
+      center: { lat: 40.4168, lng: -3.7038 }, // Madrid
+      zoom: 10,
+      mapTypeId: 'roadmap'
+    })
+  }
+
+  // Inicializar mapa desktop
+  const mapDesktopElement = document.getElementById('map-desktop')
+  if (mapDesktopElement && !mapDesktop) {
+    mapDesktop = new window.google.maps.Map(mapDesktopElement, {
+      center: { lat: 40.4168, lng: -3.7038 }, // Madrid
+      zoom: 10,
+      mapTypeId: 'roadmap'
+    })
+  }
+}
+
+// Función para mostrar resultados en el mapa
+const showResultsOnMap = (results: SearchResult[]) => {
+  if (!mapMobile && !mapDesktop) return
+
+  const map = mapMobile || mapDesktop
+  if (!map) return
+
+  // Limpiar marcadores anteriores
+  // (En una implementación completa, guardarías referencias a los marcadores)
+
+  // Crear marcadores para cada resultado
+  results.forEach((result, index) => {
+    const trip = result.trip
+    
+    // Marcador de origen
+    new window.google.maps.Marker({
+      position: { lat: trip.origin_lat, lng: trip.origin_lng },
+      map: map,
+      title: `Origen: ${trip.origin_name}`,
+      icon: {
+        url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
+      }
+    })
+
+    // Marcador de destino
+    new window.google.maps.Marker({
+      position: { lat: trip.destination_lat, lng: trip.destination_lng },
+      map: map,
+      title: `Destino: ${trip.destination_name}`,
+      icon: {
+        url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+      }
+    })
+
+    // Línea entre origen y destino
+    new window.google.maps.Polyline({
+      path: [
+        { lat: trip.origin_lat, lng: trip.origin_lng },
+        { lat: trip.destination_lat, lng: trip.destination_lng }
+      ],
+      map: map,
+      strokeColor: '#3B82F6',
+      strokeOpacity: 0.8,
+      strokeWeight: 3
+    })
+  })
+
+  // Ajustar la vista para mostrar todos los marcadores
+  if (results.length > 0) {
+    const bounds = new window.google.maps.LatLngBounds()
+    results.forEach(result => {
+      bounds.extend({ lat: result.trip.origin_lat, lng: result.trip.origin_lng })
+      bounds.extend({ lat: result.trip.destination_lat, lng: result.trip.destination_lng })
+    })
+    map.fitBounds(bounds)
+  }
+}
+
 // Inicialización
 searchForm.date = today
+
+// Inicializar mapa cuando el componente se monte
+onMounted(() => {
+  // Esperar un poco para que el DOM esté listo
+  setTimeout(initializeMap, 500)
+})
 </script>
