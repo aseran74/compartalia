@@ -612,7 +612,7 @@ const handleOriginInput = async (value: string) => {
   
   // Fallback a autocompletado local
   try {
-    const results = await autocompleteService.getSuggestions(value)
+    const results = autocompleteService.searchSuggestions(value)
     originSuggestions.value = results
   } catch (error) {
     console.error('Error en autocompletado:', error)
@@ -642,7 +642,7 @@ const handleDestinationInput = async (value: string) => {
   
   // Fallback a autocompletado local
   try {
-    const results = await autocompleteService.getSuggestions(value)
+    const results = autocompleteService.searchSuggestions(value)
     destinationSuggestions.value = results
   } catch (error) {
     console.error('Error en autocompletado:', error)
@@ -855,7 +855,7 @@ const showTripOnMap = async (result: SearchResult) => {
 }
 
 // Función para mostrar resultados en el mapa
-const showResultsOnMap = (results: SearchResult[]) => {
+const showResultsOnMap = async (results: SearchResult[]) => {
   console.log('Mostrando resultados en mapa:', results)
   
   // Determinar qué mapa usar basado en el tamaño de pantalla
@@ -873,7 +873,7 @@ const showResultsOnMap = (results: SearchResult[]) => {
   clearMapMarkers()
 
   // Crear marcadores para cada resultado
-  results.forEach((result, index) => {
+  for (const result of results) {
     const trip = result.trip
     
     // Marcador de origen
@@ -898,54 +898,41 @@ const showResultsOnMap = (results: SearchResult[]) => {
     })
     currentMarkers.push(destinationMarker)
 
-    // Usar Routes API (New) con implementación correcta
-    console.log('Solicitando ruta de:', trip.origin_name, 'a', trip.destination_name)
-    console.log('Coordenadas origen:', trip.origin_lat, trip.origin_lng)
-    console.log('Coordenadas destino:', trip.destination_lat, trip.destination_lng)
-
-    // Intentar usar Routes API (New) si está disponible
-    if (typeof window.google.maps.Route !== 'undefined' && typeof window.google.maps.RouteRenderer !== 'undefined') {
-      console.log('✅ Usando Routes API (New)')
-      try {
-        const route = new window.google.maps.Route({
-          origin: { lat: trip.origin_lat, lng: trip.origin_lng },
-          destination: { lat: trip.destination_lat, lng: trip.destination_lng },
-          travelMode: window.google.maps.TravelMode.DRIVING
-        })
-
-        const routeRenderer = new window.google.maps.RouteRenderer({
-          route: route,
-          suppressMarkers: true,
-          polylineOptions: {
-            strokeColor: '#3B82F6',
-            strokeOpacity: 0.8,
-            strokeWeight: 4
-          }
-        })
-        
-        routeRenderer.setMap(map)
-        currentPolylines.push(routeRenderer)
-        console.log('✅ Ruta creada con Routes API (New)')
-        return
-      } catch (error) {
-        console.warn('❌ Error con Routes API (New):', error)
-      }
+    // Usar la nueva Routes API con fetch directo
+    try {
+      console.log('🛣️ Calculando ruta con nueva Routes API...')
+      const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
+      const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
+      
+      console.log('📍 Coordenadas:', { originCoords, destinationCoords })
+      
+      const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
+      console.log('✅ Ruta calculada exitosamente:', routeInfo)
+      
+      // Dibujar la ruta en el mapa
+      const routePolyline = routesApiService.drawRouteOnMap(map, originCoords, destinationCoords, routeInfo.polyline)
+      currentPolylines.push(routePolyline)
+      
+      console.log('✅ Ruta dibujada en el mapa')
+      
+    } catch (error) {
+      console.error('❌ Error calculando ruta con Routes API:', error)
+      console.log('⚠️ Usando fallback a línea recta (Routes API falló)')
+      
+      // Fallback a línea recta
+      const fallbackPolyline = new window.google.maps.Polyline({
+        path: [
+          { lat: trip.origin_lat, lng: trip.origin_lng },
+          { lat: trip.destination_lat, lng: trip.destination_lng }
+        ],
+        map: map,
+        strokeColor: '#3B82F6',
+        strokeOpacity: 0.8,
+        strokeWeight: 4
+      })
+      currentPolylines.push(fallbackPolyline)
     }
-
-    // Fallback: Usar línea recta ya que Directions API está descontinuada
-    console.log('⚠️ Usando fallback a línea recta (Directions API descontinuada)')
-    const fallbackPolyline = new window.google.maps.Polyline({
-      path: [
-        { lat: trip.origin_lat, lng: trip.origin_lng },
-        { lat: trip.destination_lat, lng: trip.destination_lng }
-      ],
-      map: map,
-      strokeColor: '#3B82F6',
-      strokeOpacity: 0.8,
-      strokeWeight: 4
-    })
-    currentPolylines.push(fallbackPolyline)
-  })
+  }
 
   // Ajustar la vista para mostrar todos los marcadores
   if (results.length > 0) {
