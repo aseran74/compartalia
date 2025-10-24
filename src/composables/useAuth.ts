@@ -10,6 +10,7 @@ export function useAuth() {
   const isAuthenticated = computed(() => user.value !== null);
   const isConductor = computed(() => userProfile.value?.role === 'conductor');
   const isPasajero = computed(() => userProfile.value?.role === 'pasajero');
+  const isAdmin = computed(() => userProfile.value?.role === 'admin' || userProfile.value?.email === 'admin@compartalia.com');
 
   // Login function
   const login = async (email: string, password: string) => {
@@ -138,6 +139,7 @@ export function useAuth() {
     isAuthenticated,
     isConductor,
     isPasajero,
+    isAdmin,
     isLoading,
     login,
     register,

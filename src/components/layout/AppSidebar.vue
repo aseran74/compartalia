@@ -228,12 +228,14 @@ import {
 import SidebarWidget from "./SidebarWidget.vue";
 import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
 import { useSidebar } from "@/composables/useSidebar";
+import { useAuth } from "@/composables/useAuth";
 
 const route = useRoute();
 
 const { isExpanded, isMobileOpen, isHovered, openSubmenu, handleMouseEnter, handleMouseLeave, handleMobileNavigation } = useSidebar();
+const { isAdmin } = useAuth();
 
-const menuGroups = [
+const allMenuGroups = [
   {
     title: "Dashboard",
     items: [
@@ -271,6 +273,7 @@ const menuGroups = [
         icon: GridIcon,
         name: "Gestión de Viajes",
         path: "/carpooling/trip-management",
+        adminOnly: true, // Solo para administradores
       },
             {
               icon: UserGroupIcon,
@@ -286,11 +289,26 @@ const menuGroups = [
               icon: DocsIcon,
               name: "Historial Mensajes",
               path: "/carpooling/historial-mensajes",
-              adminOnly: true, // Indicador de que es solo para admins
+              adminOnly: true, // Solo para administradores
             },
     ],
   },
 ]
+
+// Filtrar elementos del menú según si el usuario es administrador
+const menuGroups = computed(() => {
+  return allMenuGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => {
+      // Si el elemento requiere ser admin, verificar si el usuario es admin
+      if (item.adminOnly) {
+        return isAdmin.value;
+      }
+      // Si no requiere ser admin, mostrarlo siempre
+      return true;
+    })
+  }));
+});
 
 const isActive = (path) => route.path === path;
 
