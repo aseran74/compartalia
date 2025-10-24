@@ -181,6 +181,12 @@ export class HybridTripService {
       // Combinar viajes con perfiles
       const tripsWithProfiles = trips.map(trip => {
         const profile = profiles?.find(p => p.id === trip.driver_id)
+        console.log('🔍 Combinando viaje:', {
+          tripId: trip.id,
+          driverId: trip.driver_id,
+          profileFound: !!profile,
+          profileName: profile?.name || 'No encontrado'
+        })
         return {
           ...trip,
           profiles: profile ? {
