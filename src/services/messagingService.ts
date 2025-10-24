@@ -35,10 +35,15 @@ export class MessagingService {
   public supabase = supabaseClean;
 
   // Obtener conversaciones del usuario actual
-  async getConversations(): Promise<Conversation[]> {
+  async getConversations(firebaseUserId?: string): Promise<Conversation[]> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) throw new Error('Usuario no autenticado');
+      let userId = firebaseUserId;
+      
+      if (!userId) {
+        const { data: { user } } = await this.supabase.auth.getUser();
+        if (!user) throw new Error('Usuario no autenticado');
+        userId = user.id;
+      }
 
       const { data, error } = await this.supabase
         .from('conversations')
@@ -51,7 +56,7 @@ export class MessagingService {
           user1:profiles!conversations_user1_id_fkey(id, name, avatar_url, role),
           user2:profiles!conversations_user2_id_fkey(id, name, avatar_url, role)
         `)
-        .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
+        .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -59,8 +64,8 @@ export class MessagingService {
       // Transformar datos para incluir información del otro usuario
       const conversations: Conversation[] = await Promise.all(
         (data || []).map(async (conv) => {
-          const otherUser = conv.user1_id === user.id ? conv.user2 : conv.user1;
-          const otherUserId = conv.user1_id === user.id ? conv.user2_id : conv.user1_id;
+          const otherUser = conv.user1_id === userId ? conv.user2 : conv.user1;
+          const otherUserId = conv.user1_id === userId ? conv.user2_id : conv.user1_id;
 
           // Obtener último mensaje
           const { data: lastMessage } = await this.supabase
@@ -181,21 +186,26 @@ export class MessagingService {
   }
 
   // Crear nueva conversación
-  async createConversation(otherUserId: string): Promise<Conversation | null> {
+  async createConversation(otherUserId: string, firebaseUserId?: string): Promise<Conversation | null> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) throw new Error('Usuario no autenticado');
+      let userId = firebaseUserId;
+      
+      if (!userId) {
+        const { data: { user } } = await this.supabase.auth.getUser();
+        if (!user) throw new Error('Usuario no autenticado');
+        userId = user.id;
+      }
 
       // Verificar si ya existe una conversación
       const { data: existingConv } = await this.supabase
         .from('conversations')
         .select('*')
-        .or(`and(user1_id.eq.${user.id},user2_id.eq.${otherUserId}),and(user1_id.eq.${otherUserId},user2_id.eq.${user.id})`)
+        .or(`and(user1_id.eq.${userId},user2_id.eq.${otherUserId}),and(user1_id.eq.${otherUserId},user2_id.eq.${userId})`)
         .single();
 
       if (existingConv) {
         // Retornar conversación existente
-        const conversations = await this.getConversations();
+        const conversations = await this.getConversations(userId);
         return conversations.find(c => c.id === existingConv.id) || null;
       }
 
@@ -203,7 +213,7 @@ export class MessagingService {
       const { data, error } = await this.supabase
         .from('conversations')
         .insert({
-          user1_id: user.id,
+          user1_id: userId,
           user2_id: otherUserId
         })
         .select(`

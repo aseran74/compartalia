@@ -19,7 +19,22 @@
 
     <!-- Header desktop -->
     <div class="hidden lg:block bg-white shadow-sm border-b px-6 py-4">
-      <h1 class="text-2xl font-bold text-gray-900">👥 Gestión de Miembros</h1>
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">👥 Gestión de Miembros</h1>
+        <div v-if="!isAuthenticated" class="flex items-center space-x-4">
+          <span class="text-sm text-red-600">⚠️ No autenticado</span>
+          <button
+            @click="router.push('/login')"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            🔐 Iniciar Sesión
+          </button>
+        </div>
+        <div v-else class="flex items-center space-x-2">
+          <span class="text-sm text-green-600">✅ Autenticado</span>
+          <span class="text-sm text-gray-600">{{ user?.email }}</span>
+        </div>
+      </div>
     </div>
 
     <div class="max-w-7xl mx-auto p-4 lg:p-6">
@@ -442,8 +457,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { messagingService } from '@/services/messagingService';
+import { useAuth } from '@/composables/useAuth';
 
 const router = useRouter();
+const { user, isAuthenticated } = useAuth();
 
 // Estado reactivo
 const searchQuery = ref('');
@@ -570,17 +587,22 @@ function toggleAmigo(miembro: any) {
 async function iniciarConversacion(miembro: any) {
   try {
     console.log('Iniciando conversación con:', miembro.nombre);
+    console.log('Usuario autenticado:', isAuthenticated.value);
+    console.log('Usuario actual:', user.value);
     
-    // Verificar que el usuario esté autenticado
-    const { data: { user } } = await messagingService.supabase.auth.getUser();
-    if (!user) {
-      alert('Debes estar autenticado para enviar mensajes');
+    // Verificar que el usuario esté autenticado usando Firebase Auth
+    if (!isAuthenticated.value || !user.value) {
+      alert('Debes estar autenticado para enviar mensajes. Por favor, inicia sesión primero.');
+      // Redirigir al login
+      router.push('/login');
       return;
     }
 
+    console.log('Usuario autenticado correctamente, procediendo...');
+
     // Intentar crear conversación
     try {
-      const conversation = await messagingService.createConversation(miembro.id);
+      const conversation = await messagingService.createConversation(miembro.id, user.value?.uid);
       if (conversation) {
         console.log('Conversación creada:', conversation);
         // Navegar a mensajería

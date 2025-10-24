@@ -553,7 +553,7 @@ async function loadMessages(conversationId: string) {
 async function loadConversations() {
   try {
     loading.value = true;
-    const conversations = await messagingService.getConversations();
+    const conversations = await messagingService.getConversations(user.value?.uid);
     conversaciones.value = conversations;
   } catch (error) {
     console.error('Error cargando conversaciones:', error);
@@ -597,7 +597,7 @@ async function iniciarNuevaConversacion() {
 
 async function iniciarNuevaConversacionConUsuario(usuario: any) {
   try {
-    const conversation = await messagingService.createConversation(usuario.id);
+    const conversation = await messagingService.createConversation(usuario.id, user.value?.uid);
     if (conversation) {
       // Recargar conversaciones
       await loadConversations();
