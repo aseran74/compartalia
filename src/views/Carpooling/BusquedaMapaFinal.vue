@@ -719,41 +719,58 @@ const resetForm = () => {
 }
 
 // Inicialización del mapa
-let mapMobile: any = null
-let mapDesktop: any = null
+let mapMobile: google.maps.Map | null = null
+let mapDesktop: google.maps.Map | null = null
 
 const initializeMap = () => {
   // Esperar a que Google Maps esté cargado
-  if (typeof window.google === 'undefined') {
-    setTimeout(initializeMap, 100)
+  if (typeof window.google === 'undefined' || !window.google.maps) {
+    console.log('⏳ Esperando a que Google Maps se cargue...')
+    setTimeout(initializeMap, 500)
     return
   }
 
-  console.log('Inicializando mapas...')
+  console.log('🗺️ Inicializando mapas de Google Maps...')
 
   // Inicializar mapa móvil
   const mapMobileElement = document.getElementById('map-mobile')
   if (mapMobileElement && !mapMobile) {
-    console.log('Inicializando mapa móvil')
+    console.log('📱 Inicializando mapa móvil')
     mapMobile = new window.google.maps.Map(mapMobileElement, {
       center: { lat: 40.4168, lng: -3.7038 }, // Madrid
       zoom: 10,
-      mapTypeId: 'roadmap'
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'off' }]
+        }
+      ]
     })
-    console.log('Mapa móvil inicializado:', mapMobile)
+    console.log('✅ Mapa móvil inicializado:', mapMobile)
   }
 
   // Inicializar mapa desktop
   const mapDesktopElement = document.getElementById('map-desktop')
   if (mapDesktopElement && !mapDesktop) {
-    console.log('Inicializando mapa desktop')
+    console.log('🖥️ Inicializando mapa desktop')
     mapDesktop = new window.google.maps.Map(mapDesktopElement, {
       center: { lat: 40.4168, lng: -3.7038 }, // Madrid
       zoom: 10,
-      mapTypeId: 'roadmap'
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'off' }]
+        }
+      ]
     })
-    console.log('Mapa desktop inicializado:', mapDesktop)
+    console.log('✅ Mapa desktop inicializado:', mapDesktop)
   }
+
+  console.log('🎉 Mapas inicializados correctamente')
 }
 
 // Variables para almacenar marcadores y líneas
@@ -789,7 +806,7 @@ const showTripOnMap = async (result: SearchResult) => {
   const trip = result.trip
   
   // Marcador de origen
-  const originMarker = new window.google.maps.Marker({
+  const originMarker = new google.maps.Marker({
     position: { lat: trip.origin_lat, lng: trip.origin_lng },
     map: map,
     title: `Origen: ${trip.origin_name}`,
@@ -800,7 +817,7 @@ const showTripOnMap = async (result: SearchResult) => {
   currentMarkers.push(originMarker)
 
   // Marcador de destino
-  const destinationMarker = new window.google.maps.Marker({
+  const destinationMarker = new google.maps.Marker({
     position: { lat: trip.destination_lat, lng: trip.destination_lng },
     map: map,
     title: `Destino: ${trip.destination_name}`,
@@ -846,7 +863,7 @@ const showTripOnMap = async (result: SearchResult) => {
   }
 
   // Ajustar la vista para mostrar el viaje
-  const bounds = new window.google.maps.LatLngBounds()
+  const bounds = new google.maps.LatLngBounds()
   bounds.extend({ lat: trip.origin_lat, lng: trip.origin_lng })
   bounds.extend({ lat: trip.destination_lat, lng: trip.destination_lng })
   map.fitBounds(bounds)
@@ -877,7 +894,7 @@ const showResultsOnMap = async (results: SearchResult[]) => {
     const trip = result.trip
     
     // Marcador de origen
-    const originMarker = new window.google.maps.Marker({
+    const originMarker = new google.maps.Marker({
       position: { lat: trip.origin_lat, lng: trip.origin_lng },
       map: map,
       title: `Origen: ${trip.origin_name}`,
@@ -888,7 +905,7 @@ const showResultsOnMap = async (results: SearchResult[]) => {
     currentMarkers.push(originMarker)
 
     // Marcador de destino
-    const destinationMarker = new window.google.maps.Marker({
+    const destinationMarker = new google.maps.Marker({
       position: { lat: trip.destination_lat, lng: trip.destination_lng },
       map: map,
       title: `Destino: ${trip.destination_name}`,
@@ -920,7 +937,7 @@ const showResultsOnMap = async (results: SearchResult[]) => {
       console.log('⚠️ Usando fallback a línea recta (Routes API falló)')
       
       // Fallback a línea recta
-      const fallbackPolyline = new window.google.maps.Polyline({
+      const fallbackPolyline = new google.maps.Polyline({
         path: [
           { lat: trip.origin_lat, lng: trip.origin_lng },
           { lat: trip.destination_lat, lng: trip.destination_lng }
@@ -936,7 +953,7 @@ const showResultsOnMap = async (results: SearchResult[]) => {
 
   // Ajustar la vista para mostrar todos los marcadores
   if (results.length > 0) {
-    const bounds = new window.google.maps.LatLngBounds()
+    const bounds = new google.maps.LatLngBounds()
     results.forEach(result => {
       bounds.extend({ lat: result.trip.origin_lat, lng: result.trip.origin_lng })
       bounds.extend({ lat: result.trip.destination_lat, lng: result.trip.destination_lng })
