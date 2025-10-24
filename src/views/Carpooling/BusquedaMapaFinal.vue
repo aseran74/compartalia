@@ -523,6 +523,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { HybridTripService, type SearchResult } from '@/services/hybridTripService'
+import { RoutesApiService, type Coords } from '@/services/routesApiService'
 import AutocompleteInput from '@/components/AutocompleteInput.vue'
 import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
 import { GeolocationService } from '@/services/geolocation'
@@ -562,6 +563,7 @@ const isLoadingDestination = ref(false)
 
 // Servicios
 const hybridService = new HybridTripService()
+const routesApiService = new RoutesApiService()
 const autocompleteService = new SimpleAutocompleteService()
 const geolocationService = new GeolocationService()
 
@@ -767,19 +769,19 @@ const clearMapMarkers = () => {
 }
 
 // Función para mostrar un viaje específico en el mapa
-const showTripOnMap = (result: SearchResult) => {
-  console.log('Mostrando viaje en mapa:', result)
+const showTripOnMap = async (result: SearchResult) => {
+  console.log('🗺️ Mostrando viaje en mapa:', result)
   
   // Determinar qué mapa usar basado en el tamaño de pantalla
   const isMobile = window.innerWidth < 1024
   const map = isMobile ? mapMobile : mapDesktop
   
   if (!map) {
-    console.warn('Mapa no inicializado. Móvil:', mapMobile, 'Desktop:', mapDesktop)
+    console.warn('❌ Mapa no inicializado. Móvil:', mapMobile, 'Desktop:', mapDesktop)
     return
   }
   
-  console.log('Usando mapa:', isMobile ? 'móvil' : 'desktop', map)
+  console.log('✅ Usando mapa:', isMobile ? 'móvil' : 'desktop', map)
 
   // Limpiar marcadores anteriores
   clearMapMarkers()
@@ -808,61 +810,35 @@ const showTripOnMap = (result: SearchResult) => {
   })
   currentMarkers.push(destinationMarker)
 
-  // Usar Routes API (New) con implementación correcta
-  console.log('Solicitando ruta de:', trip.origin_name, 'a', trip.destination_name)
-  console.log('Coordenadas origen:', trip.origin_lat, trip.origin_lng)
-  console.log('Coordenadas destino:', trip.destination_lat, trip.destination_lng)
-
-  // Verificar APIs disponibles
-  console.log('APIs disponibles:', {
-    DirectionsService: typeof window.google.maps.DirectionsService,
-    DirectionsRenderer: typeof window.google.maps.DirectionsRenderer,
-    Route: typeof window.google.maps.Route,
-    RouteRenderer: typeof window.google.maps.RouteRenderer
-  })
-
-  // Intentar usar Routes API (New) si está disponible
-  if (typeof window.google.maps.Route !== 'undefined' && typeof window.google.maps.RouteRenderer !== 'undefined') {
-    console.log('✅ Usando Routes API (New)')
-    try {
-      const route = new window.google.maps.Route({
-        origin: { lat: trip.origin_lat, lng: trip.origin_lng },
-        destination: { lat: trip.destination_lat, lng: trip.destination_lng },
-        travelMode: window.google.maps.TravelMode.DRIVING
-      })
-
-      const routeRenderer = new window.google.maps.RouteRenderer({
-        route: route,
-        suppressMarkers: true,
-        polylineOptions: {
-          strokeColor: '#3B82F6',
-          strokeOpacity: 0.8,
-          strokeWeight: 4
-        }
-      })
-      
-      routeRenderer.setMap(map)
-      currentPolylines.push(routeRenderer)
-      console.log('✅ Ruta creada con Routes API (New)')
-      return
-    } catch (error) {
-      console.warn('❌ Error con Routes API (New):', error)
-    }
+  // Usar la nueva Routes API
+  try {
+    console.log('🛣️ Calculando ruta con nueva Routes API...')
+    const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
+    const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
+    
+    const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
+    console.log('✅ Ruta calculada:', routeInfo)
+    
+    // Dibujar la ruta en el mapa
+    const routePolyline = routesApiService.drawRouteOnMap(map, originCoords, destinationCoords, routeInfo.polyline)
+    currentPolylines.push(routePolyline)
+    
+  } catch (error) {
+    console.warn('❌ Error calculando ruta, usando fallback:', error)
+    
+    // Fallback a línea recta
+    const fallbackPolyline = new window.google.maps.Polyline({
+      path: [
+        { lat: trip.origin_lat, lng: trip.origin_lng },
+        { lat: trip.destination_lat, lng: trip.destination_lng }
+      ],
+      map: map,
+      strokeColor: '#3B82F6',
+      strokeOpacity: 0.8,
+      strokeWeight: 4
+    })
+    currentPolylines.push(fallbackPolyline)
   }
-
-  // Fallback: Usar línea recta ya que Directions API está descontinuada
-  console.log('⚠️ Usando fallback a línea recta (Directions API descontinuada)')
-  const fallbackPolyline = new window.google.maps.Polyline({
-    path: [
-      { lat: trip.origin_lat, lng: trip.origin_lng },
-      { lat: trip.destination_lat, lng: trip.destination_lng }
-    ],
-    map: map,
-    strokeColor: '#3B82F6',
-    strokeOpacity: 0.8,
-    strokeWeight: 4
-  })
-  currentPolylines.push(fallbackPolyline)
 
   // Ajustar la vista para mostrar el viaje
   const bounds = new window.google.maps.LatLngBounds()
@@ -870,7 +846,7 @@ const showTripOnMap = (result: SearchResult) => {
   bounds.extend({ lat: trip.destination_lat, lng: trip.destination_lng })
   map.fitBounds(bounds)
 
-  console.log('Viaje mostrado en el mapa:', trip.origin_name, '→', trip.destination_name)
+  console.log('✅ Viaje mostrado en el mapa:', trip.origin_name, '→', trip.destination_name)
 }
 
 // Función para mostrar resultados en el mapa
