@@ -823,15 +823,22 @@ const showTripOnMap = (result: SearchResult) => {
   currentPolylines.push(directionsRenderer)
 
   console.log('Solicitando ruta de:', trip.origin_name, 'a', trip.destination_name)
+  console.log('Coordenadas origen:', trip.origin_lat, trip.origin_lng)
+  console.log('Coordenadas destino:', trip.destination_lat, trip.destination_lng)
+
+  // Usar direcciones de texto en lugar de coordenadas para mejor compatibilidad
+  const originText = `${trip.origin_lat},${trip.origin_lng}`
+  const destinationText = `${trip.destination_lat},${trip.destination_lng}`
 
   directionsService.route({
-    origin: { lat: trip.origin_lat, lng: trip.origin_lng },
-    destination: { lat: trip.destination_lat, lng: trip.destination_lng },
+    origin: originText,
+    destination: destinationText,
     travelMode: window.google.maps.TravelMode.DRIVING,
     avoidHighways: false,
     avoidTolls: false
   }, (result, status) => {
     console.log('Estado de la ruta:', status)
+    console.log('Resultado:', result)
     if (status === 'OK') {
       console.log('Ruta obtenida exitosamente')
       directionsRenderer.setDirections(result)
@@ -920,15 +927,22 @@ const showResultsOnMap = (results: SearchResult[]) => {
     currentPolylines.push(directionsRenderer)
 
     console.log('Solicitando ruta de:', trip.origin_name, 'a', trip.destination_name)
+    console.log('Coordenadas origen:', trip.origin_lat, trip.origin_lng)
+    console.log('Coordenadas destino:', trip.destination_lat, trip.destination_lng)
+
+    // Usar direcciones de texto en lugar de coordenadas para mejor compatibilidad
+    const originText = `${trip.origin_lat},${trip.origin_lng}`
+    const destinationText = `${trip.destination_lat},${trip.destination_lng}`
 
     directionsService.route({
-      origin: { lat: trip.origin_lat, lng: trip.origin_lng },
-      destination: { lat: trip.destination_lat, lng: trip.destination_lng },
+      origin: originText,
+      destination: destinationText,
       travelMode: window.google.maps.TravelMode.DRIVING,
       avoidHighways: false,
       avoidTolls: false
     }, (result, status) => {
       console.log('Estado de la ruta:', status)
+      console.log('Resultado:', result)
       if (status === 'OK') {
         console.log('Ruta obtenida exitosamente')
         directionsRenderer.setDirections(result)
