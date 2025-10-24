@@ -827,29 +827,56 @@ const showTripOnMap = async (result: SearchResult) => {
   })
   currentMarkers.push(destinationMarker)
 
-  // Usar la nueva Routes API
+  // Intentar usar Directions API (Legacy) primero
   try {
-    console.log('🛣️ Calculando ruta con nueva Routes API...')
-    const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
-    const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
+    console.log('🛣️ Calculando ruta con Directions API (Legacy)...')
     
-    console.log('📍 Coordenadas:', { originCoords, destinationCoords })
+    const directionsService = new google.maps.DirectionsService()
+    const directionsRenderer = new google.maps.DirectionsRenderer({
+      suppressMarkers: true,
+      polylineOptions: {
+        strokeColor: '#3B82F6',
+        strokeOpacity: 0.8,
+        strokeWeight: 4
+      }
+    })
     
-    const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
-    console.log('✅ Ruta calculada exitosamente:', routeInfo)
+    directionsRenderer.setMap(map)
     
-    // Dibujar la ruta en el mapa
-    const routePolyline = routesApiService.drawRouteOnMap(map, originCoords, destinationCoords, routeInfo.polyline)
-    currentPolylines.push(routePolyline)
-    
-    console.log('✅ Ruta dibujada en el mapa')
+    directionsService.route({
+      origin: { lat: trip.origin_lat, lng: trip.origin_lng },
+      destination: { lat: trip.destination_lat, lng: trip.destination_lng },
+      travelMode: google.maps.TravelMode.DRIVING,
+      avoidHighways: false,
+      avoidTolls: false
+    }, (result, status) => {
+      if (status === 'OK' && result) {
+        console.log('✅ Ruta calculada con Directions API')
+        directionsRenderer.setDirections(result)
+        currentPolylines.push(directionsRenderer)
+      } else {
+        console.warn('❌ Directions API falló:', status)
+        // Fallback a línea recta
+        const fallbackPolyline = new google.maps.Polyline({
+          path: [
+            { lat: trip.origin_lat, lng: trip.origin_lng },
+            { lat: trip.destination_lat, lng: trip.destination_lng }
+          ],
+          map: map,
+          strokeColor: '#3B82F6',
+          strokeOpacity: 0.8,
+          strokeWeight: 4
+        })
+        currentPolylines.push(fallbackPolyline)
+      }
+    })
     
   } catch (error) {
-    console.error('❌ Error calculando ruta con Routes API:', error)
-    console.log('⚠️ Usando fallback a línea recta (Routes API falló)')
+    console.error('❌ Error con Directions API:', error)
+    console.log('⚠️ Usando fallback a línea recta')
     
     // Fallback a línea recta
-    const fallbackPolyline = new window.google.maps.Polyline({
+    const fallbackPolyline = new google.maps.Polyline({
       path: [
         { lat: trip.origin_lat, lng: trip.origin_lng },
         { lat: trip.destination_lat, lng: trip.destination_lng }
@@ -915,26 +942,53 @@ const showResultsOnMap = async (results: SearchResult[]) => {
     })
     currentMarkers.push(destinationMarker)
 
-    // Usar la nueva Routes API con fetch directo
+    // Intentar usar Directions API (Legacy) primero
     try {
-      console.log('🛣️ Calculando ruta con nueva Routes API...')
-      const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
-      const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
+      console.log('🛣️ Calculando ruta con Directions API (Legacy)...')
       
-      console.log('📍 Coordenadas:', { originCoords, destinationCoords })
+      const directionsService = new google.maps.DirectionsService()
+      const directionsRenderer = new google.maps.DirectionsRenderer({
+        suppressMarkers: true,
+        polylineOptions: {
+          strokeColor: '#3B82F6',
+          strokeOpacity: 0.8,
+          strokeWeight: 4
+        }
+      })
       
-      const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
-      console.log('✅ Ruta calculada exitosamente:', routeInfo)
+      directionsRenderer.setMap(map)
       
-      // Dibujar la ruta en el mapa
-      const routePolyline = routesApiService.drawRouteOnMap(map, originCoords, destinationCoords, routeInfo.polyline)
-      currentPolylines.push(routePolyline)
-      
-      console.log('✅ Ruta dibujada en el mapa')
+      directionsService.route({
+        origin: { lat: trip.origin_lat, lng: trip.origin_lng },
+        destination: { lat: trip.destination_lat, lng: trip.destination_lng },
+        travelMode: google.maps.TravelMode.DRIVING,
+        avoidHighways: false,
+        avoidTolls: false
+      }, (result, status) => {
+        if (status === 'OK' && result) {
+          console.log('✅ Ruta calculada con Directions API')
+          directionsRenderer.setDirections(result)
+          currentPolylines.push(directionsRenderer)
+        } else {
+          console.warn('❌ Directions API falló:', status)
+          // Fallback a línea recta
+          const fallbackPolyline = new google.maps.Polyline({
+            path: [
+              { lat: trip.origin_lat, lng: trip.origin_lng },
+              { lat: trip.destination_lat, lng: trip.destination_lng }
+            ],
+            map: map,
+            strokeColor: '#3B82F6',
+            strokeOpacity: 0.8,
+            strokeWeight: 4
+          })
+          currentPolylines.push(fallbackPolyline)
+        }
+      })
       
     } catch (error) {
-      console.error('❌ Error calculando ruta con Routes API:', error)
-      console.log('⚠️ Usando fallback a línea recta (Routes API falló)')
+      console.error('❌ Error con Directions API:', error)
+      console.log('⚠️ Usando fallback a línea recta')
       
       // Fallback a línea recta
       const fallbackPolyline = new google.maps.Polyline({
