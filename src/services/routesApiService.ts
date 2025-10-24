@@ -27,8 +27,33 @@ export class RoutesApiService {
   async calculateRoute(origin: Coords, destination: Coords): Promise<RouteInfo> {
     
     console.log('🛣️ Calculando ruta con Routes API...', { origin, destination })
+    console.log('🔑 API Key:', API_KEY.substring(0, 10) + '...')
+    console.log('🌐 URL:', ROUTES_API_URL)
 
     try {
+      const requestBody = {
+        origin: {
+          location: {
+            latLng: {
+              latitude: origin.lat,
+              longitude: origin.lng
+            }
+          }
+        },
+        destination: {
+          location: {
+            latLng: {
+              latitude: destination.lat,
+              longitude: destination.lng
+            }
+          }
+        },
+        travelMode: 'DRIVE',
+        routingPreference: 'TRAFFIC_AWARE_OPTIMAL'
+      }
+
+      console.log('📤 Enviando request:', requestBody)
+
       const response = await fetch(ROUTES_API_URL, {
         method: 'POST',
         headers: {
@@ -37,27 +62,11 @@ export class RoutesApiService {
           // Pedimos distancia, duración y polylínea
           'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline' 
         },
-        body: JSON.stringify({
-          origin: {
-            location: {
-              latLng: {
-                latitude: origin.lat,
-                longitude: origin.lng
-              }
-            }
-          },
-          destination: {
-            location: {
-              latLng: {
-                latitude: destination.lat,
-                longitude: destination.lng
-              }
-            }
-          },
-          travelMode: 'DRIVE',
-          routingPreference: 'TRAFFIC_AWARE_OPTIMAL'
-        })
+        body: JSON.stringify(requestBody)
       })
+
+      console.log('📥 Response status:', response.status)
+      console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()))
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -65,7 +74,7 @@ export class RoutesApiService {
         
         // Si la API Key es incorrecta o la API no está habilitada,
         // el error (REQUEST_DENIED) ahora se mostrará aquí.
-        throw new Error(errorData.error?.message || 'Error al calcular la ruta')
+        throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`)
       }
 
       const data = await response.json()
@@ -73,6 +82,12 @@ export class RoutesApiService {
 
       if (data.routes && data.routes.length > 0) {
         const route = data.routes[0]
+        console.log('🛣️ Ruta encontrada:', {
+          distance: route.distanceMeters,
+          duration: route.duration,
+          hasPolyline: !!route.polyline?.encodedPolyline
+        })
+        
         // Devolvemos la información de la primera ruta encontrada
         return {
           distance: route.distanceMeters, // Distancia en metros

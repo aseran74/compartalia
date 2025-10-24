@@ -816,15 +816,20 @@ const showTripOnMap = async (result: SearchResult) => {
     const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
     const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
     
+    console.log('📍 Coordenadas:', { originCoords, destinationCoords })
+    
     const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
-    console.log('✅ Ruta calculada:', routeInfo)
+    console.log('✅ Ruta calculada exitosamente:', routeInfo)
     
     // Dibujar la ruta en el mapa
     const routePolyline = routesApiService.drawRouteOnMap(map, originCoords, destinationCoords, routeInfo.polyline)
     currentPolylines.push(routePolyline)
     
+    console.log('✅ Ruta dibujada en el mapa')
+    
   } catch (error) {
-    console.warn('❌ Error calculando ruta, usando fallback:', error)
+    console.error('❌ Error calculando ruta con Routes API:', error)
+    console.log('⚠️ Usando fallback a línea recta (Routes API falló)')
     
     // Fallback a línea recta
     const fallbackPolyline = new window.google.maps.Polyline({
