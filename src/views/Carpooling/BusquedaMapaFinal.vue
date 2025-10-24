@@ -827,67 +827,23 @@ const showTripOnMap = async (result: SearchResult) => {
   })
   currentMarkers.push(destinationMarker)
 
-  // Intentar usar Directions API (Legacy) primero
-  try {
-    console.log('🛣️ Calculando ruta con Directions API (Legacy)...')
-    
-    const directionsService = new google.maps.DirectionsService()
-    const directionsRenderer = new google.maps.DirectionsRenderer({
-      suppressMarkers: true,
-      polylineOptions: {
-        strokeColor: '#3B82F6',
-        strokeOpacity: 0.8,
-        strokeWeight: 4
-      }
-    })
-    
-    directionsRenderer.setMap(map)
-    
-    directionsService.route({
-      origin: { lat: trip.origin_lat, lng: trip.origin_lng },
-      destination: { lat: trip.destination_lat, lng: trip.destination_lng },
-      travelMode: google.maps.TravelMode.DRIVING,
-      avoidHighways: false,
-      avoidTolls: false
-    }, (result, status) => {
-      if (status === 'OK' && result) {
-        console.log('✅ Ruta calculada con Directions API')
-        directionsRenderer.setDirections(result)
-        currentPolylines.push(directionsRenderer)
-      } else {
-        console.warn('❌ Directions API falló:', status)
-        // Fallback a línea recta
-        const fallbackPolyline = new google.maps.Polyline({
-          path: [
-            { lat: trip.origin_lat, lng: trip.origin_lng },
-            { lat: trip.destination_lat, lng: trip.destination_lng }
-          ],
-          map: map,
-          strokeColor: '#3B82F6',
-          strokeOpacity: 0.8,
-          strokeWeight: 4
-        })
-        currentPolylines.push(fallbackPolyline)
-      }
-    })
-    
-  } catch (error) {
-    console.error('❌ Error con Directions API:', error)
-    console.log('⚠️ Usando fallback a línea recta')
-    
-    // Fallback a línea recta
-    const fallbackPolyline = new google.maps.Polyline({
-      path: [
-        { lat: trip.origin_lat, lng: trip.origin_lng },
-        { lat: trip.destination_lat, lng: trip.destination_lng }
-      ],
-      map: map,
-      strokeColor: '#3B82F6',
-      strokeOpacity: 0.8,
-      strokeWeight: 4
-    })
-    currentPolylines.push(fallbackPolyline)
-  }
+  // Usar línea recta temporalmente hasta que se habiliten las APIs
+  console.log('🛣️ Dibujando línea recta (APIs de rutas no habilitadas)')
+  
+  const polyline = new google.maps.Polyline({
+    path: [
+      { lat: trip.origin_lat, lng: trip.origin_lng },
+      { lat: trip.destination_lat, lng: trip.destination_lng }
+    ],
+    map: map,
+    strokeColor: '#3B82F6',
+    strokeOpacity: 0.8,
+    strokeWeight: 4,
+    geodesic: true
+  })
+  currentPolylines.push(polyline)
+  
+  console.log('✅ Línea recta dibujada')
 
   // Ajustar la vista para mostrar el viaje
   const bounds = new google.maps.LatLngBounds()
@@ -942,67 +898,23 @@ const showResultsOnMap = async (results: SearchResult[]) => {
     })
     currentMarkers.push(destinationMarker)
 
-    // Intentar usar Directions API (Legacy) primero
-    try {
-      console.log('🛣️ Calculando ruta con Directions API (Legacy)...')
-      
-      const directionsService = new google.maps.DirectionsService()
-      const directionsRenderer = new google.maps.DirectionsRenderer({
-        suppressMarkers: true,
-        polylineOptions: {
-          strokeColor: '#3B82F6',
-          strokeOpacity: 0.8,
-          strokeWeight: 4
-        }
-      })
-      
-      directionsRenderer.setMap(map)
-      
-      directionsService.route({
-        origin: { lat: trip.origin_lat, lng: trip.origin_lng },
-        destination: { lat: trip.destination_lat, lng: trip.destination_lng },
-        travelMode: google.maps.TravelMode.DRIVING,
-        avoidHighways: false,
-        avoidTolls: false
-      }, (result, status) => {
-        if (status === 'OK' && result) {
-          console.log('✅ Ruta calculada con Directions API')
-          directionsRenderer.setDirections(result)
-          currentPolylines.push(directionsRenderer)
-        } else {
-          console.warn('❌ Directions API falló:', status)
-          // Fallback a línea recta
-          const fallbackPolyline = new google.maps.Polyline({
-            path: [
-              { lat: trip.origin_lat, lng: trip.origin_lng },
-              { lat: trip.destination_lat, lng: trip.destination_lng }
-            ],
-            map: map,
-            strokeColor: '#3B82F6',
-            strokeOpacity: 0.8,
-            strokeWeight: 4
-          })
-          currentPolylines.push(fallbackPolyline)
-        }
-      })
-      
-    } catch (error) {
-      console.error('❌ Error con Directions API:', error)
-      console.log('⚠️ Usando fallback a línea recta')
-      
-      // Fallback a línea recta
-      const fallbackPolyline = new google.maps.Polyline({
-        path: [
-          { lat: trip.origin_lat, lng: trip.origin_lng },
-          { lat: trip.destination_lat, lng: trip.destination_lng }
-        ],
-        map: map,
-        strokeColor: '#3B82F6',
-        strokeOpacity: 0.8,
-        strokeWeight: 4
-      })
-      currentPolylines.push(fallbackPolyline)
-    }
+    // Usar línea recta temporalmente hasta que se habiliten las APIs
+    console.log('🛣️ Dibujando línea recta (APIs de rutas no habilitadas)')
+    
+    const polyline = new google.maps.Polyline({
+      path: [
+        { lat: trip.origin_lat, lng: trip.origin_lng },
+        { lat: trip.destination_lat, lng: trip.destination_lng }
+      ],
+      map: map,
+      strokeColor: '#3B82F6',
+      strokeOpacity: 0.8,
+      strokeWeight: 4,
+      geodesic: true
+    })
+    currentPolylines.push(polyline)
+    
+    console.log('✅ Línea recta dibujada')
   }
 
   // Ajustar la vista para mostrar todos los marcadores
