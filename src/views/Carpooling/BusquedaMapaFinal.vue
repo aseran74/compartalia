@@ -727,24 +727,30 @@ const initializeMap = () => {
     return
   }
 
+  console.log('Inicializando mapas...')
+
   // Inicializar mapa móvil
   const mapMobileElement = document.getElementById('map-mobile')
   if (mapMobileElement && !mapMobile) {
+    console.log('Inicializando mapa móvil')
     mapMobile = new window.google.maps.Map(mapMobileElement, {
       center: { lat: 40.4168, lng: -3.7038 }, // Madrid
       zoom: 10,
       mapTypeId: 'roadmap'
     })
+    console.log('Mapa móvil inicializado:', mapMobile)
   }
 
   // Inicializar mapa desktop
   const mapDesktopElement = document.getElementById('map-desktop')
   if (mapDesktopElement && !mapDesktop) {
+    console.log('Inicializando mapa desktop')
     mapDesktop = new window.google.maps.Map(mapDesktopElement, {
       center: { lat: 40.4168, lng: -3.7038 }, // Madrid
       zoom: 10,
       mapTypeId: 'roadmap'
     })
+    console.log('Mapa desktop inicializado:', mapDesktop)
   }
 }
 
@@ -762,13 +768,18 @@ const clearMapMarkers = () => {
 
 // Función para mostrar un viaje específico en el mapa
 const showTripOnMap = (result: SearchResult) => {
-  if (!mapMobile && !mapDesktop) {
-    console.warn('Mapa no inicializado')
+  console.log('Mostrando viaje en mapa:', result)
+  
+  // Determinar qué mapa usar basado en el tamaño de pantalla
+  const isMobile = window.innerWidth < 1024
+  const map = isMobile ? mapMobile : mapDesktop
+  
+  if (!map) {
+    console.warn('Mapa no inicializado. Móvil:', mapMobile, 'Desktop:', mapDesktop)
     return
   }
-
-  const map = mapMobile || mapDesktop
-  if (!map) return
+  
+  console.log('Usando mapa:', isMobile ? 'móvil' : 'desktop', map)
 
   // Limpiar marcadores anteriores
   clearMapMarkers()
@@ -797,18 +808,43 @@ const showTripOnMap = (result: SearchResult) => {
   })
   currentMarkers.push(destinationMarker)
 
-  // Línea entre origen y destino
-  const polyline = new window.google.maps.Polyline({
-    path: [
-      { lat: trip.origin_lat, lng: trip.origin_lng },
-      { lat: trip.destination_lat, lng: trip.destination_lng }
-    ],
-    map: map,
-    strokeColor: '#3B82F6',
-    strokeOpacity: 0.8,
-    strokeWeight: 3
+  // Obtener ruta real usando DirectionsService
+  const directionsService = new window.google.maps.DirectionsService()
+  const directionsRenderer = new window.google.maps.DirectionsRenderer({
+    suppressMarkers: true, // No mostrar marcadores por defecto
+    polylineOptions: {
+      strokeColor: '#3B82F6',
+      strokeOpacity: 0.8,
+      strokeWeight: 4
+    }
   })
-  currentPolylines.push(polyline)
+  
+  directionsRenderer.setMap(map)
+  currentPolylines.push(directionsRenderer)
+
+  directionsService.route({
+    origin: { lat: trip.origin_lat, lng: trip.origin_lng },
+    destination: { lat: trip.destination_lat, lng: trip.destination_lng },
+    travelMode: window.google.maps.TravelMode.DRIVING
+  }, (result, status) => {
+    if (status === 'OK') {
+      directionsRenderer.setDirections(result)
+    } else {
+      console.warn('Error al obtener ruta:', status)
+      // Fallback a línea recta si falla la ruta
+      const fallbackPolyline = new window.google.maps.Polyline({
+        path: [
+          { lat: trip.origin_lat, lng: trip.origin_lng },
+          { lat: trip.destination_lat, lng: trip.destination_lng }
+        ],
+        map: map,
+        strokeColor: '#3B82F6',
+        strokeOpacity: 0.8,
+        strokeWeight: 3
+      })
+      currentPolylines.push(fallbackPolyline)
+    }
+  })
 
   // Ajustar la vista para mostrar el viaje
   const bounds = new window.google.maps.LatLngBounds()
@@ -821,10 +857,18 @@ const showTripOnMap = (result: SearchResult) => {
 
 // Función para mostrar resultados en el mapa
 const showResultsOnMap = (results: SearchResult[]) => {
-  if (!mapMobile && !mapDesktop) return
-
-  const map = mapMobile || mapDesktop
-  if (!map) return
+  console.log('Mostrando resultados en mapa:', results)
+  
+  // Determinar qué mapa usar basado en el tamaño de pantalla
+  const isMobile = window.innerWidth < 1024
+  const map = isMobile ? mapMobile : mapDesktop
+  
+  if (!map) {
+    console.warn('Mapa no inicializado. Móvil:', mapMobile, 'Desktop:', mapDesktop)
+    return
+  }
+  
+  console.log('Usando mapa:', isMobile ? 'móvil' : 'desktop', map)
 
   // Limpiar marcadores anteriores
   clearMapMarkers()
@@ -855,18 +899,43 @@ const showResultsOnMap = (results: SearchResult[]) => {
     })
     currentMarkers.push(destinationMarker)
 
-    // Línea entre origen y destino
-    const polyline = new window.google.maps.Polyline({
-      path: [
-        { lat: trip.origin_lat, lng: trip.origin_lng },
-        { lat: trip.destination_lat, lng: trip.destination_lng }
-      ],
-      map: map,
-      strokeColor: '#3B82F6',
-      strokeOpacity: 0.8,
-      strokeWeight: 3
+    // Obtener ruta real usando DirectionsService
+    const directionsService = new window.google.maps.DirectionsService()
+    const directionsRenderer = new window.google.maps.DirectionsRenderer({
+      suppressMarkers: true, // No mostrar marcadores por defecto
+      polylineOptions: {
+        strokeColor: '#3B82F6',
+        strokeOpacity: 0.8,
+        strokeWeight: 4
+      }
     })
-    currentPolylines.push(polyline)
+    
+    directionsRenderer.setMap(map)
+    currentPolylines.push(directionsRenderer)
+
+    directionsService.route({
+      origin: { lat: trip.origin_lat, lng: trip.origin_lng },
+      destination: { lat: trip.destination_lat, lng: trip.destination_lng },
+      travelMode: window.google.maps.TravelMode.DRIVING
+    }, (result, status) => {
+      if (status === 'OK') {
+        directionsRenderer.setDirections(result)
+      } else {
+        console.warn('Error al obtener ruta:', status)
+        // Fallback a línea recta si falla la ruta
+        const fallbackPolyline = new window.google.maps.Polyline({
+          path: [
+            { lat: trip.origin_lat, lng: trip.origin_lng },
+            { lat: trip.destination_lat, lng: trip.destination_lng }
+          ],
+          map: map,
+          strokeColor: '#3B82F6',
+          strokeOpacity: 0.8,
+          strokeWeight: 3
+        })
+        currentPolylines.push(fallbackPolyline)
+      }
+    })
   })
 
   // Ajustar la vista para mostrar todos los marcadores
