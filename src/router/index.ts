@@ -153,7 +153,7 @@ const router = createRouter({
     {
       path: '/carpooling/busqueda-mapa',
       name: 'Busqueda Mapa',
-      component: () => import('../views/Carpooling/BusquedaMapaCompleta.vue'),
+      component: () => import('../views/Carpooling/BusquedaMapaSimple.vue'),
       meta: {
         title: 'Búsqueda por Mapa',
       },
