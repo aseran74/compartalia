@@ -115,7 +115,7 @@ export class HybridTripService {
           .from('trips')
           .select(`
             *,
-            profiles!inner (
+            profiles!driver_id (
               name,
               avatar_url
             )
