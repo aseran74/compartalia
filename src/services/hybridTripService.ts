@@ -62,7 +62,7 @@ export class HybridTripService {
       date?: string
     } = {}
   ): Promise<SearchResult[]> {
-    const { useGeolocation = true, maxDistanceKm = 10, limit = 50 } = options
+    const { useGeolocation = true, maxDistanceKm = 5, limit = 50 } = options
 
     try {
       console.log('🔍 HybridTripService - Búsqueda híbrida:', { 
