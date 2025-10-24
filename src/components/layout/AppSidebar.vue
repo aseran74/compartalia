@@ -10,8 +10,8 @@
         'lg:translate-x-0': true,
       },
     ]"
-    @mouseenter="!isExpanded && (isHovered = true)"
-    @mouseleave="isHovered = false"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
   >
     <!-- Logo solo en vista móvil -->
     <div
@@ -229,7 +229,7 @@ import { useSidebar } from "@/composables/useSidebar";
 
 const route = useRoute();
 
-const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
+const { isExpanded, isMobileOpen, isHovered, openSubmenu, handleMouseEnter, handleMouseLeave } = useSidebar();
 
 const menuGroups = [
   {

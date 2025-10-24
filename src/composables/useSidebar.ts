@@ -12,6 +12,10 @@ interface SidebarContextType {
   setIsHovered: (isHovered: boolean) => void
   setActiveItem: (item: string | null) => void
   toggleSubmenu: (item: string) => void
+  handleMouseEnter: () => void
+  handleMouseLeave: () => void
+  startAutoHideTimer: () => void
+  clearAutoHideTimer: () => void
 }
 
 const SidebarSymbol = Symbol()
@@ -23,6 +27,7 @@ export function useSidebarProvider() {
   const isHovered = ref(false)
   const activeItem = ref<string | null>(null)
   const openSubmenu = ref<string | null>(null)
+  const autoHideTimeout = ref<NodeJS.Timeout | null>(null)
 
   const handleResize = () => {
     const mobile = window.innerWidth < 768
@@ -39,6 +44,7 @@ export function useSidebarProvider() {
 
   onUnmounted(() => {
     window.removeEventListener('resize', handleResize)
+    clearAutoHideTimer()
   })
 
   const toggleSidebar = () => {
@@ -46,6 +52,12 @@ export function useSidebarProvider() {
       isMobileOpen.value = !isMobileOpen.value
     } else {
       isExpanded.value = !isExpanded.value
+      // Si se abre la sidebar, iniciar timer de auto-ocultar
+      if (isExpanded.value) {
+        startAutoHideTimer()
+      } else {
+        clearAutoHideTimer()
+      }
     }
   }
 
@@ -65,6 +77,39 @@ export function useSidebarProvider() {
     openSubmenu.value = openSubmenu.value === item ? null : item
   }
 
+  const startAutoHideTimer = () => {
+    // Limpiar timer anterior si existe
+    if (autoHideTimeout.value) {
+      clearTimeout(autoHideTimeout.value)
+    }
+    
+    // Solo auto-ocultar en desktop y si no está siendo hovered
+    if (!isMobile.value && !isHovered.value) {
+      autoHideTimeout.value = setTimeout(() => {
+        if (!isHovered.value) {
+          isExpanded.value = false
+        }
+      }, 2000) // 2 segundos
+    }
+  }
+
+  const clearAutoHideTimer = () => {
+    if (autoHideTimeout.value) {
+      clearTimeout(autoHideTimeout.value)
+      autoHideTimeout.value = null
+    }
+  }
+
+  const handleMouseEnter = () => {
+    setIsHovered(true)
+    clearAutoHideTimer()
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovered(false)
+    startAutoHideTimer()
+  }
+
   const context: SidebarContextType = {
     isExpanded: computed(() => (isMobile.value ? false : isExpanded.value)),
     isMobileOpen,
@@ -76,6 +121,10 @@ export function useSidebarProvider() {
     setIsHovered,
     setActiveItem,
     toggleSubmenu,
+    handleMouseEnter,
+    handleMouseLeave,
+    startAutoHideTimer,
+    clearAutoHideTimer,
   }
 
   provide(SidebarSymbol, context)
