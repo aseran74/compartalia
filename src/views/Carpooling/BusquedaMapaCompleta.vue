@@ -433,8 +433,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Panel de Filtros Flotante para Móvil -->
         <div v-if="showFiltersMobile" class="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden">
           <div class="absolute inset-0 bg-white dark:bg-boxdark overflow-y-auto">
             <div class="p-4">
