@@ -218,7 +218,9 @@ const handleClickOutside = (event: Event) => {
 
 onMounted(() => {
   if (props.modelValue) {
-    selectedDate.value = new Date(props.modelValue)
+    // Parsear la fecha como fecha local para evitar problemas de zona horaria
+    const [year, month, day] = props.modelValue.split('-').map(Number)
+    selectedDate.value = new Date(year, month - 1, day)
   }
   document.addEventListener('click', handleClickOutside)
 })

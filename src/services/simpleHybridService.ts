@@ -44,17 +44,18 @@ export class SimpleHybridService {
       useGeolocation?: boolean
       maxDistanceKm?: number
       limit?: number
+      date?: string
     } = {}
   ): Promise<SearchResult[]> {
-    const { limit = 50 } = options
+    const { limit = 50, date } = options
 
     try {
       console.log('🔍 SimpleHybridService - Búsqueda simplificada:', { 
-        origin, destination, limit 
+        origin, destination, limit, date 
       })
 
       // Solo búsqueda por texto directo
-      const textResults = await this.searchByText(origin, destination, limit)
+      const textResults = await this.searchByText(origin, destination, limit, date)
       
       const results: SearchResult[] = textResults.map(trip => ({
         trip,
@@ -73,17 +74,36 @@ export class SimpleHybridService {
   /**
    * Búsqueda por texto directo
    */
-  private async searchByText(origin?: string, destination?: string, limit: number = 50): Promise<Trip[]> {
+  private async searchByText(origin?: string, destination?: string, limit: number = 50, date?: string): Promise<Trip[]> {
     try {
-      console.log('🔍 SimpleHybridService.searchByText - Iniciando búsqueda:', { origin, destination, limit })
+      console.log('🔍 SimpleHybridService.searchByText - Iniciando búsqueda:', { origin, destination, limit, date })
       
       // Primero obtener los viajes sin JOIN
       let query = supabaseClean
         .from('trips')
         .select('*')
         .eq('status', 'active')
-        .gte('departure_time', new Date().toISOString())
         .limit(limit)
+
+      // Filtrar por fecha si se proporciona
+      if (date) {
+        const searchDate = new Date(date)
+        const startOfDay = new Date(searchDate.getFullYear(), searchDate.getMonth(), searchDate.getDate())
+        const endOfDay = new Date(searchDate.getFullYear(), searchDate.getMonth(), searchDate.getDate() + 1)
+        
+        console.log('🔍 Filtrando por fecha:', { 
+          date, 
+          startOfDay: startOfDay.toISOString(), 
+          endOfDay: endOfDay.toISOString() 
+        })
+        
+        query = query
+          .gte('departure_time', startOfDay.toISOString())
+          .lt('departure_time', endOfDay.toISOString())
+      } else {
+        // Si no hay fecha específica, buscar solo viajes futuros
+        query = query.gte('departure_time', new Date().toISOString())
+      }
 
       // Aplicar filtros de texto
       if (origin) {

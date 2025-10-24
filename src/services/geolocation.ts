@@ -16,19 +16,20 @@ export class GeolocationService {
    * Autocompleta direcciones usando Google Places API o fallback a Nominatim
    */
   async autocompleteAddress(input: string, sessionToken?: string): Promise<Location[]> {
-    // Intentar usar Google Places API primero
-    if (this.googlePlacesApiKey) {
-      try {
-        console.log('🔍 Intentando usar Google Places API...');
-        return await this.googlePlacesService.autocompleteAddress(input, sessionToken);
-      } catch (error) {
-        console.warn('⚠️ Google Places API falló, usando Nominatim:', error);
-      }
-    }
-    
-    // Fallback a Nominatim
+    // Por ahora, usar solo Nominatim para evitar problemas de autorización
     console.log('🔍 Usando OpenStreetMap (Nominatim) para autocompletado');
     return this.autocompleteAddressNominatim(input);
+    
+    // TODO: Rehabilitar Google Places API cuando esté correctamente autorizada
+    // Intentar usar Google Places API primero
+    // if (this.googlePlacesApiKey) {
+    //   try {
+    //     console.log('🔍 Intentando usar Google Places API...');
+    //     return await this.googlePlacesService.autocompleteAddress(input, sessionToken);
+    //   } catch (error) {
+    //     console.warn('⚠️ Google Places API falló, usando Nominatim:', error);
+    //   }
+    // }
   }
 
   /**
