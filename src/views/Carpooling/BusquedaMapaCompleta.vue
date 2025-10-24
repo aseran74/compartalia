@@ -37,31 +37,109 @@
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
           <!-- En móvil: Mapa de pantalla completa -->
           <div class="lg:hidden">
-            <div class="fixed inset-0 bg-white dark:bg-boxdark z-10">
-              <!-- Header del mapa móvil -->
-              <div class="absolute top-0 left-0 right-0 z-20 bg-white dark:bg-boxdark shadow-sm p-4">
-                <div class="flex items-center justify-between">
-                  <h1 class="text-lg font-bold text-black dark:text-white">
-                    🗺️ Búsqueda por Mapa
-                  </h1>
-                  <button
-                    @click="$router.go(-1)"
-                    class="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </button>
-                </div>
+            <!-- Header del mapa móvil -->
+            <div class="mb-4 bg-white dark:bg-boxdark shadow-sm p-4 rounded-lg">
+              <div class="flex items-center justify-between">
+                <h1 class="text-lg font-bold text-black dark:text-white">
+                  🗺️ Búsqueda por Mapa
+                </h1>
+                <button
+                  @click="$router.go(-1)"
+                  class="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
               </div>
-              
-              <!-- Mapa de pantalla completa -->
-              <div class="absolute inset-0 pt-16">
-                <div 
-                  id="map-mobile" 
-                  class="w-full h-full"
-                  style="min-height: calc(100vh - 64px);"
-                ></div>
+            </div>
+            
+            <!-- Mapa móvil -->
+            <div class="bg-white dark:bg-boxdark rounded-lg shadow-lg overflow-hidden">
+              <div 
+                id="map-mobile" 
+                class="w-full"
+                style="height: 70vh; min-height: 400px;"
+              ></div>
+            </div>
+            
+            <!-- Botón flotante para filtros en móvil -->
+            <div class="fixed bottom-4 right-4 z-30">
+              <button
+                @click="showFiltersMobile = !showFiltersMobile"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors"
+              >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Panel de filtros móvil -->
+            <div v-if="showFiltersMobile" class="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden">
+              <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-boxdark rounded-t-lg shadow-lg max-h-[80vh] overflow-y-auto">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-black dark:text-white">
+                      🔍 Filtros de Búsqueda
+                    </h3>
+                    <button
+                      @click="showFiltersMobile = false"
+                      class="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="p-4">
+                  <!-- Aquí va el contenido de los filtros -->
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium text-black dark:text-white mb-2">
+                        🚗 Origen
+                      </label>
+                      <input
+                        v-model="searchForm.origin"
+                        type="text"
+                        placeholder="Escribe tu origen..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label class="block text-sm font-medium text-black dark:text-white mb-2">
+                        🎯 Destino
+                      </label>
+                      <input
+                        v-model="searchForm.destination"
+                        type="text"
+                        placeholder="Escribe tu destino..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label class="block text-sm font-medium text-black dark:text-white mb-2">
+                        📅 Fecha
+                      </label>
+                      <input
+                        v-model="searchForm.date"
+                        type="date"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    
+                    <button
+                      @click="searchTrips"
+                      class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+                    >
+                      🔍 Buscar Viajes
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
