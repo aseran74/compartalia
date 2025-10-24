@@ -500,7 +500,10 @@
                         <span class="text-sm text-body-color">
                           🪑 {{ result.trip.available_seats }} asientos disponibles
                         </span>
-                        <button class="text-primary hover:text-primary/80 text-sm font-medium">
+                        <button 
+                          @click="showTripOnMap(result)"
+                          class="text-primary hover:text-primary/80 text-sm font-medium"
+                        >
                           Ver en mapa
                         </button>
                       </div>
@@ -745,6 +748,77 @@ const initializeMap = () => {
   }
 }
 
+// Variables para almacenar marcadores y líneas
+let currentMarkers: any[] = []
+let currentPolylines: any[] = []
+
+// Función para limpiar marcadores anteriores
+const clearMapMarkers = () => {
+  currentMarkers.forEach(marker => marker.setMap(null))
+  currentPolylines.forEach(polyline => polyline.setMap(null))
+  currentMarkers = []
+  currentPolylines = []
+}
+
+// Función para mostrar un viaje específico en el mapa
+const showTripOnMap = (result: SearchResult) => {
+  if (!mapMobile && !mapDesktop) {
+    console.warn('Mapa no inicializado')
+    return
+  }
+
+  const map = mapMobile || mapDesktop
+  if (!map) return
+
+  // Limpiar marcadores anteriores
+  clearMapMarkers()
+
+  const trip = result.trip
+  
+  // Marcador de origen
+  const originMarker = new window.google.maps.Marker({
+    position: { lat: trip.origin_lat, lng: trip.origin_lng },
+    map: map,
+    title: `Origen: ${trip.origin_name}`,
+    icon: {
+      url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
+    }
+  })
+  currentMarkers.push(originMarker)
+
+  // Marcador de destino
+  const destinationMarker = new window.google.maps.Marker({
+    position: { lat: trip.destination_lat, lng: trip.destination_lng },
+    map: map,
+    title: `Destino: ${trip.destination_name}`,
+    icon: {
+      url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+    }
+  })
+  currentMarkers.push(destinationMarker)
+
+  // Línea entre origen y destino
+  const polyline = new window.google.maps.Polyline({
+    path: [
+      { lat: trip.origin_lat, lng: trip.origin_lng },
+      { lat: trip.destination_lat, lng: trip.destination_lng }
+    ],
+    map: map,
+    strokeColor: '#3B82F6',
+    strokeOpacity: 0.8,
+    strokeWeight: 3
+  })
+  currentPolylines.push(polyline)
+
+  // Ajustar la vista para mostrar el viaje
+  const bounds = new window.google.maps.LatLngBounds()
+  bounds.extend({ lat: trip.origin_lat, lng: trip.origin_lng })
+  bounds.extend({ lat: trip.destination_lat, lng: trip.destination_lng })
+  map.fitBounds(bounds)
+
+  console.log('Viaje mostrado en el mapa:', trip.origin_name, '→', trip.destination_name)
+}
+
 // Función para mostrar resultados en el mapa
 const showResultsOnMap = (results: SearchResult[]) => {
   if (!mapMobile && !mapDesktop) return
@@ -753,14 +827,14 @@ const showResultsOnMap = (results: SearchResult[]) => {
   if (!map) return
 
   // Limpiar marcadores anteriores
-  // (En una implementación completa, guardarías referencias a los marcadores)
+  clearMapMarkers()
 
   // Crear marcadores para cada resultado
   results.forEach((result, index) => {
     const trip = result.trip
     
     // Marcador de origen
-    new window.google.maps.Marker({
+    const originMarker = new window.google.maps.Marker({
       position: { lat: trip.origin_lat, lng: trip.origin_lng },
       map: map,
       title: `Origen: ${trip.origin_name}`,
@@ -768,9 +842,10 @@ const showResultsOnMap = (results: SearchResult[]) => {
         url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
       }
     })
+    currentMarkers.push(originMarker)
 
     // Marcador de destino
-    new window.google.maps.Marker({
+    const destinationMarker = new window.google.maps.Marker({
       position: { lat: trip.destination_lat, lng: trip.destination_lng },
       map: map,
       title: `Destino: ${trip.destination_name}`,
@@ -778,9 +853,10 @@ const showResultsOnMap = (results: SearchResult[]) => {
         url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
       }
     })
+    currentMarkers.push(destinationMarker)
 
     // Línea entre origen y destino
-    new window.google.maps.Polyline({
+    const polyline = new window.google.maps.Polyline({
       path: [
         { lat: trip.origin_lat, lng: trip.origin_lng },
         { lat: trip.destination_lat, lng: trip.destination_lng }
@@ -790,6 +866,7 @@ const showResultsOnMap = (results: SearchResult[]) => {
       strokeOpacity: 0.8,
       strokeWeight: 3
     })
+    currentPolylines.push(polyline)
   })
 
   // Ajustar la vista para mostrar todos los marcadores
