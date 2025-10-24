@@ -387,10 +387,10 @@
                     >
                       <div class="flex items-center justify-between mb-2">
                         <h4 class="font-semibold text-black dark:text-white">
-                          {{ result.trip.origin }} → {{ result.trip.destination }}
+                          {{ result.trip.origin_name }} → {{ result.trip.destination_name }}
                         </h4>
                         <span class="text-sm font-medium text-primary">
-                          {{ result.trip.price }}€
+                          {{ result.trip.price_per_seat }}€
                         </span>
                       </div>
                       <p class="text-sm text-body-color mb-2">
