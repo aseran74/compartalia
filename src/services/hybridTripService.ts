@@ -79,10 +79,13 @@ export class HybridTripService {
         score: 1.0
       })))
 
-      // 2. Búsqueda por geolocalización (si está habilitada y tenemos coordenadas)
-      if (useGeolocation && (origin || destination)) {
+      // 2. Búsqueda por geolocalización (solo si no hay coincidencia exacta por texto)
+      if (useGeolocation && (origin || destination) && textResults.length === 0) {
+        console.log('🔍 No hay coincidencias exactas por texto, buscando por geolocalización...')
         const geoResults = await this.searchByGeolocation(origin, destination, maxDistanceKm, limit)
         results.push(...geoResults)
+      } else if (textResults.length > 0) {
+        console.log('🔍 Coincidencias exactas encontradas, omitiendo búsqueda por geolocalización')
       }
 
       // 3. Eliminar duplicados y ordenar por score
