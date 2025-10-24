@@ -297,17 +297,34 @@ const allMenuGroups = [
 
 // Filtrar elementos del menú según si el usuario es administrador
 const menuGroups = computed(() => {
-  return allMenuGroups.map(group => ({
-    ...group,
-    items: group.items.filter(item => {
-      // Si el elemento requiere ser admin, verificar si el usuario es admin
-      if (item.adminOnly) {
-        return isAdmin.value;
+  try {
+    if (!allMenuGroups || !Array.isArray(allMenuGroups)) {
+      console.warn('allMenuGroups is not an array:', allMenuGroups);
+      return [];
+    }
+    
+    return allMenuGroups.map(group => {
+      if (!group || !group.items || !Array.isArray(group.items)) {
+        console.warn('Group items is not an array:', group);
+        return { ...group, items: [] };
       }
-      // Si no requiere ser admin, mostrarlo siempre
-      return true;
-    })
-  }));
+      
+      return {
+        ...group,
+        items: group.items.filter(item => {
+          // Si el elemento requiere ser admin, verificar si el usuario es admin
+          if (item.adminOnly) {
+            return isAdmin.value;
+          }
+          // Si no requiere ser admin, mostrarlo siempre
+          return true;
+        })
+      };
+    });
+  } catch (error) {
+    console.error('Error filtering menu groups:', error);
+    return [];
+  }
 });
 
 const isActive = (path) => route.path === path;
