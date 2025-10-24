@@ -111,15 +111,10 @@ export class HybridTripService {
     try {
       console.log('🔍 HybridTripService.searchByText - Iniciando búsqueda:', { origin, destination, limit })
       
-        let query = supabaseClean
-          .from('trips')
-          .select(`
-            *,
-            profiles!driver_id (
-              name,
-              avatar_url
-            )
-          `)
+      // Primero obtener los viajes sin JOIN
+      let query = supabaseClean
+        .from('trips')
+        .select('*')
         .eq('status', 'active')
         .limit(limit)
 
@@ -151,24 +146,60 @@ export class HybridTripService {
         query = query.ilike('destination_name', `%${normalizedDestination}%`)
       }
 
-      console.log('🔍 Ejecutando query...')
-      const { data, error } = await query
+      console.log('🔍 Ejecutando query de viajes...')
+      const { data: trips, error: tripsError } = await query
 
-      if (error) {
-        console.error('❌ Error en búsqueda por texto:', error)
+      if (tripsError) {
+        console.error('❌ Error en búsqueda por texto:', tripsError)
         return []
       }
 
-      console.log(`✅ Búsqueda por texto: ${data?.length || 0} viajes encontrados`)
-      console.log('📊 Datos encontrados:', data)
-      
+      if (!trips || trips.length === 0) {
+        console.log('✅ Búsqueda por texto: 0 viajes encontrados')
+        return []
+      }
+
+      console.log(`✅ Búsqueda por texto: ${trips.length} viajes encontrados`)
+      console.log('📊 Viajes encontrados:', trips)
+
+      // Ahora obtener los perfiles de los conductores
+      const driverIds = trips.map(trip => trip.driver_id)
+      console.log('🔍 Obteniendo perfiles para driver_ids:', driverIds)
+
+      const { data: profiles, error: profilesError } = await supabaseClean
+        .from('profiles')
+        .select('id, name, avatar_url')
+        .in('id', driverIds)
+
+      if (profilesError) {
+        console.error('❌ Error obteniendo perfiles:', profilesError)
+        // Continuar sin perfiles
+      }
+
+      console.log('📊 Perfiles encontrados:', profiles)
+
+      // Combinar viajes con perfiles
+      const tripsWithProfiles = trips.map(trip => {
+        const profile = profiles?.find(p => p.id === trip.driver_id)
+        return {
+          ...trip,
+          profiles: profile ? {
+            name: profile.name,
+            avatar_url: profile.avatar_url
+          } : {
+            name: 'Conductor',
+            avatar_url: null
+          }
+        }
+      })
+
       // Debug específico para verificar si el JOIN funciona
-      if (data && data.length > 0) {
-        console.log('🔍 Primer viaje con JOIN:', data[0])
-        console.log('🔍 Profiles del primer viaje:', data[0].profiles)
+      if (tripsWithProfiles && tripsWithProfiles.length > 0) {
+        console.log('🔍 Primer viaje con JOIN:', tripsWithProfiles[0])
+        console.log('🔍 Profiles del primer viaje:', tripsWithProfiles[0].profiles)
       }
       
-      return data || []
+      return tripsWithProfiles
     } catch (error) {
       console.error('❌ Error en searchByText:', error)
       return []
