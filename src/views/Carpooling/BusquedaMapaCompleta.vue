@@ -433,11 +433,21 @@
             </div>
           </div>
         </div>
-        <div v-if="showFiltersMobile" class="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden">
-          <div class="absolute inset-0 bg-white dark:bg-boxdark overflow-y-auto">
-            <div class="p-4">
-              <!-- Header del panel móvil -->
-              <div class="flex items-center justify-between mb-4">
+      </main>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+import { SimpleHybridService, type SearchResult } from '@/services/simpleHybridService'
+import AutocompleteInput from '@/components/AutocompleteInput.vue'
+import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
+import { GeolocationService } from '@/services/geolocation'
+import { useSidebar } from '@/composables/useSidebar'
+import AppSidebar from '@/components/layout/AppSidebar.vue'
+import AppHeader from '@/components/layout/AppHeader.vue'
                 <h3 class="text-lg font-semibold text-black dark:text-white">
                   🔍 Filtros de Búsqueda
                 </h3>
