@@ -128,10 +128,20 @@ const router = createRouter({
     },
     {
       path: '/carpooling',
-      name: 'Carpooling Dashboard',
+      name: 'Carpooling',
+      component: () => import('../views/Carpooling/Index.vue'),
+      meta: {
+        title: 'Carpooling - Compartalia',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/carpooling/dashboard',
+      name: 'CarpoolingDashboard',
       component: () => import('../views/Carpooling/Dashboard.vue'),
       meta: {
-        title: 'Compartalia - Dashboard',
+        title: 'Dashboard - Compartalia',
+        requiresAuth: true,
       },
     },
     {

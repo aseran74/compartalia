@@ -1,91 +1,161 @@
 <template>
-  <div class="p-6 max-w-7xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6">💬 Sistema de Mensajería</h1>
+  <div class="h-screen flex flex-col bg-gray-50">
+    <!-- Header móvil -->
+    <div class="lg:hidden bg-white shadow-sm border-b px-4 py-3 flex items-center justify-between">
+      <button
+        v-if="showMobileChat"
+        @click="showMobileChat = false"
+        class="p-2 text-gray-600 hover:text-gray-900"
+      >
+        ← Volver
+      </button>
+      <h1 class="text-lg font-semibold text-gray-900">💬 Mensajes</h1>
+      <button
+        @click="showNewChatModal = true"
+        class="p-2 text-blue-600 hover:text-blue-800"
+      >
+        ✉️
+      </button>
+    </div>
+
+    <!-- Header desktop -->
+    <div class="hidden lg:block bg-white shadow-sm border-b px-6 py-4">
+      <h1 class="text-2xl font-bold text-gray-900">💬 Sistema de Mensajería</h1>
+    </div>
     
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="flex-1 flex overflow-hidden">
       <!-- Lista de conversaciones -->
-      <div class="lg:col-span-1">
-        <div class="bg-white rounded-lg shadow-md">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold">📋 Conversaciones</h2>
-            <div class="mt-2">
+      <div 
+        :class="[
+          'bg-white shadow-lg border-r border-gray-200 transition-all duration-300',
+          'lg:w-1/3',
+          showMobileChat ? 'hidden' : 'w-full lg:block'
+        ]"
+      >
+        <div class="h-full flex flex-col">
+          <!-- Búsqueda -->
+          <div class="p-4 border-b border-gray-200">
+            <div class="relative">
               <input
                 v-model="searchConversations"
                 type="text"
                 placeholder="Buscar conversaciones..."
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="text-gray-400">🔍</span>
+              </div>
             </div>
           </div>
           
-          <div class="max-h-96 overflow-y-auto">
+          <!-- Lista de conversaciones -->
+          <div class="flex-1 overflow-y-auto">
             <div
               v-for="conversation in filteredConversations"
               :key="conversation.id"
               @click="selectConversation(conversation)"
               :class="[
-                'p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50',
+                'p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-200',
                 selectedConversation?.id === conversation.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
               ]"
             >
               <div class="flex items-center space-x-3">
-                <img
-                  :src="conversation.otherUser.avatar || '/images/user/default-avatar.png'"
-                  :alt="conversation.otherUser.nombre"
-                  class="h-10 w-10 rounded-full object-cover"
-                />
+                <div class="relative">
+                  <img
+                    :src="conversation.other_user.avatar_url || '/images/user/default-avatar.png'"
+                    :alt="conversation.other_user.name"
+                    class="h-12 w-12 rounded-full object-cover"
+                    @error="(event: any) => event.target.src = '/images/user/default-avatar.png'"
+                  />
+                  <!-- Indicador de estado online -->
+                  <div
+                    :class="[
+                      'absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white',
+                      conversation.other_user.role === 'admin' ? 'bg-green-400' : 'bg-gray-400'
+                    ]"
+                  ></div>
+                </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center justify-between">
                     <p class="text-sm font-medium text-gray-900 truncate">
-                      {{ conversation.otherUser.nombre }}
+                      {{ conversation.other_user.name }}
                     </p>
-                    <p class="text-xs text-gray-500">
-                      {{ formatTime(conversation.lastMessage.fecha) }}
-                    </p>
+                    <div class="flex items-center space-x-2">
+                      <p class="text-xs text-gray-500">
+                        {{ conversation.last_message ? formatTime(conversation.last_message.created_at) : '' }}
+                      </p>
+                      <span
+                        v-if="conversation.unread_count > 0"
+                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full"
+                      >
+                        {{ conversation.unread_count }}
+                      </span>
+                    </div>
                   </div>
-                  <p class="text-sm text-gray-600 truncate">
-                    {{ conversation.lastMessage.contenido }}
+                  <p class="text-sm text-gray-600 truncate mt-1">
+                    {{ conversation.last_message?.content || 'Sin mensajes' }}
                   </p>
-                  <div class="flex items-center justify-between mt-1">
+                  <div class="flex items-center justify-between mt-2">
                     <span
                       :class="[
                         'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                        conversation.otherUser.tipo.includes('conductor') ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                        conversation.other_user.role === 'admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                       ]"
                     >
-                      {{ conversation.otherUser.tipo.includes('conductor') ? '🚗 Conductor' : '👤 Pasajero' }}
-                    </span>
-                    <span
-                      v-if="conversation.unreadCount > 0"
-                      class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full"
-                    >
-                      {{ conversation.unreadCount }}
+                      {{ conversation.other_user.role === 'admin' ? '🚗 Admin' : '👤 Usuario' }}
                     </span>
                   </div>
                 </div>
               </div>
+            </div>
+            
+            <!-- Estado vacío -->
+            <div v-if="filteredConversations.length === 0" class="p-8 text-center">
+              <div class="text-4xl mb-4">💬</div>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">No hay conversaciones</h3>
+              <p class="text-gray-500 mb-4">Inicia una nueva conversación</p>
+              <button
+                @click="showNewChatModal = true"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                💬 Nueva Conversación
+              </button>
             </div>
           </div>
         </div>
       </div>
       
       <!-- Área de chat -->
-      <div class="lg:col-span-2">
-        <div v-if="selectedConversation" class="bg-white rounded-lg shadow-md h-96 flex flex-col">
+      <div 
+        :class="[
+          'flex-1 flex flex-col bg-white',
+          showMobileChat ? 'block' : 'hidden lg:flex'
+        ]"
+      >
+        <div v-if="selectedConversation" class="flex-1 flex flex-col h-full">
           <!-- Header del chat -->
-          <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <div class="px-4 lg:px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
             <div class="flex items-center space-x-3">
-              <img
-                :src="selectedConversation.otherUser.avatar || '/images/user/default-avatar.png'"
-                :alt="selectedConversation.otherUser.nombre"
-                class="h-8 w-8 rounded-full object-cover"
-              />
+              <div class="relative">
+                <img
+                  :src="selectedConversation.otherUser.avatar || '/images/user/default-avatar.png'"
+                  :alt="selectedConversation.otherUser.nombre"
+                  class="h-10 w-10 rounded-full object-cover"
+                  @error="(event: any) => event.target.src = '/images/user/default-avatar.png'"
+                />
+                <div
+                  :class="[
+                    'absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white',
+                    selectedConversation.otherUser.estado === 'activo' ? 'bg-green-400' : 'bg-gray-400'
+                  ]"
+                ></div>
+              </div>
               <div>
                 <h3 class="text-lg font-medium text-gray-900">
-                  {{ selectedConversation.otherUser.nombre }}
+                  {{ selectedConversation.other_user.name }}
                 </h3>
                 <p class="text-sm text-gray-500">
-                  {{ selectedConversation.otherUser.email }}
+                  {{ selectedConversation.other_user.id }}
                 </p>
               </div>
             </div>
@@ -93,16 +163,17 @@
               <span
                 :class="[
                   'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
-                  selectedConversation.otherUser.tipo.includes('conductor') ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                  selectedConversation.other_user.role === 'admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                 ]"
               >
-                {{ selectedConversation.otherUser.tipo.includes('conductor') ? '🚗 Conductor' : '👤 Pasajero' }}
+                {{ selectedConversation.other_user.role === 'admin' ? '🚗 Admin' : '👤 Usuario' }}
               </span>
               <button
-                @click="verPerfilUsuario(selectedConversation.otherUser)"
-                class="text-blue-600 hover:text-blue-900 text-sm"
+                @click="verPerfilUsuario(selectedConversation.other_user)"
+                class="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors"
+                title="Ver Perfil"
               >
-                👁️ Ver Perfil
+                👁️
               </button>
             </div>
           </div>
@@ -119,61 +190,153 @@
             >
               <div
                 :class="[
-                  'max-w-xs lg:max-w-md px-4 py-2 rounded-lg',
+                  'max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm',
                   mensaje.remitenteId === currentUser.id
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-900'
+                    ? 'bg-blue-500 text-white rounded-br-md'
+                    : 'bg-gray-100 text-gray-900 rounded-bl-md'
                 ]"
               >
-                <p class="text-sm">{{ mensaje.contenido }}</p>
-                <p
-                  :class="[
-                    'text-xs mt-1',
-                    mensaje.remitenteId === currentUser.id ? 'text-blue-100' : 'text-gray-500'
-                  ]"
-                >
-                  {{ formatDateTime(mensaje.fecha) }}
-                </p>
+                <p class="text-sm leading-relaxed">{{ mensaje.contenido }}</p>
+                <div class="flex items-center justify-end mt-1 space-x-1">
+                  <p
+                    :class="[
+                      'text-xs',
+                      mensaje.remitenteId === currentUser.id ? 'text-blue-100' : 'text-gray-500'
+                    ]"
+                  >
+                    {{ formatDateTime(mensaje.fecha) }}
+                  </p>
+                  <span
+                    v-if="mensaje.remitenteId === currentUser.id"
+                    class="text-xs"
+                  >
+                    {{ mensaje.leido ? '✓✓' : '✓' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Indicador de escritura -->
+            <div v-if="isTyping" class="flex justify-start">
+              <div class="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+                <div class="flex space-x-1">
+                  <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                  <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                </div>
               </div>
             </div>
           </div>
           
           <!-- Input de mensaje -->
-          <div class="px-6 py-4 border-t border-gray-200">
+          <div class="px-4 lg:px-6 py-4 border-t border-gray-200 bg-white">
             <form @submit.prevent="enviarMensaje" class="flex space-x-2">
-              <input
-                v-model="nuevoMensaje"
-                type="text"
-                placeholder="Escribe tu mensaje..."
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :disabled="!canSendMessage"
-              />
+              <div class="flex-1 relative">
+                <input
+                  v-model="nuevoMensaje"
+                  type="text"
+                  placeholder="Escribe tu mensaje..."
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  :disabled="!canSendMessage"
+                  @keydown.enter="enviarMensaje"
+                />
+                <button
+                  type="button"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  😊
+                </button>
+              </div>
               <button
                 type="submit"
                 :disabled="!nuevoMensaje.trim() || !canSendMessage"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
               >
-                📤 Enviar
+                <span>📤</span>
+                <span class="hidden sm:inline">Enviar</span>
               </button>
             </form>
           </div>
         </div>
         
         <!-- Estado cuando no hay conversación seleccionada -->
-        <div v-else class="bg-white rounded-lg shadow-md h-96 flex items-center justify-center">
-          <div class="text-center">
+        <div v-else class="flex-1 flex items-center justify-center bg-gray-50">
+          <div class="text-center p-8">
             <div class="text-6xl mb-4">💬</div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">
+            <h3 class="text-xl font-medium text-gray-900 mb-2">
               Selecciona una conversación
             </h3>
-            <p class="text-gray-500">
+            <p class="text-gray-500 mb-6">
               Elige una conversación de la lista para comenzar a chatear
             </p>
+            <button
+              @click="showNewChatModal = true"
+              class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              💬 Nueva Conversación
+            </button>
           </div>
         </div>
       </div>
     </div>
     
+    <!-- Modal de nueva conversación -->
+    <div
+      v-if="showNewChatModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+    >
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900">
+              💬 Nueva Conversación
+            </h3>
+            <button
+              @click="showNewChatModal = false"
+              class="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Buscar usuario
+              </label>
+              <input
+                v-model="searchNewUser"
+                type="text"
+                placeholder="Nombre o email..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div class="max-h-60 overflow-y-auto">
+              <div
+                v-for="user in filteredUsers"
+                :key="user.id"
+                @click="iniciarNuevaConversacionConUsuario(user)"
+                class="p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+              >
+                <div class="flex items-center space-x-3">
+                  <img
+                    :src="user.avatar || '/images/user/default-avatar.png'"
+                    :alt="user.nombre"
+                    class="h-10 w-10 rounded-full object-cover"
+                  />
+                  <div>
+                    <p class="font-medium text-gray-900">{{ user.nombre }}</p>
+                    <p class="text-sm text-gray-500">{{ user.email }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal de perfil de usuario -->
     <div
       v-if="showProfileModal"
@@ -262,167 +425,37 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
+import { messagingService, type Message, type Conversation } from '@/services/messagingService';
+import { useAuth } from '@/composables/useAuth';
 
-// Interfaces
-interface Usuario {
-  id: string;
-  nombre: string;
-  email: string;
-  telefono: string;
-  avatar?: string;
-  tipo: string[];
-  estado: string;
-  rating: number;
-}
-
-interface Mensaje {
-  id: string;
-  conversacionId: string;
-  remitenteId: string;
-  contenido: string;
-  fecha: Date;
-  leido: boolean;
-}
-
-interface Conversacion {
-  id: string;
-  usuario1Id: string;
-  usuario2Id: string;
-  otherUser: Usuario;
-  mensajes: Mensaje[];
-  lastMessage: Mensaje;
-  unreadCount: number;
-  fechaCreacion: Date;
-}
+// Usar el composable de autenticación
+const { user, userProfile } = useAuth();
 
 // Estado reactivo
 const searchConversations = ref('');
-const selectedConversation = ref<Conversacion | null>(null);
+const selectedConversation = ref<Conversation | null>(null);
 const nuevoMensaje = ref('');
 const showProfileModal = ref(false);
-const selectedUser = ref<Usuario | null>(null);
+const showNewChatModal = ref(false);
+const selectedUser = ref<any>(null);
 const messagesContainer = ref<HTMLElement | null>(null);
+const showMobileChat = ref(false);
+const isTyping = ref(false);
+const searchNewUser = ref('');
+const loading = ref(false);
+const error = ref('');
 
-// Usuario actual (simulado)
-const currentUser = ref({
-  id: 'user-1',
-  nombre: 'Usuario Actual',
-  email: 'usuario@compartalia.com'
-});
+// Datos reactivos
+const conversaciones = ref<Conversation[]>([]);
+const mensajes = ref<Message[]>([]);
+const usuariosDisponibles = ref<any[]>([]);
 
-// Datos de ejemplo
-const conversaciones = ref<Conversacion[]>([
-  {
-    id: 'conv-1',
-    usuario1Id: 'user-1',
-    usuario2Id: 'user-2',
-    otherUser: {
-      id: 'user-2',
-      nombre: 'María García',
-      email: 'maria.garcia@email.com',
-      telefono: '+34600123456',
-      avatar: '/images/user/user-01.jpg',
-      tipo: ['conductor', 'pasajero'],
-      estado: 'verificado',
-      rating: 4.8
-    },
-    mensajes: [
-      {
-        id: 'msg-1',
-        conversacionId: 'conv-1',
-        remitenteId: 'user-2',
-        contenido: 'Hola! ¿Estás interesado en compartir el viaje a Madrid el viernes?',
-        fecha: new Date('2024-01-15T10:30:00'),
-        leido: true
-      },
-      {
-        id: 'msg-2',
-        conversacionId: 'conv-1',
-        remitenteId: 'user-1',
-        contenido: '¡Hola María! Sí, me interesa mucho. ¿A qué hora saldrías?',
-        fecha: new Date('2024-01-15T10:35:00'),
-        leido: true
-      },
-      {
-        id: 'msg-3',
-        conversacionId: 'conv-1',
-        remitenteId: 'user-2',
-        contenido: 'Perfecto! Saldría a las 7:30 AM desde Móstoles. ¿Te viene bien?',
-        fecha: new Date('2024-01-15T10:40:00'),
-        leido: true
-      },
-      {
-        id: 'msg-4',
-        conversacionId: 'conv-1',
-        remitenteId: 'user-1',
-        contenido: 'Perfecto, me viene genial. ¿Cuánto sería el precio?',
-        fecha: new Date('2024-01-15T10:45:00'),
-        leido: true
-      },
-      {
-        id: 'msg-5',
-        conversacionId: 'conv-1',
-        remitenteId: 'user-2',
-        contenido: 'Serían 15€ por persona. ¿Te parece bien?',
-        fecha: new Date('2024-01-15T10:50:00'),
-        leido: false
-      }
-    ],
-    lastMessage: {
-      id: 'msg-5',
-      conversacionId: 'conv-1',
-      remitenteId: 'user-2',
-      contenido: 'Serían 15€ por persona. ¿Te parece bien?',
-      fecha: new Date('2024-01-15T10:50:00'),
-      leido: false
-    },
-    unreadCount: 1,
-    fechaCreacion: new Date('2024-01-15T10:30:00')
-  },
-  {
-    id: 'conv-2',
-    usuario1Id: 'user-1',
-    usuario2Id: 'user-3',
-    otherUser: {
-      id: 'user-3',
-      nombre: 'Carlos López',
-      email: 'carlos.lopez@email.com',
-      telefono: '+34600234567',
-      avatar: '/images/user/user-02.jpg',
-      tipo: ['conductor'],
-      estado: 'activo',
-      rating: 4.6
-    },
-    mensajes: [
-      {
-        id: 'msg-6',
-        conversacionId: 'conv-2',
-        remitenteId: 'user-3',
-        contenido: 'Hola! Vi que buscas viaje a Madrid. Tengo uno disponible el lunes.',
-        fecha: new Date('2024-01-14T15:20:00'),
-        leido: true
-      },
-      {
-        id: 'msg-7',
-        conversacionId: 'conv-2',
-        remitenteId: 'user-1',
-        contenido: '¡Hola Carlos! ¿A qué hora y desde dónde?',
-        fecha: new Date('2024-01-14T15:25:00'),
-        leido: true
-      }
-    ],
-    lastMessage: {
-      id: 'msg-7',
-      conversacionId: 'conv-2',
-      remitenteId: 'user-1',
-      contenido: '¡Hola Carlos! ¿A qué hora y desde dónde?',
-      fecha: new Date('2024-01-14T15:25:00'),
-      leido: true
-    },
-    unreadCount: 0,
-    fechaCreacion: new Date('2024-01-14T15:20:00')
-  }
-]);
+// Computed properties
+const currentUser = computed(() => ({
+  id: user.value?.id || '',
+  nombre: userProfile.value?.name || 'Usuario',
+  email: user.value?.email || ''
+}));
 
 // Computed properties
 const filteredConversations = computed(() => {
@@ -432,26 +465,42 @@ const filteredConversations = computed(() => {
   
   const query = searchConversations.value.toLowerCase();
   return conversaciones.value.filter(conv =>
-    conv.otherUser.nombre.toLowerCase().includes(query) ||
-    conv.otherUser.email.toLowerCase().includes(query) ||
-    conv.lastMessage.contenido.toLowerCase().includes(query)
+    conv.other_user.name.toLowerCase().includes(query) ||
+    conv.other_user.id.toLowerCase().includes(query) ||
+    (conv.last_message?.content || '').toLowerCase().includes(query)
   );
 });
 
 const canSendMessage = computed(() => {
-  return selectedConversation.value && selectedConversation.value.otherUser.estado === 'activo';
+  return selectedConversation.value && user.value;
+});
+
+const filteredUsers = computed(() => {
+  if (!searchNewUser.value) {
+    return usuariosDisponibles.value;
+  }
+  
+  const query = searchNewUser.value.toLowerCase();
+  return usuariosDisponibles.value.filter(user =>
+    user.name.toLowerCase().includes(query) ||
+    user.id.toLowerCase().includes(query)
+  );
 });
 
 // Métodos
-function selectConversation(conversation: Conversacion) {
+async function selectConversation(conversation: Conversation) {
   selectedConversation.value = conversation;
+  
+  // En móvil, mostrar el chat
+  if (window.innerWidth < 1024) {
+    showMobileChat.value = true;
+  }
+  
+  // Cargar mensajes de la conversación
+  await loadMessages(conversation.id);
+  
   // Marcar mensajes como leídos
-  conversation.mensajes.forEach(mensaje => {
-    if (mensaje.remitenteId !== currentUser.value.id) {
-      mensaje.leido = true;
-    }
-  });
-  conversation.unreadCount = 0;
+  await messagingService.markMessagesAsRead(conversation.id);
   
   // Scroll al final de los mensajes
   nextTick(() => {
@@ -461,72 +510,109 @@ function selectConversation(conversation: Conversacion) {
   });
 }
 
-function enviarMensaje() {
+async function enviarMensaje() {
   if (!nuevoMensaje.value.trim() || !selectedConversation.value) return;
   
-  const nuevoMensajeObj: Mensaje = {
-    id: `msg-${Date.now()}`,
-    conversacionId: selectedConversation.value.id,
-    remitenteId: currentUser.value.id,
-    contenido: nuevoMensaje.value.trim(),
-    fecha: new Date(),
-    leido: false
-  };
-  
-  selectedConversation.value.mensajes.push(nuevoMensajeObj);
-  selectedConversation.value.lastMessage = nuevoMensajeObj;
-  
+  const content = nuevoMensaje.value.trim();
   nuevoMensaje.value = '';
   
-  // Scroll al final
-  nextTick(() => {
-    if (messagesContainer.value) {
-      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+  try {
+    const newMessage = await messagingService.sendMessage(
+      selectedConversation.value.id, 
+      content
+    );
+    
+    if (newMessage) {
+      // Recargar mensajes para mostrar el nuevo
+      await loadMessages(selectedConversation.value.id);
+      
+      // Scroll al final
+      nextTick(() => {
+        if (messagesContainer.value) {
+          messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+        }
+      });
     }
-  });
+  } catch (error) {
+    console.error('Error enviando mensaje:', error);
+    error.value = 'Error al enviar el mensaje';
+  }
 }
 
-function verPerfilUsuario(usuario: Usuario) {
+// Función para cargar mensajes
+async function loadMessages(conversationId: string) {
+  try {
+    const messages = await messagingService.getMessages(conversationId);
+    mensajes.value = messages;
+  } catch (error) {
+    console.error('Error cargando mensajes:', error);
+  }
+}
+
+// Función para cargar conversaciones
+async function loadConversations() {
+  try {
+    loading.value = true;
+    const conversations = await messagingService.getConversations();
+    conversaciones.value = conversations;
+  } catch (error) {
+    console.error('Error cargando conversaciones:', error);
+    error.value = 'Error al cargar las conversaciones';
+  } finally {
+    loading.value = false;
+  }
+}
+
+// Función para cargar usuarios disponibles
+async function loadAvailableUsers() {
+  try {
+    const users = await messagingService.getAvailableUsers();
+    usuariosDisponibles.value = users;
+  } catch (error) {
+    console.error('Error cargando usuarios:', error);
+  }
+}
+
+function verPerfilUsuario(usuario: any) {
   selectedUser.value = usuario;
   showProfileModal.value = true;
 }
 
-function iniciarNuevaConversacion() {
+async function iniciarNuevaConversacion() {
   if (selectedUser.value) {
-    // Buscar conversación existente o crear nueva
-    let conversacion = conversaciones.value.find(conv =>
-      conv.usuario1Id === currentUser.value.id && conv.usuario2Id === selectedUser.value!.id ||
-      conv.usuario1Id === selectedUser.value!.id && conv.usuario2Id === currentUser.value.id
-    );
-    
-    if (!conversacion) {
-      // Crear nueva conversación
-      conversacion = {
-        id: `conv-${Date.now()}`,
-        usuario1Id: currentUser.value.id,
-        usuario2Id: selectedUser.value.id,
-        otherUser: selectedUser.value,
-        mensajes: [],
-        lastMessage: {
-          id: '',
-          conversacionId: '',
-          remitenteId: '',
-          contenido: '',
-          fecha: new Date(),
-          leido: false
-        },
-        unreadCount: 0,
-        fechaCreacion: new Date()
-      };
-      conversaciones.value.unshift(conversacion);
+    try {
+      const conversation = await messagingService.createConversation(selectedUser.value.id);
+      if (conversation) {
+        // Recargar conversaciones
+        await loadConversations();
+        selectConversation(conversation);
+        showProfileModal.value = false;
+      }
+    } catch (error) {
+      console.error('Error creando conversación:', error);
+      error.value = 'Error al crear la conversación';
     }
-    
-    selectConversation(conversacion);
-    showProfileModal.value = false;
   }
 }
 
-function formatTime(date: Date): string {
+async function iniciarNuevaConversacionConUsuario(usuario: any) {
+  try {
+    const conversation = await messagingService.createConversation(usuario.id);
+    if (conversation) {
+      // Recargar conversaciones
+      await loadConversations();
+      selectConversation(conversation);
+      showNewChatModal.value = false;
+      searchNewUser.value = '';
+    }
+  } catch (error) {
+    console.error('Error creando conversación:', error);
+    error.value = 'Error al crear la conversación';
+  }
+}
+
+function formatTime(dateString: string): string {
+  const date = new Date(dateString);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const minutes = Math.floor(diff / 60000);
@@ -541,7 +627,8 @@ function formatTime(date: Date): string {
   return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
 }
 
-function formatDateTime(date: Date): string {
+function formatDateTime(dateString: string): string {
+  const date = new Date(dateString);
   return date.toLocaleTimeString('es-ES', { 
     hour: '2-digit', 
     minute: '2-digit' 
@@ -569,8 +656,25 @@ function getStatusLabel(estado: string): string {
 }
 
 // Inicialización
-onMounted(() => {
+onMounted(async () => {
   console.log('Componente Mensajería montado');
+  
+  // Verificar si hay un parámetro de usuario en la URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get('user');
+  
+  if (userId) {
+    console.log('Usuario específico solicitado:', userId);
+    // Buscar el usuario en la lista de usuarios disponibles
+    const user = usuariosDisponibles.value.find(u => u.id === userId);
+    if (user) {
+      // Crear conversación automáticamente
+      await iniciarNuevaConversacionConUsuario(user);
+    }
+  }
+  
+  await loadConversations();
+  await loadAvailableUsers();
 });
 </script>
 
