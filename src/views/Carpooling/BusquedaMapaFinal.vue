@@ -808,10 +808,24 @@ const showTripOnMap = (result: SearchResult) => {
   })
   currentMarkers.push(destinationMarker)
 
-  // Obtener ruta real usando DirectionsService
-  const directionsService = new window.google.maps.DirectionsService()
-  const directionsRenderer = new window.google.maps.DirectionsRenderer({
-    suppressMarkers: true, // No mostrar marcadores por defecto
+  // Usar Routes API (New) en lugar de Directions API legacy
+  console.log('Solicitando ruta de:', trip.origin_name, 'a', trip.destination_name)
+  console.log('Coordenadas origen:', trip.origin_lat, trip.origin_lng)
+  console.log('Coordenadas destino:', trip.destination_lat, trip.destination_lng)
+
+  // Crear ruta usando Routes API (New)
+  const route = new window.google.maps.Route({
+    origin: { lat: trip.origin_lat, lng: trip.origin_lng },
+    destination: { lat: trip.destination_lat, lng: trip.destination_lng },
+    travelMode: window.google.maps.TravelMode.DRIVING,
+    avoidHighways: false,
+    avoidTolls: false
+  })
+
+  // Renderizar la ruta
+  const routeRenderer = new window.google.maps.RouteRenderer({
+    route: route,
+    suppressMarkers: true,
     polylineOptions: {
       strokeColor: '#3B82F6',
       strokeOpacity: 0.8,
@@ -819,44 +833,10 @@ const showTripOnMap = (result: SearchResult) => {
     }
   })
   
-  directionsRenderer.setMap(map)
-  currentPolylines.push(directionsRenderer)
+  routeRenderer.setMap(map)
+  currentPolylines.push(routeRenderer)
 
-  console.log('Solicitando ruta de:', trip.origin_name, 'a', trip.destination_name)
-  console.log('Coordenadas origen:', trip.origin_lat, trip.origin_lng)
-  console.log('Coordenadas destino:', trip.destination_lat, trip.destination_lng)
-
-  // Usar direcciones de texto en lugar de coordenadas para mejor compatibilidad
-  const originText = `${trip.origin_lat},${trip.origin_lng}`
-  const destinationText = `${trip.destination_lat},${trip.destination_lng}`
-
-  directionsService.route({
-    origin: originText,
-    destination: destinationText,
-    travelMode: window.google.maps.TravelMode.DRIVING,
-    avoidHighways: false,
-    avoidTolls: false
-  }, (result, status) => {
-    console.log('Estado de la ruta:', status)
-    if (status === 'OK') {
-      console.log('✅ Ruta obtenida exitosamente - Directions API funcionando')
-      directionsRenderer.setDirections(result)
-    } else {
-      console.warn('❌ Error al obtener ruta:', status)
-      // Fallback a línea recta si falla la ruta
-      const fallbackPolyline = new window.google.maps.Polyline({
-        path: [
-          { lat: trip.origin_lat, lng: trip.origin_lng },
-          { lat: trip.destination_lat, lng: trip.destination_lng }
-        ],
-        map: map,
-        strokeColor: '#FF0000', // Rojo para distinguir del fallback
-        strokeOpacity: 0.8,
-        strokeWeight: 3
-      })
-      currentPolylines.push(fallbackPolyline)
-    }
-  })
+  console.log('✅ Ruta creada con Routes API (New)')
 
   // Ajustar la vista para mostrar el viaje
   const bounds = new window.google.maps.LatLngBounds()
@@ -911,10 +891,24 @@ const showResultsOnMap = (results: SearchResult[]) => {
     })
     currentMarkers.push(destinationMarker)
 
-    // Obtener ruta real usando DirectionsService
-    const directionsService = new window.google.maps.DirectionsService()
-    const directionsRenderer = new window.google.maps.DirectionsRenderer({
-      suppressMarkers: true, // No mostrar marcadores por defecto
+    // Usar Routes API (New) en lugar de Directions API legacy
+    console.log('Solicitando ruta de:', trip.origin_name, 'a', trip.destination_name)
+    console.log('Coordenadas origen:', trip.origin_lat, trip.origin_lng)
+    console.log('Coordenadas destino:', trip.destination_lat, trip.destination_lng)
+
+    // Crear ruta usando Routes API (New)
+    const route = new window.google.maps.Route({
+      origin: { lat: trip.origin_lat, lng: trip.origin_lng },
+      destination: { lat: trip.destination_lat, lng: trip.destination_lng },
+      travelMode: window.google.maps.TravelMode.DRIVING,
+      avoidHighways: false,
+      avoidTolls: false
+    })
+
+    // Renderizar la ruta
+    const routeRenderer = new window.google.maps.RouteRenderer({
+      route: route,
+      suppressMarkers: true,
       polylineOptions: {
         strokeColor: '#3B82F6',
         strokeOpacity: 0.8,
@@ -922,44 +916,10 @@ const showResultsOnMap = (results: SearchResult[]) => {
       }
     })
     
-    directionsRenderer.setMap(map)
-    currentPolylines.push(directionsRenderer)
+    routeRenderer.setMap(map)
+    currentPolylines.push(routeRenderer)
 
-    console.log('Solicitando ruta de:', trip.origin_name, 'a', trip.destination_name)
-    console.log('Coordenadas origen:', trip.origin_lat, trip.origin_lng)
-    console.log('Coordenadas destino:', trip.destination_lat, trip.destination_lng)
-
-    // Usar direcciones de texto en lugar de coordenadas para mejor compatibilidad
-    const originText = `${trip.origin_lat},${trip.origin_lng}`
-    const destinationText = `${trip.destination_lat},${trip.destination_lng}`
-
-    directionsService.route({
-      origin: originText,
-      destination: destinationText,
-      travelMode: window.google.maps.TravelMode.DRIVING,
-      avoidHighways: false,
-      avoidTolls: false
-    }, (result, status) => {
-      console.log('Estado de la ruta:', status)
-      if (status === 'OK') {
-        console.log('✅ Ruta obtenida exitosamente - Directions API funcionando')
-        directionsRenderer.setDirections(result)
-      } else {
-        console.warn('❌ Error al obtener ruta:', status)
-        // Fallback a línea recta si falla la ruta
-        const fallbackPolyline = new window.google.maps.Polyline({
-          path: [
-            { lat: trip.origin_lat, lng: trip.origin_lng },
-            { lat: trip.destination_lat, lng: trip.destination_lng }
-          ],
-          map: map,
-          strokeColor: '#FF0000', // Rojo para distinguir del fallback
-          strokeOpacity: 0.8,
-          strokeWeight: 3
-        })
-        currentPolylines.push(fallbackPolyline)
-      }
-    })
+    console.log('✅ Ruta creada con Routes API (New)')
   })
 
   // Ajustar la vista para mostrar todos los marcadores
