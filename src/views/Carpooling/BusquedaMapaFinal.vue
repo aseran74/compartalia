@@ -828,17 +828,24 @@ const showTripOnMap = async (result: SearchResult) => {
   currentMarkers.push(destinationMarker)
 
   // Usar Routes API (New) ahora que está habilitada
+  console.log('🚀 INICIANDO CÁLCULO DE RUTA...')
+  console.log('📍 Viaje:', trip.origin_name, '→', trip.destination_name)
+  console.log('📍 Coordenadas origen:', trip.origin_lat, trip.origin_lng)
+  console.log('📍 Coordenadas destino:', trip.destination_lat, trip.destination_lng)
+  
   try {
     console.log('🛣️ Calculando ruta con Routes API (New)...')
     const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
     const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
     
-    console.log('📍 Coordenadas:', { originCoords, destinationCoords })
+    console.log('📍 Coordenadas preparadas:', { originCoords, destinationCoords })
+    console.log('🔧 Llamando a routesApiService.calculateRoute...')
     
     const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
     console.log('✅ Ruta calculada exitosamente:', routeInfo)
     
     // Dibujar la ruta en el mapa
+    console.log('🎨 Dibujando ruta en el mapa...')
     const routePolyline = routesApiService.drawRouteOnMap(map, originCoords, destinationCoords, routeInfo.polyline)
     currentPolylines.push(routePolyline)
     
@@ -917,17 +924,24 @@ const showResultsOnMap = async (results: SearchResult[]) => {
     currentMarkers.push(destinationMarker)
 
     // Usar Routes API (New) ahora que está habilitada
+    console.log('🚀 INICIANDO CÁLCULO DE RUTA...')
+    console.log('📍 Viaje:', trip.origin_name, '→', trip.destination_name)
+    console.log('📍 Coordenadas origen:', trip.origin_lat, trip.origin_lng)
+    console.log('📍 Coordenadas destino:', trip.destination_lat, trip.destination_lng)
+    
     try {
       console.log('🛣️ Calculando ruta con Routes API (New)...')
       const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
       const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
       
-      console.log('📍 Coordenadas:', { originCoords, destinationCoords })
+      console.log('📍 Coordenadas preparadas:', { originCoords, destinationCoords })
+      console.log('🔧 Llamando a routesApiService.calculateRoute...')
       
       const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
       console.log('✅ Ruta calculada exitosamente:', routeInfo)
       
       // Dibujar la ruta en el mapa
+      console.log('🎨 Dibujando ruta en el mapa...')
       const routePolyline = routesApiService.drawRouteOnMap(map, originCoords, destinationCoords, routeInfo.polyline)
       currentPolylines.push(routePolyline)
       
