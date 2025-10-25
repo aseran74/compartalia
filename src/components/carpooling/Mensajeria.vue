@@ -375,13 +375,13 @@
                 <span class="text-sm font-medium text-gray-700">Tipo:</span>
                 <div class="flex space-x-2">
                   <span
-                    v-if="selectedUser?.tipo.includes('conductor')"
+                    v-if="selectedUser?.tipo?.includes('conductor')"
                     class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
                   >
                     🚗 Conductor
                   </span>
                   <span
-                    v-if="selectedUser?.tipo.includes('pasajero')"
+                    v-if="selectedUser?.tipo?.includes('pasajero')"
                     class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                   >
                     👤 Pasajero
@@ -452,8 +452,8 @@ const usuariosDisponibles = ref<any[]>([]);
 
 // Computed properties
 const currentUser = computed(() => ({
-  id: user.value?.id || '',
-  nombre: userProfile.value?.name || 'Usuario',
+  id: user.value?.uid || user.value?.id || '',
+  nombre: userProfile.value?.name || user.value?.displayName || 'Usuario',
   email: user.value?.email || ''
 }));
 
@@ -519,7 +519,8 @@ async function enviarMensaje() {
   try {
     const newMessage = await messagingService.sendMessage(
       selectedConversation.value.id, 
-      content
+      content,
+      user.value?.uid
     );
     
     if (newMessage) {

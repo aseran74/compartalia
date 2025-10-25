@@ -194,16 +194,21 @@ export class MessagingService {
   }
 
   // Enviar mensaje
-  async sendMessage(conversationId: string, content: string): Promise<Message | null> {
+  async sendMessage(conversationId: string, content: string, firebaseUserId?: string): Promise<Message | null> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) throw new Error('Usuario no autenticado');
+      let userId = firebaseUserId;
+      
+      if (!userId) {
+        const { data: { user } } = await this.supabase.auth.getUser();
+        if (!user) throw new Error('Usuario no autenticado');
+        userId = user.id;
+      }
 
       const { data, error } = await this.supabase
         .from('messages')
         .insert({
           conversation_id: conversationId,
-          sender_id: user.id,
+          sender_id: userId,
           content: content.trim()
         })
         .select(`
