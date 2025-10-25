@@ -630,12 +630,12 @@ async function iniciarConversacion(miembro: any) {
 
     // Si no se puede crear la conversación, navegar directamente a mensajería
     // Pasando el ID del usuario como parámetro
-    router.push(`/carpooling/mensajeria?user=${miembro.id}`);
+    router.push('/carpooling/mensajeria?user=' + miembro.id);
     
   } catch (error) {
     console.error('Error en iniciarConversacion:', error);
     // Navegar a mensajería de todas formas con el parámetro
-    router.push(`/carpooling/mensajeria?user=${miembro.id}`);
+    router.push('/carpooling/mensajeria?user=' + miembro.id);
   }
 }
 
