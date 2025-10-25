@@ -21,7 +21,7 @@ export interface Conversation {
   user2_id: string;
   created_at: string;
   updated_at: string;
-  other_user: {
+  otherUser: {
     id: string;
     name: string;
     avatar_url: string | null;
