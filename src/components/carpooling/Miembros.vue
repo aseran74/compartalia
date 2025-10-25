@@ -609,7 +609,7 @@ async function iniciarConversacion(miembro: any) {
 
     // Intentar crear conversación
     try {
-      const conversation = await messagingService.createConversation(miembro.id, user.value?.uid);
+      const conversation = await messagingService.createConversation(miembro.id, user.value?.uid || '');
       if (conversation) {
         console.log('Conversación creada:', conversation);
         // Navegar a mensajería

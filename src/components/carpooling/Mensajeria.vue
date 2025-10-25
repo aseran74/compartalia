@@ -520,7 +520,7 @@ async function enviarMensaje() {
     const newMessage = await messagingService.sendMessage(
       selectedConversation.value.id, 
       content,
-      user.value?.uid
+      user.value?.uid || ''
     );
     
     if (newMessage) {
@@ -555,7 +555,7 @@ async function loadConversations() {
   try {
     loading.value = true;
     console.log('🔍 loadConversations - user.value?.uid:', user.value?.uid);
-    const conversations = await messagingService.getConversations(user.value?.uid);
+    const conversations = await messagingService.getConversations(user.value?.uid || '');
     console.log('🔍 loadConversations - conversaciones recibidas:', conversations);
     conversaciones.value = conversations;
     console.log('🔍 loadConversations - conversaciones.value actualizado:', conversaciones.value);
