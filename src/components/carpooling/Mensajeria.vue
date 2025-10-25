@@ -138,8 +138,8 @@
             <div class="flex items-center space-x-3">
               <div class="relative">
                 <img
-                  :src="selectedConversation.otherUser.avatar || '/images/user/default-avatar.png'"
-                  :alt="selectedConversation.otherUser.nombre"
+                  :src="selectedConversation.otherUser?.avatar || selectedConversation.otherUser?.avatar_url || '/images/user/default-avatar.png'"
+                  :alt="selectedConversation.otherUser?.nombre || selectedConversation.otherUser?.name || 'Usuario'"
                   class="h-10 w-10 rounded-full object-cover"
                   @error="(event: any) => event.target.src = '/images/user/default-avatar.png'"
                 />

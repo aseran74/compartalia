@@ -199,10 +199,16 @@ export class MessagingService {
       let userId = firebaseUserId;
       
       if (!userId) {
+        console.log('No se proporcionó firebaseUserId, intentando obtener de Supabase Auth...');
         const { data: { user } } = await this.supabase.auth.getUser();
-        if (!user) throw new Error('Usuario no autenticado');
+        if (!user) {
+          console.log('No hay usuario autenticado en Supabase Auth');
+          throw new Error('Usuario no autenticado');
+        }
         userId = user.id;
       }
+
+      console.log('Enviando mensaje con userId:', userId);
 
       const { data, error } = await this.supabase
         .from('messages')
