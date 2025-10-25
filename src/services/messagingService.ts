@@ -78,6 +78,8 @@ export class MessagingService {
     try {
       let userId = firebaseUserId;
       
+      console.log('🔍 getConversations - firebaseUserId recibido:', firebaseUserId);
+      
       if (!userId) {
         // Si no se proporciona userId, intentar obtenerlo de Supabase Auth como fallback
         const { data: { user } } = await this.supabase.auth.getUser();
@@ -86,7 +88,10 @@ export class MessagingService {
           return [];
         }
         userId = user.id;
+        console.log('🔍 getConversations - userId obtenido de Supabase Auth:', userId);
       }
+
+      console.log('🔍 getConversations - userId final:', userId);
 
       const { data, error } = await this.supabase
         .from('conversations')
@@ -102,7 +107,13 @@ export class MessagingService {
         .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error en getConversations:', error);
+        throw error;
+      }
+
+      console.log('🔍 getConversations - datos obtenidos:', data);
+      console.log('🔍 getConversations - número de conversaciones:', data?.length || 0);
 
       // Transformar datos para incluir información del otro usuario
       const conversations: Conversation[] = await Promise.all(
@@ -159,6 +170,9 @@ export class MessagingService {
           };
         })
       );
+
+      console.log('🔍 getConversations - conversaciones transformadas:', conversations);
+      console.log('🔍 getConversations - número de conversaciones finales:', conversations.length);
 
       return conversations;
     } catch (error) {
