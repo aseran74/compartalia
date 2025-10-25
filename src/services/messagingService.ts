@@ -34,6 +34,45 @@ export interface Conversation {
 export class MessagingService {
   public supabase = supabaseClean;
 
+  // Crear perfil de usuario si no existe
+  async ensureUserProfile(userId: string, userEmail?: string, userName?: string): Promise<boolean> {
+    try {
+      // Verificar si el usuario ya existe
+      const { data: existingProfile } = await this.supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .single();
+
+      if (existingProfile) {
+        console.log('Usuario ya existe en profiles:', userId);
+        return true;
+      }
+
+      // Crear el perfil
+      const { error } = await this.supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          email: userEmail || 'usuario@ejemplo.com',
+          name: userName || 'Usuario',
+          role: 'pasajero',
+          created_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error creando perfil:', error);
+        return false;
+      }
+
+      console.log('Perfil creado exitosamente:', userId);
+      return true;
+    } catch (error) {
+      console.error('Error en ensureUserProfile:', error);
+      return false;
+    }
+  }
+
   // Obtener conversaciones del usuario actual
   async getConversations(firebaseUserId?: string): Promise<Conversation[]> {
     try {
@@ -202,6 +241,20 @@ export class MessagingService {
           return null;
         }
         userId = user.id;
+      }
+
+      // Asegurar que el usuario actual existe en profiles
+      const currentUserExists = await this.ensureUserProfile(userId);
+      if (!currentUserExists) {
+        console.error('No se pudo crear/verificar perfil del usuario actual:', userId);
+        throw new Error('No se pudo crear/verificar perfil del usuario actual');
+      }
+
+      // Asegurar que el otro usuario existe en profiles
+      const otherUserExists = await this.ensureUserProfile(otherUserId);
+      if (!otherUserExists) {
+        console.error('No se pudo crear/verificar perfil del usuario destino:', otherUserId);
+        throw new Error('No se pudo crear/verificar perfil del usuario destino');
       }
 
       // Verificar si ya existe una conversación
