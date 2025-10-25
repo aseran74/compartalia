@@ -149,8 +149,30 @@
           <h2 class="text-xl font-semibold">📋 Lista de Miembros</h2>
         </div>
         
+        <!-- Estado de carga -->
+        <div v-if="loading" class="flex justify-center items-center py-12">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Cargando miembros...</p>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+          <div class="flex items-center">
+            <span class="text-red-600 mr-2">⚠️</span>
+            <p class="text-red-800">{{ error }}</p>
+          </div>
+          <button 
+            @click="loadMembers"
+            class="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            🔄 Reintentar
+          </button>
+        </div>
+
         <!-- Lista móvil -->
-        <div class="lg:hidden">
+        <div v-else class="lg:hidden">
           <div
             v-for="miembro in filteredMembers"
             :key="miembro.id"
@@ -237,7 +259,7 @@
         </div>
 
         <!-- Tabla desktop -->
-        <div class="hidden lg:block overflow-x-auto">
+        <div v-if="!loading && !error" class="hidden lg:block overflow-x-auto">
           <table class="w-full">
             <thead class="bg-gray-50">
               <tr>
@@ -458,6 +480,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { messagingService } from '@/services/messagingService';
 import { useAuth } from '@/composables/useAuth';
+import { supabaseClean } from '@/config/supabaseClean';
 
 const router = useRouter();
 const { user, isAuthenticated } = useAuth();
@@ -470,74 +493,12 @@ const showFilters = ref(false);
 const showProfileModal = ref(false);
 const selectedMember = ref<any>(null);
 
-// Datos de ejemplo
-const miembros = ref([
-  {
-    id: '1',
-    nombre: 'María García',
-    email: 'maria.garcia@email.com',
-    telefono: '+34600123456',
-    avatar: '/images/user/user-01.jpg',
-    tipo: ['conductor', 'pasajero'],
-    estado: 'verificado',
-    rating: 4.8,
-    viajesCompletados: 45,
-    ultimaActividad: new Date('2024-01-15'),
-    esAmigo: false
-  },
-  {
-    id: '2',
-    nombre: 'Carlos López',
-    email: 'carlos.lopez@email.com',
-    telefono: '+34600234567',
-    avatar: '/images/user/user-02.jpg',
-    tipo: ['conductor'],
-    estado: 'activo',
-    rating: 4.6,
-    viajesCompletados: 32,
-    ultimaActividad: new Date('2024-01-14'),
-    esAmigo: true
-  },
-  {
-    id: '3',
-    nombre: 'Ana Martínez',
-    email: 'ana.martinez@email.com',
-    telefono: '+34600345678',
-    avatar: '/images/user/user-03.jpg',
-    tipo: ['pasajero'],
-    estado: 'activo',
-    rating: 4.9,
-    viajesCompletados: 28,
-    ultimaActividad: new Date('2024-01-13'),
-    esAmigo: false
-  },
-  {
-    id: '4',
-    nombre: 'Pedro Sánchez',
-    email: 'pedro.sanchez@email.com',
-    telefono: '+34600456789',
-    avatar: '/images/user/user-04.jpg',
-    tipo: ['conductor'],
-    estado: 'verificado',
-    rating: 4.7,
-    viajesCompletados: 67,
-    ultimaActividad: new Date('2024-01-12'),
-    esAmigo: true
-  },
-  {
-    id: '5',
-    nombre: 'Laura Rodríguez',
-    email: 'laura.rodriguez@email.com',
-    telefono: '+34600567890',
-    avatar: '/images/user/user-05.jpg',
-    tipo: ['conductor', 'pasajero'],
-    estado: 'activo',
-    rating: 4.8,
-    viajesCompletados: 52,
-    ultimaActividad: new Date('2024-01-11'),
-    esAmigo: false
-  }
-]);
+// Estado reactivo
+const loading = ref(false);
+const error = ref('');
+
+// Datos de miembros (se cargarán desde Supabase)
+const miembros = ref<any[]>([]);
 
 // Computed properties
 const filteredMembers = computed(() => {
@@ -578,6 +539,60 @@ const stats = computed(() => {
 
   return { total, conductores, pasajeros, verificados, amigos };
 });
+
+// Función para cargar miembros desde Supabase
+async function loadMembers() {
+  try {
+    loading.value = true;
+    error.value = '';
+    
+    console.log('Cargando miembros desde Supabase...');
+    
+    const { data, error: supabaseError } = await supabaseClean
+      .from('profiles')
+      .select(`
+        id,
+        name,
+        email,
+        avatar_url,
+        role,
+        phone,
+        created_at
+      )
+      .order('created_at', { ascending: false });
+
+    if (supabaseError) {
+      console.error('Error cargando miembros:', supabaseError);
+      error.value = 'Error al cargar los miembros';
+      return;
+    }
+
+    console.log('Miembros cargados:', data);
+
+    // Transformar datos de Supabase al formato esperado
+    miembros.value = (data || []).map(profile => ({
+      id: profile.id,
+      nombre: profile.name || 'Sin nombre',
+      email: profile.email,
+      telefono: profile.phone || 'Sin teléfono',
+      avatar: profile.avatar_url || '/images/user/default-avatar.jpg',
+      tipo: [profile.role || 'pasajero'],
+      estado: 'activo', // Por defecto activo
+      rating: 4.5, // Rating por defecto
+      viajesCompletados: 0, // Se puede calcular después
+      ultimaActividad: new Date(profile.created_at),
+      esAmigo: false // Se puede implementar lógica de amigos después
+    }));
+
+    console.log('Miembros transformados:', miembros.value);
+    
+  } catch (err) {
+    console.error('Error en loadMembers:', err);
+    error.value = 'Error al cargar los miembros';
+  } finally {
+    loading.value = false;
+  }
+}
 
 // Métodos
 function toggleAmigo(miembro: any) {
@@ -657,8 +672,9 @@ function formatDate(date: Date): string {
   });
 }
 
-onMounted(() => {
+onMounted(async () => {
   console.log('Componente Miembros montado');
+  await loadMembers();
 });
 </script>
 
