@@ -62,8 +62,8 @@
               <div class="flex items-center space-x-3">
                 <div class="relative">
                   <img
-                    :src="conversation.other_user.avatar_url || '/images/user/default-avatar.png'"
-                    :alt="conversation.other_user.name"
+                    :src="conversation.otherUser?.avatar_url || conversation.otherUser?.avatar || '/images/user/default-avatar.png'"
+                    :alt="conversation.otherUser?.name || conversation.otherUser?.nombre || 'Usuario'"
                     class="h-12 w-12 rounded-full object-cover"
                     @error="(event: any) => event.target.src = '/images/user/default-avatar.png'"
                   />
@@ -71,14 +71,14 @@
                   <div
                     :class="[
                       'absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white',
-                      conversation.other_user.role === 'admin' ? 'bg-green-400' : 'bg-gray-400'
+                      conversation.otherUser?.role === 'admin' ? 'bg-green-400' : 'bg-gray-400'
                     ]"
                   ></div>
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center justify-between">
                     <p class="text-sm font-medium text-gray-900 truncate">
-                      {{ conversation.other_user.name }}
+                      {{ conversation.otherUser?.name || conversation.otherUser?.nombre || 'Usuario' }}
                     </p>
                     <div class="flex items-center space-x-2">
                       <p class="text-xs text-gray-500">
@@ -99,10 +99,10 @@
                     <span
                       :class="[
                         'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                        conversation.other_user.role === 'admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                        conversation.otherUser?.role === 'admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                       ]"
                     >
-                      {{ conversation.other_user.role === 'admin' ? '🚗 Admin' : '👤 Usuario' }}
+                      {{ conversation.otherUser?.role === 'admin' ? '🚗 Admin' : '👤 Usuario' }}
                     </span>
                   </div>
                 </div>
@@ -152,10 +152,10 @@
               </div>
               <div>
                 <h3 class="text-lg font-medium text-gray-900">
-                  {{ selectedConversation.other_user.name }}
+                  {{ selectedConversation.otherUser?.name || selectedConversation.otherUser?.nombre || 'Usuario' }}
                 </h3>
                 <p class="text-sm text-gray-500">
-                  {{ selectedConversation.other_user.id }}
+                  {{ selectedConversation.otherUser?.id || 'ID no disponible' }}
                 </p>
               </div>
             </div>
@@ -163,13 +163,13 @@
               <span
                 :class="[
                   'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
-                  selectedConversation.other_user.role === 'admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                  selectedConversation.otherUser?.role === 'admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                 ]"
               >
-                {{ selectedConversation.other_user.role === 'admin' ? '🚗 Admin' : '👤 Usuario' }}
+                {{ selectedConversation.otherUser?.role === 'admin' ? '🚗 Admin' : '👤 Usuario' }}
               </span>
               <button
-                @click="verPerfilUsuario(selectedConversation.other_user)"
+                @click="verPerfilUsuario(selectedConversation.otherUser)"
                 class="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors"
                 title="Ver Perfil"
               >
@@ -465,8 +465,8 @@ const filteredConversations = computed(() => {
   
   const query = searchConversations.value.toLowerCase();
   return conversaciones.value.filter(conv =>
-    conv.other_user.name.toLowerCase().includes(query) ||
-    conv.other_user.id.toLowerCase().includes(query) ||
+    (conv.otherUser?.name || conv.otherUser?.nombre || '').toLowerCase().includes(query) ||
+    (conv.otherUser?.id || '').toLowerCase().includes(query) ||
     (conv.last_message?.content || '').toLowerCase().includes(query)
   );
 });
