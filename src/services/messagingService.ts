@@ -304,7 +304,7 @@ export class MessagingService {
         user2_id: data.user2_id,
         created_at: data.created_at,
         updated_at: data.updated_at,
-        other_user: {
+        otherUser: {
           id: otherUser.id,
           name: otherUser.name,
           avatar_url: otherUser.avatar_url,
