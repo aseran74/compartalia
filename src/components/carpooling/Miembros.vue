@@ -550,15 +550,7 @@ async function loadMembers() {
     
     const { data, error: supabaseError } = await supabaseClean
       .from('profiles')
-      .select(`
-        id,
-        name,
-        email,
-        avatar_url,
-        role,
-        phone,
-        created_at
-      )
+      .select('id, name, email, avatar_url, role, phone, created_at')
       .order('created_at', { ascending: false });
 
     if (supabaseError) {
