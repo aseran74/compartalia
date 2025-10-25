@@ -138,11 +138,14 @@ export class MessagingService {
             user2_id: conv.user2_id,
             created_at: conv.created_at,
             updated_at: conv.updated_at,
-            other_user: {
+            otherUser: {
               id: otherUser.id,
               name: otherUser.name,
+              avatar: otherUser.avatar_url,
               avatar_url: otherUser.avatar_url,
-              role: otherUser.role
+              nombre: otherUser.name,
+              role: otherUser.role,
+              estado: 'activo'
             },
             last_message: lastMessage ? {
               id: lastMessage.id,
