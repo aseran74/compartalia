@@ -659,6 +659,10 @@ function getStatusLabel(estado: string): string {
 onMounted(async () => {
   console.log('Componente Mensajería montado');
   
+  // Cargar datos primero
+  await loadConversations();
+  await loadAvailableUsers();
+  
   // Verificar si hay un parámetro de usuario en la URL
   const urlParams = new URLSearchParams(window.location.search);
   const userId = urlParams.get('user');
@@ -668,13 +672,14 @@ onMounted(async () => {
     // Buscar el usuario en la lista de usuarios disponibles
     const user = usuariosDisponibles.value.find(u => u.id === userId);
     if (user) {
+      console.log('Usuario encontrado:', user);
       // Crear conversación automáticamente
       await iniciarNuevaConversacionConUsuario(user);
+    } else {
+      console.log('Usuario no encontrado en la lista:', userId);
+      console.log('Usuarios disponibles:', usuariosDisponibles.value);
     }
   }
-  
-  await loadConversations();
-  await loadAvailableUsers();
 });
 </script>
 
