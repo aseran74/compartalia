@@ -76,19 +76,14 @@ export class MessagingService {
   // Obtener conversaciones del usuario actual
   async getConversations(firebaseUserId?: string): Promise<Conversation[]> {
     try {
-      let userId = firebaseUserId;
+      // Usar directamente el firebaseUserId como ID de perfil
+      const userId = firebaseUserId;
       
       console.log('🔍 getConversations - firebaseUserId recibido:', firebaseUserId);
       
       if (!userId) {
-        // Si no se proporciona userId, intentar obtenerlo de Supabase Auth como fallback
-        const { data: { user } } = await this.supabase.auth.getUser();
-        if (!user) {
-          console.log('No hay usuario autenticado, retornando array vacío');
-          return [];
-        }
-        userId = user.id;
-        console.log('🔍 getConversations - userId obtenido de Supabase Auth:', userId);
+        console.log('No hay userId proporcionado, retornando array vacío');
+        return [];
       }
 
       console.log('🔍 getConversations - userId final:', userId);
@@ -173,6 +168,16 @@ export class MessagingService {
 
       console.log('🔍 getConversations - conversaciones transformadas:', conversations);
       console.log('🔍 getConversations - número de conversaciones finales:', conversations.length);
+      
+      // Log detallado de cada conversación
+      conversations.forEach((conv, index) => {
+        console.log(`🔍 Conversación ${index}:`, {
+          id: conv.id,
+          otherUser: conv.otherUser,
+          lastMessage: conv.last_message,
+          unreadCount: conv.unread_count
+        });
+      });
 
       return conversations;
     } catch (error) {
@@ -210,16 +215,11 @@ export class MessagingService {
   // Enviar mensaje
   async sendMessage(conversationId: string, content: string, firebaseUserId?: string): Promise<Message | null> {
     try {
-      let userId = firebaseUserId;
+      const userId = firebaseUserId;
       
       if (!userId) {
-        console.log('No se proporcionó firebaseUserId, intentando obtener de Supabase Auth...');
-        const { data: { user } } = await this.supabase.auth.getUser();
-        if (!user) {
-          console.log('No hay usuario autenticado en Supabase Auth');
-          throw new Error('Usuario no autenticado');
-        }
-        userId = user.id;
+        console.log('No se proporcionó firebaseUserId');
+        throw new Error('Usuario no autenticado');
       }
 
       console.log('Enviando mensaje con userId:', userId);
@@ -259,16 +259,11 @@ export class MessagingService {
   // Crear nueva conversación
   async createConversation(otherUserId: string, firebaseUserId?: string): Promise<Conversation | null> {
     try {
-      let userId = firebaseUserId;
+      const userId = firebaseUserId;
       
       if (!userId) {
-        // Si no se proporciona userId, intentar obtenerlo de Supabase Auth como fallback
-        const { data: { user } } = await this.supabase.auth.getUser();
-        if (!user) {
-          console.log('No hay usuario autenticado, no se puede crear conversación');
-          return null;
-        }
-        userId = user.id;
+        console.log('No hay userId proporcionado, no se puede crear conversación');
+        return null;
       }
 
       // Asegurar que el usuario actual existe en profiles
