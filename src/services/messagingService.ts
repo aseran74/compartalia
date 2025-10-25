@@ -40,8 +40,12 @@ export class MessagingService {
       let userId = firebaseUserId;
       
       if (!userId) {
+        // Si no se proporciona userId, intentar obtenerlo de Supabase Auth como fallback
         const { data: { user } } = await this.supabase.auth.getUser();
-        if (!user) throw new Error('Usuario no autenticado');
+        if (!user) {
+          console.log('No hay usuario autenticado, retornando array vacío');
+          return [];
+        }
         userId = user.id;
       }
 
@@ -191,8 +195,12 @@ export class MessagingService {
       let userId = firebaseUserId;
       
       if (!userId) {
+        // Si no se proporciona userId, intentar obtenerlo de Supabase Auth como fallback
         const { data: { user } } = await this.supabase.auth.getUser();
-        if (!user) throw new Error('Usuario no autenticado');
+        if (!user) {
+          console.log('No hay usuario autenticado, no se puede crear conversación');
+          return null;
+        }
         userId = user.id;
       }
 
