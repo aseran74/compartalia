@@ -76,17 +76,26 @@ export class MessagingService {
   // Obtener conversaciones del usuario actual
   async getConversations(firebaseUserId?: string): Promise<Conversation[]> {
     try {
-      // Usar directamente el firebaseUserId como ID de perfil
-      const userId = firebaseUserId;
-      
       console.log('🔍 getConversations - firebaseUserId recibido:', firebaseUserId);
       
-      if (!userId) {
-        console.log('No hay userId proporcionado, retornando array vacío');
+      if (!firebaseUserId) {
+        console.log('No hay firebaseUserId proporcionado, retornando array vacío');
         return [];
       }
 
-      console.log('🔍 getConversations - userId final:', userId);
+      // Buscar el perfil en Supabase usando el firebaseUserId
+      const { data: profile, error: profileError } = await this.supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', firebaseUserId)
+        .single();
+
+      if (profileError || !profile) {
+        console.log('No se encontró perfil para el usuario:', firebaseUserId);
+        return [];
+      }
+
+      console.log('🔍 getConversations - perfil encontrado:', profile);
 
       const { data, error } = await this.supabase
         .from('conversations')
@@ -99,7 +108,7 @@ export class MessagingService {
           user1:profiles!conversations_user1_id_fkey(id, name, avatar_url, role),
           user2:profiles!conversations_user2_id_fkey(id, name, avatar_url, role)
         `)
-        .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
+        .or(`user1_id.eq.${profile.id},user2_id.eq.${profile.id}`)
         .order('updated_at', { ascending: false });
 
       if (error) {
@@ -113,8 +122,8 @@ export class MessagingService {
       // Transformar datos para incluir información del otro usuario
       const conversations: Conversation[] = await Promise.all(
         (data || []).map(async (conv) => {
-          const otherUser = conv.user1_id === userId ? conv.user2 : conv.user1;
-          const otherUserId = conv.user1_id === userId ? conv.user2_id : conv.user1_id;
+          const otherUser = conv.user1_id === profile.id ? conv.user2 : conv.user1;
+          const otherUserId = conv.user1_id === profile.id ? conv.user2_id : conv.user1_id;
 
           // Obtener último mensaje
           const { data: lastMessage } = await this.supabase
@@ -259,37 +268,50 @@ export class MessagingService {
   // Crear nueva conversación
   async createConversation(otherUserId: string, firebaseUserId?: string): Promise<Conversation | null> {
     try {
-      const userId = firebaseUserId;
+      console.log('🔍 createConversation - firebaseUserId:', firebaseUserId, 'otherUserId:', otherUserId);
       
-      if (!userId) {
-        console.log('No hay userId proporcionado, no se puede crear conversación');
+      if (!firebaseUserId) {
+        console.log('No hay firebaseUserId proporcionado, no se puede crear conversación');
         return null;
       }
 
-      // Asegurar que el usuario actual existe en profiles
-      const currentUserExists = await this.ensureUserProfile(userId);
-      if (!currentUserExists) {
-        console.error('No se pudo crear/verificar perfil del usuario actual:', userId);
-        throw new Error('No se pudo crear/verificar perfil del usuario actual');
+      // Buscar el perfil del usuario actual
+      const { data: currentProfile, error: currentProfileError } = await this.supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', firebaseUserId)
+        .single();
+
+      if (currentProfileError || !currentProfile) {
+        console.log('No se encontró perfil del usuario actual:', firebaseUserId);
+        return null;
       }
 
-      // Asegurar que el otro usuario existe en profiles
-      const otherUserExists = await this.ensureUserProfile(otherUserId);
-      if (!otherUserExists) {
-        console.error('No se pudo crear/verificar perfil del usuario destino:', otherUserId);
-        throw new Error('No se pudo crear/verificar perfil del usuario destino');
+      // Buscar el perfil del otro usuario
+      const { data: otherProfile, error: otherProfileError } = await this.supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', otherUserId)
+        .single();
+
+      if (otherProfileError || !otherProfile) {
+        console.log('No se encontró perfil del otro usuario:', otherUserId);
+        return null;
       }
+
+      console.log('🔍 createConversation - perfiles encontrados:', { currentProfile, otherProfile });
 
       // Verificar si ya existe una conversación
       const { data: existingConv } = await this.supabase
         .from('conversations')
         .select('*')
-        .or(`and(user1_id.eq.${userId},user2_id.eq.${otherUserId}),and(user1_id.eq.${otherUserId},user2_id.eq.${userId})`)
+        .or(`and(user1_id.eq.${currentProfile.id},user2_id.eq.${otherProfile.id}),and(user1_id.eq.${otherProfile.id},user2_id.eq.${currentProfile.id})`)
         .single();
 
       if (existingConv) {
+        console.log('🔍 createConversation - conversación existente encontrada:', existingConv);
         // Retornar conversación existente
-        const conversations = await this.getConversations(userId);
+        const conversations = await this.getConversations(firebaseUserId);
         return conversations.find(c => c.id === existingConv.id) || null;
       }
 
@@ -297,8 +319,8 @@ export class MessagingService {
       const { data, error } = await this.supabase
         .from('conversations')
         .insert({
-          user1_id: userId,
-          user2_id: otherUserId
+          user1_id: currentProfile.id,
+          user2_id: otherProfile.id
         })
         .select(`
           id,
