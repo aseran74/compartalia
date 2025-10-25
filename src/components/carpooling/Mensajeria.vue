@@ -500,7 +500,7 @@ async function selectConversation(conversation: Conversation) {
   await loadMessages(conversation.id);
   
   // Marcar mensajes como leídos
-  await messagingService.markMessagesAsRead(conversation.id);
+  await messagingService.markMessagesAsRead(conversation.id, user.value?.uid || '');
   
   // Scroll al final de los mensajes
   nextTick(() => {
@@ -570,7 +570,7 @@ async function loadConversations() {
 // Función para cargar usuarios disponibles
 async function loadAvailableUsers() {
   try {
-    const users = await messagingService.getAvailableUsers();
+    const users = await messagingService.getAvailableUsers(user.value?.uid || '');
     usuariosDisponibles.value = users;
   } catch (error) {
     console.error('Error cargando usuarios:', error);

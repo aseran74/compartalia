@@ -319,16 +319,15 @@ export class MessagingService {
   }
 
   // Marcar mensajes como leídos
-  async markMessagesAsRead(conversationId: string): Promise<void> {
+  async markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) return;
+      if (!userId) return;
 
       await this.supabase
         .from('messages')
         .update({ read_at: new Date().toISOString() })
         .eq('conversation_id', conversationId)
-        .neq('sender_id', user.id)
+        .neq('sender_id', userId)
         .is('read_at', null);
     } catch (error) {
       console.error('Error marcando mensajes como leídos:', error);
@@ -336,15 +335,14 @@ export class MessagingService {
   }
 
   // Obtener usuarios disponibles para nueva conversación
-  async getAvailableUsers(): Promise<any[]> {
+  async getAvailableUsers(currentUserId: string): Promise<any[]> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) return [];
+      if (!currentUserId) return [];
 
       const { data, error } = await this.supabase
         .from('profiles')
         .select('id, name, avatar_url, role')
-        .neq('id', user.id)
+        .neq('id', currentUserId)
         .order('name');
 
       if (error) throw error;
