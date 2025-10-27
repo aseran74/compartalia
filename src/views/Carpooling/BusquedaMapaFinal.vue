@@ -124,20 +124,28 @@
                         <label class="mb-2 block text-sm font-medium text-black dark:text-white">
                           O selecciona una ciudad del extrarradio:
                         </label>
-                        <div class="grid grid-cols-2 gap-2">
-                          <button
-                            v-for="city in predefinedOrigins"
-                            :key="city.name"
-                            @click="selectPredefinedOrigin(city)"
-                            :class="[
-                              'p-2 text-sm rounded border transition-colors',
-                              searchForm.origin === city.name
-                                ? 'border-primary bg-primary text-white'
-                                : 'border-stroke hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-800'
-                            ]"
-                          >
-                            {{ city.name }}
-                          </button>
+                        <!-- Vista rápida -->
+                        <div class="mb-3">
+                          <div class="text-xs text-body-color mb-2">Vista rápida:</div>
+                          <div class="flex flex-wrap gap-2">
+                            <button
+                              v-for="city in lugaresOrigenPopulares"
+                              :key="city"
+                              type="button"
+                              @click="searchForm.origin = city"
+                              class="px-3 py-1 text-sm rounded-full border transition"
+                              :class="searchForm.origin === city ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'"
+                            >
+                              {{ city }}
+                            </button>
+                            <button
+                              type="button"
+                              @click="showModalOrigen = true"
+                              class="px-3 py-1 text-sm rounded-full border border-gray-300 bg-white text-gray-700 hover:border-blue-400 transition"
+                            >
+                              + Más lugares
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -169,20 +177,28 @@
                         <label class="mb-2 block text-sm font-medium text-black dark:text-white">
                           O selecciona un destino popular:
                         </label>
-                        <div class="grid grid-cols-2 gap-2">
-                          <button
-                            v-for="destination in predefinedDestinations"
-                            :key="destination.name"
-                            @click="selectPredefinedDestination(destination)"
-                            :class="[
-                              'p-2 text-sm rounded border transition-colors',
-                              searchForm.destination === destination.name
-                                ? 'border-primary bg-primary text-white'
-                                : 'border-stroke hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-800'
-                            ]"
-                          >
-                            {{ destination.name }}
-                          </button>
+                        <!-- Vista rápida -->
+                        <div class="mb-3">
+                          <div class="text-xs text-body-color mb-2">Vista rápida:</div>
+                          <div class="flex flex-wrap gap-2">
+                            <button
+                              v-for="dest in lugaresDestinoPopulares"
+                              :key="dest"
+                              type="button"
+                              @click="searchForm.destination = dest"
+                              class="px-3 py-1 text-sm rounded-full border transition"
+                              :class="searchForm.destination === dest ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'"
+                            >
+                              {{ dest }}
+                            </button>
+                            <button
+                              type="button"
+                              @click="showModalDestino = true"
+                              class="px-3 py-1 text-sm rounded-full border border-gray-300 bg-white text-gray-700 hover:border-blue-400 transition"
+                            >
+                              + Más lugares
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -517,10 +533,88 @@
       </main>
     </div>
   </div>
+
+  <!-- Modal Origen -->
+  <div 
+    v-if="showModalOrigen"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    @click.self="showModalOrigen = false"
+  >
+    <div class="bg-white dark:bg-boxdark rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-black dark:text-white">📍 Selecciona Origen</h3>
+        <button 
+          @click="showModalOrigen = false"
+          class="text-gray-500 hover:text-gray-700 text-2xl"
+        >
+          ×
+        </button>
+      </div>
+      
+      <input 
+        v-model="searchOrigen"
+        type="text"
+        placeholder="Buscar lugar..."
+        class="w-full px-4 py-2 border rounded-lg mb-4 dark:bg-gray-800 dark:border-strokedark dark:text-white"
+      />
+
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <button
+          v-for="lugar in lugaresOrigenFiltrados"
+          :key="lugar"
+          type="button"
+          @click="searchForm.origin = lugar; showModalOrigen = false"
+          class="px-4 py-3 text-left border rounded-lg hover:bg-blue-50 hover:border-blue-400 transition dark:bg-gray-800 dark:border-strokedark dark:hover:bg-gray-700"
+          :class="searchForm.origin === lugar ? 'bg-blue-100 border-blue-500' : 'bg-white border-gray-300'"
+        >
+          {{ lugar }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Destino -->
+  <div 
+    v-if="showModalDestino"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    @click.self="showModalDestino = false"
+  >
+    <div class="bg-white dark:bg-boxdark rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-black dark:text-white">🎯 Selecciona Destino</h3>
+        <button 
+          @click="showModalDestino = false"
+          class="text-gray-500 hover:text-gray-700 text-2xl"
+        >
+          ×
+        </button>
+      </div>
+      
+      <input 
+        v-model="searchDestino"
+        type="text"
+        placeholder="Buscar lugar..."
+        class="w-full px-4 py-2 border rounded-lg mb-4 dark:bg-gray-800 dark:border-strokedark dark:text-white"
+      />
+
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <button
+          v-for="lugar in lugaresDestinoFiltrados"
+          :key="lugar"
+          type="button"
+          @click="searchForm.destination = lugar; showModalDestino = false"
+          class="px-4 py-3 text-left border rounded-lg hover:bg-blue-50 hover:border-blue-400 transition dark:bg-gray-800 dark:border-strokedark dark:hover:bg-gray-700"
+          :class="searchForm.destination === lugar ? 'bg-blue-100 border-blue-500' : 'bg-white border-gray-300'"
+        >
+          {{ lugar }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { HybridTripService, type SearchResult } from '@/services/hybridTripService'
 import { RoutesApiService, type Coords } from '@/services/routesApiService'
@@ -590,6 +684,48 @@ const predefinedDestinations = [
   { name: 'Plaza de Castilla', lat: 40.4669, lng: -3.6886 },
   { name: 'Moncloa', lat: 40.4355, lng: -3.7195 }
 ]
+
+// Lugares populares para vista rápida
+const lugaresOrigenPopulares = ['Getafe', 'Leganés', 'Móstoles', 'Las Rozas', 'Alcobendas']
+const lugaresDestinoPopulares = ['Sol', 'Atocha', 'Chamartín', 'Nuevos Ministerios', 'Moncloa']
+
+// Lista completa de lugares
+const lugaresOrigen = [
+  'Getafe', 'Leganés', 'Fuenlabrada', 'Móstoles', 'Alcorcón', 'Parla', 'Pinto', 'Valdemoro',
+  'Las Rozas', 'Majadahonda', 'Pozuelo de Alarcón', 'Boadilla del Monte', 'Alcobendas',
+  'San Sebastián de los Reyes', 'Tres Cantos', 'Torrejón de Ardoz', 'Alcalá de Henares',
+  'Coslada', 'San Fernando de Henares', 'Rivas-Vaciamadrid', 'Arganda del Rey',
+  'Collado Villalba', 'Galapagar', 'El Escorial', 'Aranjuez'
+]
+
+const lugaresDestino = [
+  'Madrid Centro', 'Sol', 'Gran Vía', 'Atocha', 'Chamartín', 'Nuevos Ministerios',
+  'Plaza de Castilla', 'Moncloa', 'Plaza de España', 'Puerta del Sol', 'Cibeles',
+  'Retiro', 'Salamanca', 'Chamberí', 'Malasaña', 'Chueca', 'La Latina', 'Lavapiés',
+  'Argüelles', 'Cuatro Caminos', 'Tetuán', 'Ciudad Universitaria', 'Méndez Álvaro',
+  'Pacífico', 'Ventas', 'Arturo Soria', 'Aeropuerto T1', 'Aeropuerto T4', 'IFEMA', 'Barajas'
+]
+
+// Estados para modales
+const showModalOrigen = ref(false)
+const showModalDestino = ref(false)
+const searchOrigen = ref('')
+const searchDestino = ref('')
+
+// Computed para filtrar lugares
+const lugaresOrigenFiltrados = computed(() => {
+  if (!searchOrigen.value) return lugaresOrigen
+  return lugaresOrigen.filter(lugar => 
+    lugar.toLowerCase().includes(searchOrigen.value.toLowerCase())
+  )
+})
+
+const lugaresDestinoFiltrados = computed(() => {
+  if (!searchDestino.value) return lugaresDestino
+  return lugaresDestino.filter(lugar => 
+    lugar.toLowerCase().includes(searchDestino.value.toLowerCase())
+  )
+})
 
 // Funciones de autocompletado
 const handleOriginInput = async (value: string) => {
