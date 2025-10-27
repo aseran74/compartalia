@@ -348,6 +348,18 @@
             class="w-full px-4 py-2 border rounded-lg"
             required
           />
+          <!-- Cálculo informativo del precio total -->
+          <div v-if="form.price_per_seat && form.tipo_viaje !== 'unico'" class="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="text-xs text-blue-800 font-medium">
+              💡 Precio total estimado:
+              <span v-if="form.tipo_viaje === 'semanal'" class="font-semibold">
+                {{ form.price_per_seat }}€ × 7 días = {{ (form.price_per_seat * 7).toFixed(2) }}€
+              </span>
+              <span v-if="form.tipo_viaje === 'mensual'" class="font-semibold">
+                {{ form.price_per_seat }}€ × 30 días = {{ (form.price_per_seat * 30).toFixed(2) }}€
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
