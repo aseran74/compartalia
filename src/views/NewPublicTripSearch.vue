@@ -865,6 +865,7 @@ const searchTrips = async () => {
     }
     
     console.log('📍 Búsqueda:', { origin, destination, originType: originType.value, destinationType: destinationType.value })
+    console.log('📅 Fecha recibida del DatePicker:', searchForm.date, 'Tipo:', typeof searchForm.date)
     
     const results = await hybridService.searchTrips(
       origin,
