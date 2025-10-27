@@ -291,20 +291,28 @@
                     <label class="mb-2 block text-sm font-medium text-black dark:text-white">
                       O selecciona una ciudad del extrarradio:
                     </label>
-                    <div class="grid grid-cols-2 gap-2">
-                      <button
-                        v-for="city in predefinedOrigins"
-                        :key="city.name"
-                        @click="selectPredefinedOrigin(city)"
-                        :class="[
-                          'p-2 text-sm rounded border transition-colors',
-                          searchForm.origin === city.name
-                            ? 'border-primary bg-primary text-white'
-                            : 'border-stroke hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-800'
-                        ]"
-                      >
-                        {{ city.name }}
-                      </button>
+                    <!-- Vista rápida -->
+                    <div class="mb-3">
+                      <div class="text-xs text-body-color mb-2">Vista rápida:</div>
+                      <div class="flex flex-wrap gap-2">
+                        <button
+                          v-for="city in lugaresOrigenPopulares"
+                          :key="city"
+                          type="button"
+                          @click="searchForm.origin = city"
+                          class="px-3 py-1 text-sm rounded-full border transition"
+                          :class="searchForm.origin === city ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'"
+                        >
+                          {{ city }}
+                        </button>
+                        <button
+                          type="button"
+                          @click="showModalOrigen = true"
+                          class="px-3 py-1 text-sm rounded-full border border-gray-300 bg-white text-gray-700 hover:border-blue-400 transition"
+                        >
+                          + Más lugares
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -336,20 +344,28 @@
                     <label class="mb-2 block text-sm font-medium text-black dark:text-white">
                       O selecciona un destino popular:
                     </label>
-                    <div class="grid grid-cols-2 gap-2">
-                      <button
-                        v-for="destination in predefinedDestinations"
-                        :key="destination.name"
-                        @click="selectPredefinedDestination(destination)"
-                        :class="[
-                          'p-2 text-sm rounded border transition-colors',
-                          searchForm.destination === destination.name
-                            ? 'border-primary bg-primary text-white'
-                            : 'border-stroke hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-800'
-                        ]"
-                      >
-                        {{ destination.name }}
-                      </button>
+                    <!-- Vista rápida -->
+                    <div class="mb-3">
+                      <div class="text-xs text-body-color mb-2">Vista rápida:</div>
+                      <div class="flex flex-wrap gap-2">
+                        <button
+                          v-for="dest in lugaresDestinoPopulares"
+                          :key="dest"
+                          type="button"
+                          @click="searchForm.destination = dest"
+                          class="px-3 py-1 text-sm rounded-full border transition"
+                          :class="searchForm.destination === dest ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'"
+                        >
+                          {{ dest }}
+                        </button>
+                        <button
+                          type="button"
+                          @click="showModalDestino = true"
+                          class="px-3 py-1 text-sm rounded-full border border-gray-300 bg-white text-gray-700 hover:border-blue-400 transition"
+                        >
+                          + Más lugares
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
