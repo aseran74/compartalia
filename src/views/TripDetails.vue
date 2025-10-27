@@ -300,6 +300,42 @@ onMounted(async () => {
     
     console.log('✅ Viaje cargado:', tripData)
     
+    // Obtener información del conductor si existe
+    let driverInfo = { name: 'Conductor', avatar_url: null }
+    if (tripData.driver_id) {
+      try {
+        const { data: profile } = await supabaseClean
+          .from('profiles')
+          .select('name, avatar_url')
+          .eq('id', tripData.driver_id)
+          .single()
+        
+        if (profile) {
+          driverInfo = profile
+        }
+      } catch (error) {
+        console.warn('⚠️ No se pudo cargar el perfil del conductor:', error)
+      }
+    }
+    
+    // Obtener información del vehículo si existe
+    let vehicleInfo = null
+    if (tripData.vehicle_id) {
+      try {
+        const { data: vehicle } = await supabaseClean
+          .from('vehicles')
+          .select('brand, model, year, color, license_plate')
+          .eq('id', tripData.vehicle_id)
+          .single()
+        
+        if (vehicle) {
+          vehicleInfo = vehicle
+        }
+      } catch (error) {
+        console.warn('⚠️ No se pudo cargar el vehículo:', error)
+      }
+    }
+    
     // Obtener primer horario disponible
     const departureTime = tripData.monday_time || 
                          tripData.tuesday_time || 
@@ -327,8 +363,8 @@ onMounted(async () => {
     trip.value = {
       id: tripData.id,
       driver_id: tripData.driver_id,
-      driver_name: tripData.profiles?.name || 'Conductor',
-      driver_avatar: tripData.profiles?.avatar_url || '/images/user/user-01.jpg',
+      driver_name: driverInfo.name,
+      driver_avatar: driverInfo.avatar_url || '/images/user/user-01.jpg',
       driver_rating: '4.7',
       trips_completed: '50+',
       origin_name: tripData.origin_name,
@@ -351,13 +387,7 @@ onMounted(async () => {
       friday_time: tripData.friday_time,
       saturday_time: tripData.saturday_time,
       sunday_time: tripData.sunday_time,
-      vehicle: tripData.vehicles ? {
-        brand: tripData.vehicles.brand,
-        model: tripData.vehicles.model,
-        year: tripData.vehicles.year,
-        color: tripData.vehicles.color,
-        license_plate: tripData.vehicles.license_plate
-      } : null
+      vehicle: vehicleInfo
     }
     
     // Obtener información de reservas
