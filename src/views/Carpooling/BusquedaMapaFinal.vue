@@ -245,7 +245,7 @@
                       </button>
                       <button
                         type="submit"
-                        class="flex-1 rounded bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90"
+                        class="flex-1 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:bg-blue-700"
                       >
                         🔍 Buscar Viajes
                       </button>
@@ -464,7 +464,7 @@
                   </button>
                   <button
                     type="submit"
-                    class="flex-1 rounded bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90"
+                    class="flex-1 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:bg-blue-700"
                   >
                     🔍 Buscar Viajes
                   </button>
