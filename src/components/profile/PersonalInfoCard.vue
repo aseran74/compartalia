@@ -194,6 +194,61 @@
                   </div>
                 </div>
               </div>
+              
+              <!-- Información del conductor (solo si es conductor) -->
+              <div v-if="form.role === 'conductor'" class="mt-7">
+                <h5 class="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
+                  🚗 Información del Conductor
+                </h5>
+
+                <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                  <div class="col-span-2">
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                      Tipo de Vehículo
+                    </label>
+                    <select
+                      v-model="form.vehicleType"
+                      class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+                    >
+                      <option value="">Selecciona tipo de vehículo</option>
+                      <option value="sedan">Sedán</option>
+                      <option value="suv">SUV</option>
+                      <option value="hatchback">Hatchback</option>
+                      <option value="station-wagon">Station Wagon</option>
+                      <option value="van">Furgoneta</option>
+                      <option value="pickup">Pickup</option>
+                    </select>
+                  </div>
+
+                  <div class="col-span-2">
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                      Preferencias del Viaje
+                    </label>
+                    <div class="space-y-2">
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.preferences.allowSmoking" class="mr-2 rounded" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Permite fumar</span>
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.preferences.allowMusic" class="mr-2 rounded" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Música permitida</span>
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.preferences.largeLuggage" class="mr-2 rounded" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Permite equipaje grande</span>
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.preferences.petsAllowed" class="mr-2 rounded" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Permite mascotas</span>
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.preferences.conversation" class="mr-2 rounded" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Conversación durante el viaje</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             
             <div class="flex items-center gap-3 px-2 mt-6 lg:justify-end">
@@ -236,7 +291,15 @@ const form = reactive({
   email: '',
   phone: '',
   bio: '',
-  role: 'pasajero'
+  role: 'pasajero',
+  vehicleType: '',
+  preferences: {
+    allowSmoking: false,
+    allowMusic: true,
+    largeLuggage: false,
+    petsAllowed: false,
+    conversation: true
+  }
 })
 
 // Initialize form with user data
