@@ -268,23 +268,10 @@ onMounted(async () => {
   try {
     console.log('🔍 Cargando detalles del viaje:', tripId)
     
-    // Obtener datos reales desde monthly_trips
+    // Obtener datos reales desde monthly_trips (sin JOIN)
     const { data: tripData, error: tripError } = await supabaseClean
       .from('monthly_trips')
-      .select(`
-        *,
-        profiles:driver_id (
-          name,
-          avatar_url
-        ),
-        vehicles:vehicle_id (
-          brand,
-          model,
-          year,
-          color,
-          license_plate
-        )
-      `)
+      .select('*')
       .eq('id', tripId)
       .single()
     
