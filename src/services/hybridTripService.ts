@@ -196,7 +196,12 @@ export class HybridTripService {
           const endComparison = tripEndDate === null || tripEndDate >= searchDateNormalized
           const isWithinDateRange = startComparison && endComparison
           
-          console.log(`📅 ${trip.origin_name}→${trip.destination_name}: start=${tripStartDate}, end=${tripEndDate}, buscar=${searchDateNormalized}, OK=${isWithinDateRange}`)
+          console.log(`📅 Viaje ${trip.origin_name}→${trip.destination_name}:`)
+          console.log(`   - start_date: ${tripStartDate}, end_date: ${tripEndDate}`)
+          console.log(`   - Fecha buscada: ${searchDateNormalized}`)
+          console.log(`   - start <= buscar: ${startComparison}, end >= buscar: ${endComparison}`)
+          console.log(`   - ✅ Resultado: ${isWithinDateRange ? 'DENTRO del rango' : 'FUERA del rango'}`)
+          
           return isWithinDateRange
         })
         console.log(`✅ Viajes filtrados por fecha: ${filteredTrips.length} de ${trips.length}`)
