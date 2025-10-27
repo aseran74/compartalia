@@ -3,20 +3,48 @@
     <div class="p-5 mb-6 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div class="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
         <div class="flex flex-col items-center w-full gap-6 xl:flex-row">
-          <div
-            class="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800"
-          >
-            <img 
-              v-if="userProfile?.avatar_url" 
-              :src="userProfile.avatar_url" 
-              :alt="userProfile.name || 'Usuario'"
-              class="w-full h-full object-cover"
-            />
-            <div v-else class="w-full h-full bg-green-600 rounded-full flex items-center justify-center">
-              <span class="text-white text-xl font-semibold">
-                {{ (userProfile?.name || 'U').charAt(0).toUpperCase() }}
-              </span>
+          <div class="relative w-20 h-20 group">
+            <div
+              class="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800"
+            >
+              <img 
+                v-if="userProfile?.avatar_url" 
+                :src="userProfile.avatar_url" 
+                :alt="userProfile.name || 'Usuario'"
+                class="w-full h-full object-cover bg-gray-200"
+                loading="lazy"
+              />
+              <div v-else class="w-full h-full bg-green-600 rounded-full flex items-center justify-center">
+                <span class="text-white text-xl font-semibold">
+                  {{ (userProfile?.name || 'U').charAt(0).toUpperCase() }}
+                </span>
+              </div>
             </div>
+            <!-- Botón para cambiar foto -->
+            <button
+              @click="triggerFileInput"
+              :disabled="uploading"
+              class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              :class="{ 'opacity-100': uploading }"
+              title="Cambiar foto de perfil"
+            >
+              <svg v-if="!uploading" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <svg v-else class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </button>
+            <!-- Input oculto para seleccionar archivo -->
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              class="hidden"
+              @change="handleFileSelect"
+            />
           </div>
           <div class="order-3 xl:order-2">
             <h4
@@ -327,9 +355,99 @@
 import { ref, onMounted } from 'vue'
 import Modal from './Modal.vue'
 import { useAuth } from '@/composables/useAuth'
+import { supabaseClean } from '@/config/supabaseClean'
 
 const isProfileInfoModal = ref(false)
 const { user, userProfile, isAuthenticated } = useAuth()
+const fileInput = ref(null)
+const uploading = ref(false)
+
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+
+const handleFileSelect = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file || !user.value) return
+
+  // Validar tipo de archivo
+  if (!file.type.startsWith('image/')) {
+    alert('Por favor selecciona una imagen válida')
+    return
+  }
+
+  // Validar tamaño (máximo 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    alert('La imagen debe ser menor a 5MB')
+    return
+  }
+
+  try {
+    uploading.value = true
+    console.log('📤 Subiendo imagen de perfil...')
+
+    // Generar nombre único para el archivo
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${user.value.uid}-${Date.now()}.${fileExt}`
+    const filePath = `avatars/${fileName}`
+
+    // Subir archivo a Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabaseClean.storage
+      .from('avatars')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
+
+    if (uploadError) {
+      console.error('Error subiendo imagen:', uploadError)
+      alert('Error al subir la imagen. Por favor, intenta de nuevo.')
+      return
+    }
+
+    console.log('✅ Imagen subida:', uploadData)
+
+    // Obtener URL pública de la imagen
+    const { data: urlData } = supabaseClean.storage
+      .from('avatars')
+      .getPublicUrl(filePath)
+
+    const avatarUrl = urlData.publicUrl
+
+    console.log('🔗 URL pública:', avatarUrl)
+
+    // Actualizar perfil en la base de datos
+    const { error: updateError } = await supabaseClean
+      .from('profiles')
+      .update({ avatar_url: avatarUrl })
+      .eq('id', user.value.uid)
+
+    if (updateError) {
+      console.error('Error actualizando perfil:', updateError)
+      alert('Error al actualizar el perfil. Por favor, intenta de nuevo.')
+      return
+    }
+
+    console.log('✅ Perfil actualizado con nueva imagen')
+    
+    // Actualizar el perfil local
+    if (userProfile.value) {
+      userProfile.value.avatar_url = avatarUrl
+    }
+
+    alert('✅ Foto de perfil actualizada correctamente')
+
+  } catch (error) {
+    console.error('Error:', error)
+    alert('Error al cambiar la foto de perfil')
+  } finally {
+    uploading.value = false
+    // Limpiar el input
+    if (fileInput.value) {
+      fileInput.value.value = ''
+    }
+  }
+}
 
 const saveProfile = () => {
   // Implement save profile logic here

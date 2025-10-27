@@ -7,7 +7,7 @@
           <img src="/images/logo/Compartalia2.png" alt="Compartalia Logo" class="h-10 w-auto object-contain sm:h-12 md:scale-150 ml-2" />
         </div>
         <!-- Menú desktop -->
-        <nav class="hidden md:flex space-x-8 items-center">
+        <nav class="hidden lg:flex space-x-8 items-center">
           <router-link to="/buscar-viajes" class="font-semibold transition duration-150 ease-in-out" :class="isScrolled ? 'text-black hover:text-green-600' : 'text-black hover:text-green-600'">Buscar Viajes</router-link>
           <a href="#como-funciona" class="font-semibold transition duration-150 ease-in-out" :class="isScrolled ? 'text-black hover:text-green-600' : 'text-black hover:text-green-600'">Cómo funciona</a>
           <a href="#beneficios" class="font-semibold transition duration-150 ease-in-out" :class="isScrolled ? 'text-black hover:text-green-600' : 'text-black hover:text-green-600'">Beneficios</a>
@@ -15,10 +15,10 @@
           <a href="#contacto" class="font-semibold transition duration-150 ease-in-out" :class="isScrolled ? 'text-black hover:text-green-600' : 'text-black hover:text-green-600'">Contacto</a>
         </nav>
 
-        <!-- Botón hamburguesa móvil -->
+        <!-- Botón hamburguesa móvil y tablet -->
         <button 
           @click="toggleMobileMenu" 
-          class="md:hidden p-2 rounded-lg transition-colors"
+          class="lg:hidden p-2 rounded-lg transition-colors"
           :class="isScrolled ? 'text-black hover:bg-gray-100' : 'text-black hover:bg-gray-100'"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,7 +27,7 @@
           </svg>
         </button>
         <!-- Botón de perfil o login -->
-        <div class="hidden md:block relative">
+        <div class="hidden lg:block relative">
           <router-link 
             v-if="!isAuthenticated"
             to="/login"
@@ -92,8 +92,8 @@
         </div>
       </div>
 
-      <!-- Menú móvil -->
-      <div v-if="isMobileMenuOpen" class="md:hidden bg-white shadow-lg border-t border-gray-200 rounded-b-xl mx-2 mt-2">
+      <!-- Menú móvil y tablet -->
+      <div v-if="isMobileMenuOpen" class="lg:hidden bg-white shadow-lg border-t border-gray-200 rounded-b-xl mx-2 mt-2">
         <nav class="flex flex-col space-y-3 px-6 py-6">
           <router-link to="/buscar-viajes" @click="closeMobileMenu" class="text-gray-700 font-semibold hover:text-green-600 transition duration-150 ease-in-out py-3 px-4 rounded-lg hover:bg-green-50">Buscar Viajes</router-link>
           <a href="#como-funciona" @click="closeMobileMenu" class="text-gray-700 font-semibold hover:text-green-600 transition duration-150 ease-in-out py-3 px-4 rounded-lg hover:bg-green-50">Cómo funciona</a>
@@ -1037,8 +1037,21 @@ const handleGoogleLogin = async () => {
 
 /* Responsive */
 @media (max-width: 1024px) and (min-width: 769px) {
+  .hero-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .hero-text {
+    text-align: center;
+    order: 2;
+  }
+  
   .hero-image {
-    margin-top: 80px;
+    order: 1;
+    margin-top: 0;
+    height: 400px;
   }
   
   .scene-2 {
@@ -1048,12 +1061,25 @@ const handleGoogleLogin = async () => {
 
 /* Ajuste específico para tablet 768x1024 */
 @media (max-width: 1024px) and (min-width: 768px) and (max-height: 1024px) {
+  .hero-layout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    text-align: center;
+  }
+  
+  .hero-text {
+    text-align: center;
+    order: 2;
+  }
+  
   .hero-image {
-    margin-top: 60px;
+    order: 1;
+    margin-top: 0;
+    height: 350px;
   }
   
   .scene-2 {
-    transform: scale(1.1) translateX(0px) translateY(-10px) !important;
+    transform: scale(1.1) translateX(0px) translateY(0px) !important;
   }
 }
 

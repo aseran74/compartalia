@@ -218,14 +218,36 @@ const selectDate = (day: any) => {
   if (!day.isCurrentMonth) return
   
   selectedDate.value = day.fullDate
-  emit('update:modelValue', day.fullDate.toISOString().split('T')[0])
+  
+  // Formatear fecha manualmente sin conversión UTC
+  const year = day.year
+  const month = String(day.month + 1).padStart(2, '0')
+  const date = String(day.date).padStart(2, '0')
+  const formattedDate = `${year}-${month}-${date}`
+  
+  console.log('📅 DatePicker seleccionado:', {
+    fullDate: day.fullDate,
+    year,
+    month: day.month,
+    date: day.date,
+    formattedDate
+  })
+  
+  emit('update:modelValue', formattedDate)
   closeCalendar()
 }
 
 const selectToday = () => {
   const today = new Date()
   selectedDate.value = today
-  emit('update:modelValue', today.toISOString().split('T')[0])
+  
+  // Formatear sin conversión UTC
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const date = String(today.getDate()).padStart(2, '0')
+  const formattedDate = `${year}-${month}-${date}`
+  
+  emit('update:modelValue', formattedDate)
   closeCalendar()
 }
 
@@ -233,7 +255,14 @@ const selectTomorrow = () => {
   const tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate() + 1)
   selectedDate.value = tomorrow
-  emit('update:modelValue', tomorrow.toISOString().split('T')[0])
+  
+  // Formatear sin conversión UTC
+  const year = tomorrow.getFullYear()
+  const month = String(tomorrow.getMonth() + 1).padStart(2, '0')
+  const date = String(tomorrow.getDate()).padStart(2, '0')
+  const formattedDate = `${year}-${month}-${date}`
+  
+  emit('update:modelValue', formattedDate)
   closeCalendar()
 }
 

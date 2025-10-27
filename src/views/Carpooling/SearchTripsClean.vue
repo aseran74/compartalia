@@ -644,6 +644,7 @@ const handleDestinationSelect = (suggestion: AutocompleteSuggestion) => {
 // Búsqueda de viajes
 const searchTrips = async () => {
   if (!searchForm.origin || !searchForm.destination) {
+    console.warn('⚠️ Origen o destino no especificado')
     return
   }
 
@@ -651,19 +652,35 @@ const searchTrips = async () => {
   hasSearched.value = true
 
   try {
-    console.log('🔍 Iniciando búsqueda híbrida...', searchForm)
+    console.log('🔍 Iniciando búsqueda híbrida...')
+    console.log('📋 Form values:', {
+      origin: searchForm.origin,
+      destination: searchForm.destination,
+      date: searchForm.date,
+      time: searchForm.time,
+      tripType: searchForm.tripType
+    })
+    
+    // Debug: mostrar qué fecha se está enviando
+    console.log('📅 Sysdate value:', searchForm.date, 'Type:', typeof searchForm.date)
     
     const results = await hybridService.searchTrips(
       searchForm.origin,
       searchForm.destination,
       {
-        useGeolocation: true,
+        useGeolocation: false, // Deshabilitar geolocalización
         maxDistanceKm: 50,
-        limit: 20
+        limit: 20,
+        date: searchForm.date, // Pasar la fecha al servicio
+        tripType: searchForm.tripType // Pasar el tipo de viaje
       }
     )
 
-    console.log('✅ Búsqueda completada:', results)
+    console.log('✅ Búsqueda completada:', {
+      totalResults: results.length,
+      results: results
+    })
+    
     searchResults.value = results
   } catch (error) {
     console.error('❌ Error en la búsqueda:', error)
@@ -698,9 +715,16 @@ const viewTripDetails = (tripId: string) => {
 }
 
 // Función para formatear fecha y hora
-const formatDateTime = (dateTime: string) => {
+const formatDateTime = (dateTime: string | null | undefined) => {
+  if (!dateTime) {
+    return 'No definida'
+  }
+  
   try {
     const date = new Date(dateTime)
+    if (isNaN(date.getTime())) {
+      return 'Fecha inválida'
+    }
     return date.toLocaleString('es-ES', {
       day: '2-digit',
       month: '2-digit',
@@ -709,8 +733,7 @@ const formatDateTime = (dateTime: string) => {
       minute: '2-digit'
     })
   } catch (error) {
-    console.error('Error formateando fecha:', error)
-    return dateTime
+    return 'Error'
   }
 }
 

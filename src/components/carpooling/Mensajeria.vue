@@ -20,7 +20,17 @@
 
     <!-- Header desktop -->
     <div class="hidden lg:block bg-white shadow-sm border-b px-6 py-4">
-      <h1 class="text-2xl font-bold text-gray-900">💬 Sistema de Mensajería</h1>
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">💬 Sistema de Mensajería</h1>
+        <button
+          @click="runDiagnostics"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
+          title="Ejecutar diagnóstico del sistema de mensajería"
+        >
+          <span>🔧</span>
+          <span>Diagnóstico</span>
+        </button>
+      </div>
     </div>
     
     <div class="flex-1 flex overflow-hidden">
@@ -62,10 +72,11 @@
               <div class="flex items-center space-x-3">
                 <div class="relative">
                   <img
-                    :src="conversation.otherUser?.avatar_url || conversation.otherUser?.avatar || '/images/user/default-avatar.png'"
-                    :alt="conversation.otherUser?.name || conversation.otherUser?.nombre || 'Usuario'"
-                    class="h-12 w-12 rounded-full object-cover"
-                    @error="(event: any) => event.target.src = '/images/user/default-avatar.png'"
+                    :src="getAvatarUrl(conversation.otherUser?.avatar_url)"
+                    :alt="conversation.otherUser?.name || 'Usuario'"
+                    class="h-12 w-12 rounded-full object-cover bg-gray-200"
+                    loading="lazy"
+                    @error.once="(event: any) => event.target.src = '/images/user/default-avatar.png'"
                   />
                   <!-- Indicador de estado online -->
                   <div
@@ -78,7 +89,7 @@
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center justify-between">
                     <p class="text-sm font-medium text-gray-900 truncate">
-                      {{ conversation.otherUser?.name || conversation.otherUser?.nombre || 'Usuario' }}
+                      {{ conversation.otherUser?.name || 'Usuario' }}
                     </p>
                     <div class="flex items-center space-x-2">
                       <p class="text-xs text-gray-500">
@@ -138,21 +149,22 @@
             <div class="flex items-center space-x-3">
               <div class="relative">
                 <img
-                  :src="selectedConversation.otherUser?.avatar || selectedConversation.otherUser?.avatar_url || '/images/user/default-avatar.png'"
-                  :alt="selectedConversation.otherUser?.nombre || selectedConversation.otherUser?.name || 'Usuario'"
-                  class="h-10 w-10 rounded-full object-cover"
-                  @error="(event: any) => event.target.src = '/images/user/default-avatar.png'"
+                  :src="getAvatarUrl(selectedConversation.otherUser?.avatar_url)"
+                  :alt="selectedConversation.otherUser?.name || 'Usuario'"
+                  class="h-10 w-10 rounded-full object-cover bg-gray-200"
+                  loading="lazy"
+                  @error.once="(event: any) => event.target.src = '/images/user/default-avatar.png'"
                 />
                 <div
                   :class="[
                     'absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white',
-                    selectedConversation.otherUser.estado === 'activo' ? 'bg-green-400' : 'bg-gray-400'
+                    selectedConversation.otherUser.role === 'admin' ? 'bg-green-400' : 'bg-gray-400'
                   ]"
                 ></div>
               </div>
               <div>
                 <h3 class="text-lg font-medium text-gray-900">
-                  {{ selectedConversation.otherUser?.name || selectedConversation.otherUser?.nombre || 'Usuario' }}
+                  {{ selectedConversation.otherUser?.name || 'Usuario' }}
                 </h3>
                 <p class="text-sm text-gray-500">
                   {{ selectedConversation.otherUser?.id || 'ID no disponible' }}
@@ -181,36 +193,36 @@
           <!-- Mensajes -->
           <div class="flex-1 overflow-y-auto p-4 space-y-4" ref="messagesContainer">
             <div
-              v-for="mensaje in selectedConversation.mensajes"
+              v-for="mensaje in mensajes"
               :key="mensaje.id"
               :class="[
                 'flex',
-                mensaje.remitenteId === currentUser.id ? 'justify-end' : 'justify-start'
+                mensaje.sender_id === currentUser.id ? 'justify-end' : 'justify-start'
               ]"
             >
               <div
                 :class="[
                   'max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm',
-                  mensaje.remitenteId === currentUser.id
+                  mensaje.sender_id === currentUser.id
                     ? 'bg-blue-500 text-white rounded-br-md'
                     : 'bg-gray-100 text-gray-900 rounded-bl-md'
                 ]"
               >
-                <p class="text-sm leading-relaxed">{{ mensaje.contenido }}</p>
+                <p class="text-sm leading-relaxed">{{ mensaje.content }}</p>
                 <div class="flex items-center justify-end mt-1 space-x-1">
                   <p
                     :class="[
                       'text-xs',
-                      mensaje.remitenteId === currentUser.id ? 'text-blue-100' : 'text-gray-500'
+                      mensaje.sender_id === currentUser.id ? 'text-blue-100' : 'text-gray-500'
                     ]"
                   >
-                    {{ formatDateTime(mensaje.fecha) }}
+                    {{ formatDateTime(mensaje.created_at) }}
                   </p>
                   <span
-                    v-if="mensaje.remitenteId === currentUser.id"
+                    v-if="mensaje.sender_id === currentUser.id"
                     class="text-xs"
                   >
-                    {{ mensaje.leido ? '✓✓' : '✓' }}
+                    {{ mensaje.read_at ? '✓✓' : '✓' }}
                   </span>
                 </div>
               </div>
@@ -424,7 +436,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { messagingService, type Message, type Conversation } from '@/services/messagingService';
 import { useAuth } from '@/composables/useAuth';
 
@@ -444,6 +456,7 @@ const isTyping = ref(false);
 const searchNewUser = ref('');
 const loading = ref(false);
 const error = ref('');
+const showDiagnostics = ref(false);
 
 // Datos reactivos
 const conversaciones = ref<Conversation[]>([]);
@@ -452,7 +465,7 @@ const usuariosDisponibles = ref<any[]>([]);
 
 // Computed properties
 const currentUser = computed(() => ({
-  id: user.value?.uid || user.value?.id || '',
+  id: user.value?.uid || '',
   nombre: userProfile.value?.name || user.value?.displayName || 'Usuario',
   email: user.value?.email || ''
 }));
@@ -465,7 +478,7 @@ const filteredConversations = computed(() => {
   
   const query = searchConversations.value.toLowerCase();
   return conversaciones.value.filter(conv =>
-    (conv.otherUser?.name || conv.otherUser?.nombre || '').toLowerCase().includes(query) ||
+    (conv.otherUser?.name || '').toLowerCase().includes(query) ||
     (conv.otherUser?.id || '').toLowerCase().includes(query) ||
     (conv.last_message?.content || '').toLowerCase().includes(query)
   );
@@ -487,6 +500,11 @@ const filteredUsers = computed(() => {
   );
 });
 
+// Helper para obtener la URL del avatar de forma estable
+const getAvatarUrl = (avatarUrl: string | null | undefined): string => {
+  return avatarUrl || '/images/user/default-avatar.png';
+};
+
 // Métodos
 async function selectConversation(conversation: Conversation) {
   selectedConversation.value = conversation;
@@ -502,6 +520,9 @@ async function selectConversation(conversation: Conversation) {
   // Marcar mensajes como leídos
   await messagingService.markMessagesAsRead(conversation.id, user.value?.uid || '');
   
+  // Suscribirse a mensajes en tiempo real
+  subscribeToMessages();
+  
   // Scroll al final de los mensajes
   nextTick(() => {
     if (messagesContainer.value) {
@@ -514,16 +535,34 @@ async function enviarMensaje() {
   if (!nuevoMensaje.value.trim() || !selectedConversation.value) return;
   
   const content = nuevoMensaje.value.trim();
+  
+  console.log('📤 === ENVIANDO MENSAJE ===');
+  console.log('Conversación ID:', selectedConversation.value.id);
+  console.log('Usuario ID:', user.value?.uid);
+  console.log('Contenido:', content);
+  console.log('Usuario autenticado:', user.value);
+  
+  // Verificar autenticación
+  if (!user.value || !user.value.uid) {
+    console.error('❌ Usuario no autenticado');
+    error.value = 'Debes estar autenticado para enviar mensajes';
+    return;
+  }
+  
   nuevoMensaje.value = '';
   
   try {
+    console.log('Llamando a messagingService.sendMessage...');
     const newMessage = await messagingService.sendMessage(
       selectedConversation.value.id, 
       content,
-      user.value?.uid || ''
+      user.value.uid
     );
     
+    console.log('Respuesta del servicio:', newMessage);
+    
     if (newMessage) {
+      console.log('✅ Mensaje enviado exitosamente');
       // Recargar mensajes para mostrar el nuevo
       await loadMessages(selectedConversation.value.id);
       
@@ -533,10 +572,15 @@ async function enviarMensaje() {
           messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
         }
       });
+    } else {
+      console.error('❌ No se recibió respuesta del servicio');
+      error.value = 'Error al enviar el mensaje. Por favor, intenta de nuevo.';
     }
-  } catch (error) {
-    console.error('Error enviando mensaje:', error);
-    error.value = 'Error al enviar el mensaje';
+  } catch (err: any) {
+    console.error('❌ Error enviando mensaje:', err);
+    console.error('Tipo de error:', typeof err);
+    console.error('Error completo:', JSON.stringify(err, null, 2));
+    error.value = `Error al enviar el mensaje: ${err.message || 'Error desconocido'}`;
   }
 }
 
@@ -559,8 +603,8 @@ async function loadConversations() {
     console.log('🔍 loadConversations - conversaciones recibidas:', conversations);
     conversaciones.value = conversations;
     console.log('🔍 loadConversations - conversaciones.value actualizado:', conversaciones.value);
-  } catch (error) {
-    console.error('Error cargando conversaciones:', error);
+  } catch (err: any) {
+    console.error('Error cargando conversaciones:', err);
     error.value = 'Error al cargar las conversaciones';
   } finally {
     loading.value = false;
@@ -583,17 +627,17 @@ function verPerfilUsuario(usuario: any) {
 }
 
 async function iniciarNuevaConversacion() {
-  if (selectedUser.value) {
+  if (selectedUser.value && user.value?.uid) {
     try {
-      const conversation = await messagingService.createConversation(selectedUser.value.id);
+      const conversation = await messagingService.createConversation(selectedUser.value.id, user.value.uid);
       if (conversation) {
         // Recargar conversaciones
         await loadConversations();
         selectConversation(conversation);
         showProfileModal.value = false;
       }
-    } catch (error) {
-      console.error('Error creando conversación:', error);
+    } catch (err: any) {
+      console.error('Error creando conversación:', err);
       error.value = 'Error al crear la conversación';
     }
   }
@@ -601,7 +645,7 @@ async function iniciarNuevaConversacion() {
 
 async function iniciarNuevaConversacionConUsuario(usuario: any) {
   try {
-    const conversation = await messagingService.createConversation(usuario.id, user.value?.uid);
+    const conversation = await messagingService.createConversation(usuario.id, user.value?.uid || '');
     if (conversation) {
       // Recargar conversaciones
       await loadConversations();
@@ -609,8 +653,8 @@ async function iniciarNuevaConversacionConUsuario(usuario: any) {
       showNewChatModal.value = false;
       searchNewUser.value = '';
     }
-  } catch (error) {
-    console.error('Error creando conversación:', error);
+  } catch (err: any) {
+    console.error('Error creando conversación:', err);
     error.value = 'Error al crear la conversación';
   }
 }
@@ -659,30 +703,310 @@ function getStatusLabel(estado: string): string {
   return labels[estado as keyof typeof labels] || estado;
 }
 
+// Función de diagnóstico
+async function runDiagnostics() {
+  console.log('🔧 === EJECUTANDO DIAGNÓSTICO ===\n');
+  
+  // 1. Verificar usuario autenticado
+  console.log('1️⃣ Usuario autenticado:');
+  console.log('   Firebase user:', user.value);
+  console.log('   User profile:', userProfile.value);
+  console.log('   User ID:', user.value?.uid);
+  
+  // 2. Verificar conexión a Supabase
+  console.log('\n2️⃣ Probando conexión a Supabase...');
+  try {
+    const { data, error } = await messagingService.supabase
+      .from('profiles')
+      .select('count')
+      .limit(1);
+    
+    if (error) {
+      console.error('❌ Error de conexión:', error);
+    } else {
+      console.log('✅ Conexión exitosa');
+    }
+  } catch (err) {
+    console.error('❌ Error fatal:', err);
+  }
+  
+  // 3. Verificar permisos de lectura
+  console.log('\n3️⃣ Verificando permisos de lectura...');
+  try {
+    const { data: profiles, error: profilesError } = await messagingService.supabase
+      .from('profiles')
+      .select('id, name')
+      .limit(3);
+    
+    if (profilesError) {
+      console.error('❌ Error en profiles:', profilesError);
+    } else {
+      console.log('✅ Profiles:', profiles?.length || 0);
+    }
+    
+    const { data: convs, error: convsError } = await messagingService.supabase
+      .from('conversations')
+      .select('id')
+      .limit(3);
+    
+    if (convsError) {
+      console.error('❌ Error en conversations:', convsError);
+    } else {
+      console.log('✅ Conversations:', convs?.length || 0);
+    }
+    
+    const { data: msgs, error: msgsError } = await messagingService.supabase
+      .from('messages')
+      .select('id')
+      .limit(3);
+    
+    if (msgsError) {
+      console.error('❌ Error en messages:', msgsError);
+    } else {
+      console.log('✅ Messages:', msgs?.length || 0);
+    }
+  } catch (err) {
+    console.error('❌ Error verificando permisos:', err);
+  }
+  
+  // 4. Verificar conversaciones del usuario
+  console.log('\n4️⃣ Verificando conversaciones del usuario...');
+  console.log('   Conversaciones cargadas:', conversaciones.value.length);
+  console.log('   Conversación seleccionada:', selectedConversation.value?.id);
+  
+  // 5. Probar inserción (si hay conversación seleccionada)
+  if (selectedConversation.value && user.value?.uid) {
+    console.log('\n5️⃣ Probando inserción de mensaje de prueba...');
+    try {
+      const testMessage = await messagingService.sendMessage(
+        selectedConversation.value.id,
+        '[DIAGNÓSTICO] Este es un mensaje de prueba',
+        user.value.uid
+      );
+      
+      if (testMessage) {
+        console.log('✅ Mensaje de prueba enviado exitosamente:', testMessage);
+        // Recargar mensajes
+        await loadMessages(selectedConversation.value.id);
+      } else {
+        console.error('❌ No se pudo enviar el mensaje de prueba');
+      }
+    } catch (err) {
+      console.error('❌ Error enviando mensaje de prueba:', err);
+    }
+  } else {
+    console.log('\n5️⃣ No se puede probar inserción (selecciona una conversación primero)');
+  }
+  
+  console.log('\n✅ === DIAGNÓSTICO COMPLETADO ===\n');
+  alert('Diagnóstico completado. Revisa la consola del navegador (F12) para ver los resultados.');
+}
+
+// Variables para almacenar las suscripciones
+let messageSubscription: any = null;
+let conversationsSubscription: any = null;
+
+// Suscribirse a cambios en tiempo real de mensajes
+function subscribeToMessages() {
+  if (!selectedConversation.value) return;
+  
+  console.log('🔔 Suscribiéndose a mensajes en tiempo real para conversación:', selectedConversation.value.id);
+  
+  // Cancelar suscripción anterior si existe
+  if (messageSubscription) {
+    messageSubscription.unsubscribe();
+  }
+  
+  // Suscribirse a nuevos mensajes en la conversación actual
+  messageSubscription = messagingService.supabase
+    .channel(`messages:${selectedConversation.value.id}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${selectedConversation.value.id}`
+      },
+      (payload) => {
+        console.log('🔔 Nuevo mensaje recibido en tiempo real:', payload);
+        
+        // Agregar el nuevo mensaje a la lista
+        const newMessage = payload.new as Message;
+        
+        // Solo agregar si no existe ya (evitar duplicados)
+        const exists = mensajes.value.some(m => m.id === newMessage.id);
+        if (!exists) {
+          mensajes.value.push(newMessage);
+          
+          // Scroll al final
+          nextTick(() => {
+            if (messagesContainer.value) {
+              messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+            }
+          });
+        }
+      }
+    )
+    .subscribe((status) => {
+      console.log('🔔 Estado de suscripción mensajes:', status);
+    });
+}
+
+// Suscribirse a cambios en el historial de conversaciones
+function subscribeToConversations() {
+  if (!user.value?.uid) return;
+  
+  console.log('🔔 Suscribiéndose a actualizaciones de conversaciones para usuario:', user.value.uid);
+  
+  // Cancelar suscripción anterior si existe
+  if (conversationsSubscription) {
+    conversationsSubscription.unsubscribe();
+  }
+  
+  // Suscribirse a nuevos mensajes en TODAS las conversaciones del usuario
+  conversationsSubscription = messagingService.supabase
+    .channel(`conversations:${user.value.uid}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages'
+      },
+      async (payload) => {
+        console.log('🔔 Nuevo mensaje en alguna conversación:', payload);
+        
+        const newMessage = payload.new as any;
+        
+        // Verificar si el mensaje es de una conversación del usuario
+        const conversation = conversaciones.value.find(c => c.id === newMessage.conversation_id);
+        
+        if (conversation) {
+          console.log('🔔 Actualizando historial de conversaciones...');
+          
+          // Actualizar el último mensaje de la conversación
+          conversation.last_message = {
+            id: newMessage.id,
+            conversation_id: newMessage.conversation_id,
+            sender_id: newMessage.sender_id,
+            content: newMessage.content,
+            read_at: null,
+            created_at: newMessage.created_at
+          };
+          
+          // Si el mensaje no es del usuario actual, incrementar contador de no leídos
+          if (newMessage.sender_id !== user.value?.uid) {
+            conversation.unread_count = (conversation.unread_count || 0) + 1;
+          }
+          
+          // Mover la conversación al principio de la lista
+          const index = conversaciones.value.indexOf(conversation);
+          if (index > 0) {
+            conversaciones.value.splice(index, 1);
+            conversaciones.value.unshift(conversation);
+          }
+        } else {
+          // Si es una conversación nueva, recargar todas las conversaciones
+          console.log('🔔 Nueva conversación detectada, recargando...');
+          await loadConversations();
+        }
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'conversations'
+      },
+      async (payload) => {
+        console.log('🔔 Nueva conversación creada:', payload);
+        
+        const newConv = payload.new as any;
+        
+        // Si el usuario es parte de la conversación, recargar
+        if (newConv.user1_id === user.value?.uid || newConv.user2_id === user.value?.uid) {
+          console.log('🔔 Nueva conversación para el usuario, recargando...');
+          await loadConversations();
+        }
+      }
+    )
+    .subscribe((status) => {
+      console.log('🔔 Estado de suscripción conversaciones:', status);
+    });
+}
+
+// Cancelar suscripciones al desmontar
+onUnmounted(() => {
+  if (messageSubscription) {
+    console.log('🔔 Cancelando suscripción a mensajes');
+    messageSubscription.unsubscribe();
+  }
+  if (conversationsSubscription) {
+    console.log('🔔 Cancelando suscripción a conversaciones');
+    conversationsSubscription.unsubscribe();
+  }
+});
+
+// Watch para detectar cuando el usuario se autentica
+watch(() => user.value?.uid, async (newUid, oldUid) => {
+  console.log('👤 Usuario cambió:', { oldUid, newUid });
+  
+  if (newUid && !oldUid) {
+    // Usuario acaba de autenticarse
+    console.log('✅ Usuario autenticado, cargando conversaciones...');
+    await loadConversations();
+    await loadAvailableUsers();
+    subscribeToConversations();
+  } else if (!newUid && oldUid) {
+    // Usuario cerró sesión
+    console.log('❌ Usuario cerró sesión, limpiando datos...');
+    conversaciones.value = [];
+    mensajes.value = [];
+    usuariosDisponibles.value = [];
+    selectedConversation.value = null;
+    
+    // Cancelar suscripciones
+    if (messageSubscription) messageSubscription.unsubscribe();
+    if (conversationsSubscription) conversationsSubscription.unsubscribe();
+  }
+});
+
 // Inicialización
 onMounted(async () => {
   console.log('Componente Mensajería montado');
+  console.log('Usuario en mount:', user.value?.uid);
   
-  // Cargar datos primero
-  await loadConversations();
-  await loadAvailableUsers();
-  
-  // Verificar si hay un parámetro de usuario en la URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const userId = urlParams.get('user');
-  
-  if (userId) {
-    console.log('Usuario específico solicitado:', userId);
-    // Buscar el usuario en la lista de usuarios disponibles
-    const user = usuariosDisponibles.value.find(u => u.id === userId);
-    if (user) {
-      console.log('Usuario encontrado:', user);
-      // Crear conversación automáticamente
-      await iniciarNuevaConversacionConUsuario(user);
-    } else {
-      console.log('Usuario no encontrado en la lista:', userId);
-      console.log('Usuarios disponibles:', usuariosDisponibles.value);
+  // Solo cargar si el usuario ya está autenticado
+  if (user.value?.uid) {
+    console.log('Usuario ya autenticado, cargando datos...');
+    // Cargar datos primero
+    await loadConversations();
+    await loadAvailableUsers();
+    
+    // Suscribirse a actualizaciones de conversaciones en tiempo real
+    subscribeToConversations();
+    
+    // Verificar si hay un parámetro de usuario en la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user');
+    
+    if (userId) {
+      console.log('Usuario específico solicitado:', userId);
+      // Buscar el usuario en la lista de usuarios disponibles
+      const targetUser = usuariosDisponibles.value.find(u => u.id === userId);
+      if (targetUser) {
+        console.log('Usuario encontrado:', targetUser);
+        // Crear conversación automáticamente
+        await iniciarNuevaConversacionConUsuario(targetUser);
+      } else {
+        console.log('Usuario no encontrado en la lista:', userId);
+        console.log('Usuarios disponibles:', usuariosDisponibles.value);
+      }
     }
+  } else {
+    console.log('⏳ Esperando autenticación del usuario...');
   }
 });
 </script>

@@ -183,8 +183,9 @@
                 <img
                   :src="miembro.avatar || '/images/user/default-avatar.png'"
                   :alt="miembro.nombre"
-                  class="h-12 w-12 rounded-full object-cover"
-                  @error="(event: any) => event.target.src = '/images/user/default-avatar.png'"
+                  class="h-12 w-12 rounded-full object-cover bg-gray-200"
+                  loading="lazy"
+                  @error.once="(event: any) => event.target.src = '/images/user/default-avatar.png'"
                 />
                 <div
                   :class="[
@@ -298,8 +299,9 @@
                       <img
                         :src="miembro.avatar || '/images/user/default-avatar.png'"
                         :alt="miembro.nombre"
-                        class="h-10 w-10 rounded-full object-cover"
-                        @error="(event: any) => event.target.src = '/images/user/default-avatar.png'"
+                        class="h-10 w-10 rounded-full object-cover bg-gray-200"
+                        loading="lazy"
+                        @error.once="(event: any) => event.target.src = '/images/user/default-avatar.png'"
                       />
                       <div
                         :class="[
@@ -410,7 +412,9 @@
               <img
                 :src="selectedMember?.avatar || '/images/user/default-avatar.png'"
                 :alt="selectedMember?.nombre"
-                class="h-16 w-16 rounded-full object-cover"
+                class="h-16 w-16 rounded-full object-cover bg-gray-200"
+                loading="lazy"
+                @error.once="(event: any) => event.target.src = '/images/user/default-avatar.png'"
               />
               <div>
                 <h4 class="text-lg font-medium text-gray-900">{{ selectedMember?.nombre }}</h4>

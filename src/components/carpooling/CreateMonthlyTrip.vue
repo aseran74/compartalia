@@ -130,9 +130,9 @@
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
               required
             >
-              <option value="recurrent">📅 Fechas Seleccionadas (período específico)</option>
-              <option value="weekly">📅 Semanal (lunes a viernes)</option>
-              <option value="monthly">📅 Mensual (mismo día cada mes)</option>
+              <option value="single">🚗 Viaje Único (puntual)</option>
+              <option value="weekly">📅 Semanal (recurrente)</option>
+              <option value="monthly">📅 Mensual (recurrente)</option>
             </select>
             <p class="text-xs text-gray-500 mt-1">{{ getTripDescription() }}</p>
           </div>
@@ -230,8 +230,35 @@
           <!-- Fecha de fin -->
           <div class="form-group">
             <label class="block text-sm font-medium text-gray-700 mb-2">📅 Fecha de fin</label>
-            <input v-model="endDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+            <input 
+              v-model="endDate" 
+              type="date" 
+              :disabled="autoRenew && tripType !== 'single'"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              :required="!autoRenew || tripType === 'single'" 
+            />
             <p class="text-xs text-gray-500 mt-1">{{ getEndDateDescription() }}</p>
+          </div>
+
+          <!-- Renovación automática (solo para recurrentes) -->
+          <div v-if="tripType !== 'single'" class="form-group md:col-span-2">
+            <div class="rounded-lg border border-gray-300 p-4">
+              <label class="flex items-start gap-3 cursor-pointer">
+                <input
+                  v-model="autoRenew"
+                  type="checkbox"
+                  class="mt-1 rounded"
+                />
+                <div>
+                  <p class="font-medium text-gray-900 mb-1">
+                    🔄 Renovación automática
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    El viaje continuará indefinidamente sin fecha de fin. Se renovará automáticamente cada vez que esté próximo a expirar.
+                  </p>
+                </div>
+              </label>
+            </div>
           </div>
 
           <!-- Día del mes (solo para mensuales) -->
@@ -266,9 +293,10 @@
               <p><strong>🚗 Tipo:</strong> {{ getTripTypeLabel() }}</p>
               <p><strong>💰 Precio:</strong> €{{ tripPrice }} {{ getTripTypeLabel() }}</p>
               <p><strong>📅 Inicio:</strong> {{ formatDate(startDate) }}</p>
-              <p><strong>📅 Fin:</strong> {{ formatDate(endDate) }}</p>
+              <p v-if="tripType !== 'single'"><strong>📅 Fin:</strong> {{ autoRenew ? 'Sin fecha de fin (renovación automática)' : formatDate(endDate) }}</p>
               <p v-if="tripType === 'monthly'"><strong>📅 Día del mes:</strong> {{ monthlyDay }}</p>
               <p><strong>📆 Días:</strong> {{ tripForm.days_of_week.map(d => daysOfWeek.find(day => day.value === d)?.label).join(', ') }}</p>
+              <p v-if="autoRenew && tripType !== 'single'"><strong>🔄 Renovación:</strong> Automática</p>
             </div>
           </div>
         </div>
@@ -301,7 +329,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
-import MonthlyTripsService from '@/services/monthlyTripsService'
+import TripsService from '@/services/tripsServiceSimple'
+import type { TripSimple } from '@/services/tripsServiceSimple'
 
 const loading = ref(false)
 
@@ -373,10 +402,9 @@ const tripForm = reactive({
   destination_lng: 0
 })
 
-const tripType = ref('recurrent')
-const tripPrice = ref(320)
-const startDate = ref('2024-11-01')
-const endDate = ref('2024-11-30')
+const tripPrice = ref(80)
+const startDate = ref('2025-11-01')
+const endDate = ref('2025-11-30')
 const monthlyDay = ref(1)
 const monthlyDuration = ref('12')
 const showCalendar = ref(false)
@@ -465,71 +493,71 @@ function onTripTypeChange(event: Event) {
 // Funciones para manejar los tipos de viaje
 function getTripTypeLabel() {
   switch (tripType.value) {
-    case 'recurrent': return 'recurrente'
+    case 'single': return 'único'
     case 'weekly': return 'semanal'
     case 'monthly': return 'mensual'
-    default: return 'recurrente'
+    default: return 'único'
   }
 }
 
 function getTripDescription() {
   switch (tripType.value) {
-    case 'recurrent': return 'Viaje todos los días laborables (lunes a viernes)'
-    case 'weekly': return 'Viaje de lunes a viernes de la semana seleccionada'
-    case 'monthly': return 'Viaje el mismo día de cada mes'
-    default: return 'Viaje todos los días laborables'
+    case 'single': return 'Viaje puntual para una fecha específica'
+    case 'weekly': return 'Viaje recurrente semanal (elige los días que opera)'
+    case 'monthly': return 'Viaje recurrente mensual (elige los días que opera)'
+    default: return 'Viaje puntual'
   }
 }
 
 function getEndDateDescription() {
   switch (tripType.value) {
-    case 'recurrent': return 'El viaje se realizará todos los días laborables en este período'
-    case 'weekly': return 'El viaje terminará el viernes de la semana seleccionada'
-    case 'monthly': return `El viaje se repetirá durante ${monthlyDuration.value} meses (mismo día cada mes)`
+    case 'single': return 'No aplica para viajes únicos'
+    case 'weekly': return 'Fecha en la que termina el viaje semanal'
+    case 'monthly': return `El viaje se repetirá hasta esta fecha`
     default: return 'Fecha de finalización del viaje'
   }
 }
 
 function getMinPrice() {
   switch (tripType.value) {
-    case 'recurrent': return 50
-    case 'weekly': return 25
-    case 'monthly': return 100
-    default: return 50
+    case 'single': return 5
+    case 'weekly': return 20
+    case 'monthly': return 80
+    default: return 5
   }
 }
 
 function getMaxPrice() {
   switch (tripType.value) {
-    case 'recurrent': return 500
-    case 'weekly': return 200
-    case 'monthly': return 1000
-    default: return 500
+    case 'single': return 50
+    case 'weekly': return 150
+    case 'monthly': return 500
+    default: return 50
   }
 }
 
 function getPriceStep() {
   switch (tripType.value) {
-    case 'recurrent': return 10
+    case 'single': return 0.5
     case 'weekly': return 5
-    case 'monthly': return 25
-    default: return 10
+    case 'monthly': return 10
+    default: return 0.5
   }
 }
 
 function getPriceDescription() {
   switch (tripType.value) {
-    case 'recurrent': return 'Precio por período completo (€50-500)'
-    case 'weekly': return 'Precio por semana (€25-200)'
-    case 'monthly': return 'Precio por mes (€100-1000)'
-    default: return 'Precio por período completo (€50-500)'
+    case 'single': return 'Precio por plaza para este viaje (€5-50)'
+    case 'weekly': return 'Precio por plaza por semana (€20-150)'
+    case 'monthly': return 'Precio por plaza por mes (€80-500)'
+    default: return 'Precio por plaza'
   }
 }
 
 // Funciones para manejar la recurrencia
 function getRecurrenceDescription() {
   switch (tripType.value) {
-    case 'recurrent': return `Desde ${startDate.value} hasta ${endDate.value} (todos los días laborables)`
+    case 'single': return `Viaje único el ${startDate.value}`
     case 'weekly': return `Semana del ${startDate.value} (lunes a viernes)`
     case 'monthly': return `Día ${monthlyDay.value} de cada mes desde ${startDate.value}`
     default: return 'No especificado'
@@ -537,8 +565,8 @@ function getRecurrenceDescription() {
 }
 
 function calculateEndDate() {
-  if (tripType.value === 'recurrent') {
-    return endDate.value
+  if (tripType.value === 'single') {
+    return startDate.value
   } else if (tripType.value === 'weekly') {
     // Calcular fin de semana (viernes)
     const start = new Date(startDate.value)
@@ -952,27 +980,90 @@ async function createMonthlyTrip() {
 
 async function processTripCreation(tripData: any) {
   try {
-    // // addLog(`📍 Origen: ${tripForm.origin_name}`)
-    // // addLog(`🎯 Destino: ${tripForm.destination_name}`)
-    // // addLog(`🕐 Salida: ${tripForm.departure_time}`)
-    // // addLog(`🕐 Llegada: ${tripForm.return_time}`)
-    // // addLog(`👥 Plazas: ${tripForm.available_seats}`)
-    // // addLog(`💰 Precio por plaza: €${tripForm.price_per_seat}`)
-    // // addLog(`📅 Precio ${getTripTypeLabel()}: €${tripPrice.value}`)
-    // // addLog(`🚗 Tipo de viaje: ${getTripTypeLabel()}`)
-    // // addLog(`📅 Período: ${getRecurrenceDescription()}`)
+    console.log(`📍 Origen: ${tripForm.origin_name}`)
+    console.log(`🎯 Destino: ${tripForm.destination_name}`)
+    console.log(`🚗 Tipo de viaje: ${getTripTypeLabel()}`)
 
-    const result = await MonthlyTripsService.createMonthlyTrip(tripData)
+    // Preparar datos según el tipo de viaje
+    const tripToCreate: Partial<Trip> = {
+      driver_id: tripData.driver_id,
+      vehicle_id: tripData.vehicle_id,
+      origin_name: tripData.origin_name,
+      origin_lat: tripData.origin_lat,
+      origin_lng: tripData.origin_lng,
+      destination_name: tripData.destination_name,
+      destination_lat: tripData.destination_lat,
+      destination_lng: tripData.destination_lng,
+      trip_type: tripType.value,
+      available_seats: tripData.available_seats,
+      description: tripData.description,
+      status: 'active'
+    }
+
+    if (tripType.value === 'single') {
+      // Viaje único
+      const departureDateTime = `${startDate.value}T${tripData.departure_time}:00+00:00`
+      tripToCreate.departure_time = departureDateTime
+      tripToCreate.price_per_seat = tripData.price_per_seat
+      tripToCreate.return_time = tripData.return_time
+    } else {
+      // Viajes recurrentes (weekly, monthly)
+      tripToCreate.start_date = startDate.value
+      tripToCreate.end_date = autoRenew.value ? undefined : endDate.value
+      tripToCreate.price_per_day = tripData.price_per_seat
+      tripToCreate.price_per_period = tripPrice.value
+      tripToCreate.auto_renew = autoRenew.value
+      
+      // Asignar horarios por día según los días seleccionados
+      const dayMapping: Record<number, keyof Trip> = {
+        1: 'monday_time',
+        2: 'tuesday_time',
+        3: 'wednesday_time',
+        4: 'thursday_time',
+        5: 'friday_time',
+        6: 'saturday_time',
+        7: 'sunday_time'
+      }
+      
+      tripData.days_of_week.forEach((dayValue: number) => {
+        const dayKey = dayMapping[dayValue]
+        if (dayKey && hasSpecialSchedules.value && specialSchedules.value[dayValue]) {
+          (tripToCreate as any)[dayKey] = specialSchedules.value[dayValue].departure_time
+        } else {
+          (tripToCreate as any)[dayKey] = tripData.departure_time
+        }
+      })
+      
+      // Horarios especiales
+      if (hasSpecialSchedules.value) {
+        const specialTimesObj: any = { departure: {}, return: {} }
+        Object.entries(specialSchedules.value).forEach(([day, times]) => {
+          if (times.departure_time !== tripData.departure_time) {
+            specialTimesObj.departure[day] = times.departure_time
+          }
+          if (times.return_time !== tripData.return_time) {
+            specialTimesObj.return[day] = times.return_time
+          }
+        })
+        tripToCreate.special_times = specialTimesObj
+      }
+    }
+
+    const result = await TripsService.createTrip(tripToCreate as Omit<Trip, 'id' | 'created_at' | 'updated_at'>)
 
     if (result) {
-      // // addLog(`✅ Viaje creado exitosamente con ID: ${result.id}`)
-      // // addLog('🎉 ¡Viaje configurado correctamente!')
+      console.log(`✅ Viaje creado exitosamente con ID: ${result.id}`)
+      const renewalMsg = autoRenew.value ? ' con renovación automática activada' : ''
+      alert(`🎉 ¡Viaje ${getTripTypeLabel()} creado correctamente${renewalMsg}!`)
+      resetForm()
     } else {
-      // // addLog('❌ Error al crear el viaje')
+      console.error('❌ Error al crear el viaje')
+      alert('❌ Error al crear el viaje. Por favor, inténtalo de nuevo.')
     }
 
   } catch (error) {
-    // // addLog(`❌ Error: ${error}`)
+    console.error(`❌ Error: ${error}`)
+    alert('❌ Error al crear el viaje. Por favor, inténtalo de nuevo.')
   }
 }
 
@@ -989,41 +1080,24 @@ function resetForm() {
   tripForm.origin_lng = 0
   tripForm.destination_lat = 0
   tripForm.destination_lng = 0
-  tripType.value = 'recurrent'
-  tripPrice.value = 320
-  startDate.value = '2024-11-01'
-  endDate.value = '2024-11-30'
+  // Ya no hay tripType
+  tripPrice.value = 80
+  const today = new Date().toISOString().split('T')[0]
+  startDate.value = today
+  endDate.value = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  autoRenew.value = false
   monthlyDay.value = 1
-  monthlyDuration.value = '12'
+  monthlyDuration.value = '1'
   showCalendar.value = false
   currentMonth.value = new Date().getMonth()
   currentYear.value = new Date().getFullYear()
-  // // addLog('🔄 Formulario limpiado')
+  hasSpecialSchedules.value = false
+  specialSchedules.value = {}
+  console.log('🔄 Formulario limpiado')
 }
 
-// Watcher para actualizar el precio cuando cambie el tipo de viaje
-watch(tripType, (newType) => {
-  console.log('🔄 Cambio de tipo de viaje:', newType)
-  // // addLog(`🔄 Cambio detectado: ${newType}`)
-  
-  switch (newType) {
-    case 'recurrent':
-      tripPrice.value = 320
-      // // addLog('✅ Configurado como Recurrente')
-      break
-    case 'weekly':
-      tripPrice.value = 80
-      // // addLog('✅ Configurado como Semanal')
-      break
-    case 'monthly':
-      tripPrice.value = 150
-      // // addLog('✅ Configurado como Mensual')
-      break
-    default:
-      // // addLog(`❌ Tipo desconocido: ${newType}`)
-  }
-  // // addLog(`🚗 Tipo de viaje cambiado a: ${getTripTypeLabel()}`)
-})
+// Precio por defecto
+// (Ya no hay tripType, es un viaje simple con fechas)
 
 // Watcher para actualizar las fechas cuando cambie el tipo de viaje
 watch(tripType, (newType) => {
@@ -1031,34 +1105,24 @@ watch(tripType, (newType) => {
   const todayStr = today.toISOString().split('T')[0]
   
   switch (newType) {
-    case 'recurrent':
+    case 'single':
       startDate.value = todayStr
-      endDate.value = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // +30 días
-      // // addLog('📅 Fechas configuradas para viaje recurrente (30 días)')
+      endDate.value = todayStr
       break
     case 'weekly':
       startDate.value = todayStr
-      // Calcular fin de semana automáticamente
-      const dayOfWeek = today.getDay()
-      const daysToFriday = (5 - dayOfWeek + 7) % 7
-      const end = new Date(today)
-      end.setDate(today.getDate() + daysToFriday)
-      endDate.value = end.toISOString().split('T')[0]
-      // // addLog('📅 Fechas configuradas para viaje semanal (lunes a viernes)')
+      endDate.value = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // +7 días
       break
     case 'monthly':
       startDate.value = todayStr
       monthlyDay.value = today.getDate()
-      monthlyDuration.value = '12'
-      // Para mensual, calcular fin según duración
-      const startDateObj = new Date(todayStr)
-      const endDateObj = new Date(startDateObj)
-      endDateObj.setMonth(endDateObj.getMonth() + parseInt(monthlyDuration.value))
+      monthlyDuration.value = '1'
+      const endDateObj = new Date(today)
+      endDateObj.setMonth(endDateObj.getMonth() + 1)
       endDate.value = endDateObj.toISOString().split('T')[0]
-      // // addLog(`📅 Fechas configuradas para viaje mensual (${monthlyDuration.value} meses)`)
       break
   }
-  // // addLog(`📅 Fechas actualizadas para: ${getTripTypeLabel()}`)
+  console.log(`📅 Fechas actualizadas para: ${getTripTypeLabel()}`)
 })
 
 // Watcher para sincronizar el calendario con la fecha seleccionada

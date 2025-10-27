@@ -315,9 +315,10 @@ const router = createRouter({
     {
       path: '/carpooling/create-trip',
       name: 'Create Trip',
-      component: () => import('../views/Carpooling/CreateTrip.vue'),
+      component: () => import('../views/Carpooling/CreateTripSimple.vue'),
       meta: {
         title: 'Crear Viaje',
+        requiresAuth: true,
       },
     },
     {

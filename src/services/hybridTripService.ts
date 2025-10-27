@@ -60,33 +60,35 @@ export class HybridTripService {
       maxDistanceKm?: number
       limit?: number
       date?: string
+      tripType?: string
     } = {}
   ): Promise<SearchResult[]> {
-    const { useGeolocation = true, maxDistanceKm = 10, limit = 50 } = options
+    const { useGeolocation = false, maxDistanceKm = 10, limit = 50 } = options // DESHABILITAR geolocalización por defecto
 
     try {
       console.log('🔍 HybridTripService - Búsqueda híbrida:', { 
-        origin, destination, useGeolocation, maxDistanceKm, limit 
+        origin, destination, useGeolocation, maxDistanceKm, limit, tripType: options.tripType
       })
 
       const results: SearchResult[] = []
 
       // 1. Búsqueda por texto directo (siempre)
-      const textResults = await this.searchByText(origin, destination, limit, options.date)
+      const textResults = await this.searchByText(origin, destination, limit, options.date, options.tripType)
       results.push(...textResults.map(trip => ({
         trip,
         matchType: 'exact_text' as const,
         score: 1.0
       })))
 
-      // 2. Búsqueda por geolocalización (solo si no hay coincidencia exacta por texto)
-      if (useGeolocation && (origin || destination) && textResults.length === 0) {
-        console.log('🔍 No hay coincidencias exactas por texto, buscando por geolocalización...')
-        const geoResults = await this.searchByGeolocation(origin, destination, maxDistanceKm, limit)
-        results.push(...geoResults)
-      } else if (textResults.length > 0) {
-        console.log('🔍 Coincidencias exactas encontradas, omitiendo búsqueda por geolocalización')
-      }
+      // 2. Búsqueda por geolocalización (DESHABILITADA temporalmente por resultados incorrectos)
+      // if (useGeolocation && (origin || destination) && textResults.length === 0) {
+      //   console.log('🔍 No hay coincidencias exactas por texto, buscando por geolocalización...')
+      //   const geoResults = await this.searchByGeolocation(origin, destination, maxDistanceKm, limit)
+      //   results.push(...geoResults)
+      // } else if (textResults.length > 0) {
+      //   console.log('🔍 Coincidencias exactas encontradas, omitiendo búsqueda por geolocalización')
+      // }
+      console.log('🔍 Búsqueda por geolocalización deshabilitada temporalmente')
 
       // 3. Eliminar duplicados y ordenar por score
       const uniqueResults = this.removeDuplicates(results)
@@ -108,44 +110,47 @@ export class HybridTripService {
   }
 
   /**
-   * Búsqueda por texto directo
+   * Búsqueda por texto directo en monthly_trips
    */
-  private async searchByText(origin?: string, destination?: string, limit: number = 50, date?: string): Promise<Trip[]> {
+  private async searchByText(origin?: string, destination?: string, limit: number = 50, date?: string, tripType?: string): Promise<Trip[]> {
     try {
-      console.log('🔍 HybridTripService.searchByText - Iniciando búsqueda:', { origin, destination, limit })
+      console.log('🔍 HybridTripService.searchByText - Iniciando búsqueda en monthly_trips')
+      console.log('📋 Parámetros:', { origin: origin || 'sin origen', destination: destination || 'sin destino', limit, date: date || 'sin fecha', tripType })
       
-      // Primero obtener los viajes sin JOIN
+      // Buscar en monthly_trips
       let query = supabaseClean
-        .from('trips')
+        .from('monthly_trips')
         .select('*')
-        .eq('status', 'active')
+        .eq('is_active', true)
         .limit(limit)
 
       // Filtrar por fecha si se proporciona
       if (date) {
-        const searchDate = new Date(date)
-        const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0))
-        const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999))
+        const searchDate = date
+        console.log('🔍 Filtrando por fecha en query Supabase:', searchDate)
         
-        console.log('🔍 Filtrando por fecha:', { date, startOfDay, endOfDay })
+        // Solo filtrar por start_date en la query de Supabase
+        // El filtro de end_date lo haremos después en JavaScript
         query = query
-          .gte('departure_time', startOfDay.toISOString())
-          .lte('departure_time', endOfDay.toISOString())
+          .lte('start_date', searchDate)
+          
+        console.log('✅ Aplicado filtro start_date <=', searchDate)
       } else {
-        // Si no se proporciona fecha, filtrar por fecha actual o futura
-        query = query.gte('departure_time', new Date().toISOString())
+        // Si no se proporciona fecha, filtrar por viajes activos desde hoy
+        const today = new Date().toISOString().split('T')[0]
+        query = query.lte('start_date', today)
       }
 
       // Aplicar filtros de texto
       if (origin) {
         const normalizedOrigin = this.normalizeMadridSearch(origin)
-        console.log('🔍 Aplicando filtro origen:', { original: origin, normalized: normalizedOrigin })
+        console.log('🔍 Aplicando filtro origen - Original:', origin, 'Normalizado:', normalizedOrigin)
         query = query.ilike('origin_name', `%${normalizedOrigin}%`)
       }
       
       if (destination) {
         const normalizedDestination = this.normalizeMadridSearch(destination)
-        console.log('🔍 Aplicando filtro destino:', { original: destination, normalized: normalizedDestination })
+        console.log('🔍 Aplicando filtro destino - Original:', destination, 'Normalizado:', normalizedDestination)
         query = query.ilike('destination_name', `%${normalizedDestination}%`)
       }
 
@@ -163,10 +168,62 @@ export class HybridTripService {
       }
 
       console.log(`✅ Búsqueda por texto: ${trips.length} viajes encontrados`)
-      console.log('📊 Viajes encontrados:', trips)
+      console.log('📊 Viajes encontrados ANTES de filtrar por fecha:', trips.map(t => ({
+        id: t.id,
+        origin: t.origin_name,
+        destination: t.destination_name,
+        start_date: t.start_date,
+        end_date: t.end_date
+      })))
+
+      // Filtrar por end_date si se proporcionó fecha (filtrado manual)
+      let filteredTrips = trips
+      if (date) {
+        // Normalizar fecha de búsqueda (eliminar hora si existe)
+        const searchDateNormalized = date.split('T')[0]
+        
+        console.log('📅 FECHA ORIGINAL RECIBIDA:', date)
+        console.log('📅 FECHA NORMALIZADA:', searchDateNormalized)
+        console.log('📊 Total viajes antes de filtrar:', trips.length)
+        
+        filteredTrips = trips.filter(trip => {
+          // Normalizar fechas del viaje
+          const tripStartDate = trip.start_date ? trip.start_date.split('T')[0] : null
+          const tripEndDate = trip.end_date ? trip.end_date.split('T')[0] : null
+          
+          // Comparar fechas como strings YYYY-MM-DD
+          const startComparison = tripStartDate && tripStartDate <= searchDateNormalized
+          const endComparison = tripEndDate === null || tripEndDate >= searchDateNormalized
+          const isWithinDateRange = startComparison && endComparison
+          
+          console.log(`📅 ${trip.origin_name}→${trip.destination_name}: start=${tripStartDate}, end=${tripEndDate}, buscar=${searchDateNormalized}, OK=${isWithinDateRange}`)
+          return isWithinDateRange
+        })
+        console.log(`✅ Viajes filtrados por fecha: ${filteredTrips.length} de ${trips.length}`)
+        console.log('📊 Viajes DESPUÉS de filtrar por fecha:', filteredTrips.map(t => ({
+          id: t.id,
+          origin: t.origin_name,
+          destination: t.destination_name,
+          start_date: t.start_date,
+          end_date: t.end_date
+        })))
+      }
+      
+      // Filtrar por tipo de viaje si se proporciona
+      if (tripType && tripType !== '') {
+        const tripTypeLower = tripType.toLowerCase()
+        console.log('🔍 Filtrando por tipo de viaje:', tripTypeLower)
+        
+        filteredTrips = filteredTrips.filter(trip => {
+          // No filtramos por tipo en monthly_trips porque todos son recurrentes
+          // Simplemente no filtramos nada
+          return true
+        })
+        console.log(`✅ Viajes después de filtro de tipo: ${filteredTrips.length}`)
+      }
 
       // Ahora obtener los perfiles de los conductores
-      const driverIds = trips.map(trip => trip.driver_id)
+      const driverIds = filteredTrips.map(trip => trip.driver_id)
       console.log('🔍 Obteniendo perfiles para driver_ids:', driverIds)
 
       const { data: profiles, error: profilesError } = await supabaseClean
@@ -181,8 +238,8 @@ export class HybridTripService {
 
       console.log('📊 Perfiles encontrados:', profiles)
 
-      // Combinar viajes con perfiles
-      const tripsWithProfiles = trips.map(trip => {
+      // Combinar viajes con perfiles y mapear de monthly_trips a Trip
+      const tripsWithProfiles = filteredTrips.map(trip => {
         const profile = profiles?.find(p => p.id === trip.driver_id)
         console.log('🔍 Combinando viaje:', {
           tripId: trip.id,
@@ -190,16 +247,9 @@ export class HybridTripService {
           profileFound: !!profile,
           profileName: profile?.name || 'No encontrado'
         })
-        return {
-          ...trip,
-          profiles: profile ? {
-            name: profile.name,
-            avatar_url: profile.avatar_url
-          } : {
-            name: 'Conductor',
-            avatar_url: null
-          }
-        }
+        
+        // Mapear monthly_trips a formato Trip
+        return this.mapMonthlyTripToTrip(trip, profile)
       })
 
       // Debug específico para verificar si el JOIN funciona
@@ -337,6 +387,12 @@ export class HybridTripService {
   private normalizeMadridSearch(searchTerm: string): string {
     const term = searchTerm.toLowerCase().trim()
     
+    // Normalizar "Puerta del Sol" a "Sol"
+    if (term.includes('puerta del sol')) {
+      return 'sol'
+    }
+    
+    // Normalizar "Madrid" a "Madrid Centro"
     if (term === 'madrid') {
       return 'madrid centro'
     }
@@ -429,6 +485,60 @@ export class HybridTripService {
     } catch (error) {
       console.error('❌ Error obteniendo sugerencias:', error)
       return []
+    }
+  }
+
+  /**
+   * Mapea un viaje de monthly_trips al formato Trip esperado
+   */
+  private mapMonthlyTripToTrip(monthlyTrip: any, profile?: any): Trip {
+    // Obtener el primer horario disponible como departure_time
+    let departureTime = monthlyTrip.monday_time || 
+                       monthlyTrip.tuesday_time || 
+                       monthlyTrip.wednesday_time || 
+                       monthlyTrip.thursday_time || 
+                       monthlyTrip.friday_time || 
+                       monthlyTrip.saturday_time || 
+                       monthlyTrip.sunday_time || 
+                       '08:00'
+    
+    // Normalizar formato de tiempo (eliminar segundos si existen)
+    if (departureTime && departureTime.includes(':')) {
+      const parts = departureTime.split(':')
+      if (parts.length >= 2) {
+        departureTime = `${parts[0]}:${parts[1]}`
+      }
+    }
+    
+    // Crear un timestamp combinando start_date con el horario
+    const startDate = monthlyTrip.start_date || new Date().toISOString().split('T')[0]
+    const departureTimestamp = `${startDate}T${departureTime}:00`
+    
+    return {
+      id: monthlyTrip.id,
+      driver_id: monthlyTrip.driver_id,
+      vehicle_id: monthlyTrip.vehicle_id,
+      origin_name: monthlyTrip.origin_name,
+      origin_lat: parseFloat(monthlyTrip.origin_lat),
+      origin_lng: parseFloat(monthlyTrip.origin_lng),
+      destination_name: monthlyTrip.destination_name,
+      destination_lat: parseFloat(monthlyTrip.destination_lat),
+      destination_lng: parseFloat(monthlyTrip.destination_lng),
+      departure_time: departureTimestamp,
+      available_seats: monthlyTrip.available_seats,
+      price_per_seat: parseFloat(monthlyTrip.monthly_price || monthlyTrip.price_per_seat || 0),
+      description: monthlyTrip.description || `Viaje recurrente de ${monthlyTrip.origin_name} a ${monthlyTrip.destination_name}`,
+      status: monthlyTrip.is_active ? 'active' : 'inactive',
+      route_data: null,
+      created_at: monthlyTrip.created_at,
+      updated_at: monthlyTrip.updated_at,
+      profiles: profile ? {
+        name: profile.name,
+        avatar_url: profile.avatar_url
+      } : {
+        name: 'Conductor',
+        avatar_url: null
+      }
     }
   }
 }

@@ -134,10 +134,14 @@ export function useSidebarProvider() {
 
   const handleMobileNavigation = (item: string) => {
     setActiveItem(item)
-    // En móvil, siempre cerrar sidebar después de navegar
+    clearAutoHideTimer()
+    
+    // En móvil, cerrar sidebar completamente
     if (isMobile.value) {
-      clearAutoHideTimer()
       isMobileOpen.value = false
+    } else {
+      // En desktop, plegar sidebar (colapsar)
+      isExpanded.value = false
     }
   }
 

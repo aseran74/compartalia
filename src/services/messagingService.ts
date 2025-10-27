@@ -209,13 +209,40 @@ export class MessagingService {
 
   // Enviar mensaje
   async sendMessage(conversationId: string, content: string, userId: string): Promise<Message | null> {
+    console.log('🔵 === MessagingService.sendMessage ===');
+    console.log('   conversationId:', conversationId);
+    console.log('   userId:', userId);
+    console.log('   content length:', content.length);
+    
     try {
       if (!userId) {
-        console.log('No se proporcionó userId');
+        console.error('❌ No se proporcionó userId');
         throw new Error('Usuario no autenticado');
       }
 
-      console.log('Enviando mensaje con userId:', userId);
+      console.log('✅ userId válido, procediendo a insertar...');
+
+      // Verificar que la conversación existe
+      const { data: conversation, error: convError } = await this.supabase
+        .from('conversations')
+        .select('id, user1_id, user2_id')
+        .eq('id', conversationId)
+        .single();
+
+      if (convError) {
+        console.error('❌ Error verificando conversación:', convError);
+        throw new Error(`Conversación no encontrada: ${convError.message}`);
+      }
+
+      console.log('✅ Conversación encontrada:', conversation);
+
+      // Verificar que el usuario es parte de la conversación
+      if (conversation.user1_id !== userId && conversation.user2_id !== userId) {
+        console.error('❌ Usuario no es parte de la conversación');
+        throw new Error('No tienes permiso para enviar mensajes en esta conversación');
+      }
+
+      console.log('✅ Usuario autorizado, insertando mensaje...');
 
       const { data, error } = await this.supabase
         .from('messages')
@@ -234,17 +261,37 @@ export class MessagingService {
         `)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error de Supabase al insertar mensaje:', error);
+        console.error('   Código:', error.code);
+        console.error('   Mensaje:', error.message);
+        console.error('   Detalles:', error.details);
+        console.error('   Hint:', error.hint);
+        throw error;
+      }
+
+      console.log('✅ Mensaje insertado exitosamente:', data);
 
       // Actualizar timestamp de la conversación
-      await this.supabase
+      console.log('Actualizando timestamp de conversación...');
+      const { error: updateError } = await this.supabase
         .from('conversations')
         .update({ updated_at: new Date().toISOString() })
         .eq('id', conversationId);
 
+      if (updateError) {
+        console.warn('⚠️ Error actualizando timestamp:', updateError);
+        // No lanzamos error aquí porque el mensaje ya se envió
+      } else {
+        console.log('✅ Timestamp actualizado');
+      }
+
       return data;
-    } catch (error) {
-      console.error('Error enviando mensaje:', error);
+    } catch (error: any) {
+      console.error('❌ Error en sendMessage:', error);
+      console.error('   Tipo:', typeof error);
+      console.error('   Message:', error.message);
+      console.error('   Stack:', error.stack);
       return null;
     }
   }
