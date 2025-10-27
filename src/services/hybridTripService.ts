@@ -385,7 +385,13 @@ export class HybridTripService {
    * Normalizar búsquedas de Madrid
    */
   private normalizeMadridSearch(searchTerm: string): string {
-    const term = searchTerm.toLowerCase().trim()
+    let term = searchTerm.toLowerCase().trim()
+    
+    // Extraer solo el primer componente (antes de la primera coma)
+    // Ej: "Leganés, Madrid, España" -> "leganés"
+    if (term.includes(',')) {
+      term = term.split(',')[0].trim()
+    }
     
     // Normalizar "Puerta del Sol" a "Sol"
     if (term.includes('puerta del sol')) {
@@ -402,10 +408,10 @@ export class HybridTripService {
     }
     
     if (term.includes('madrid') && term.length > 6) {
-      return searchTerm
+      return term
     }
     
-    return searchTerm
+    return term
   }
 
   /**

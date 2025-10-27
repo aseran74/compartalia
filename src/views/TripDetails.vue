@@ -246,6 +246,8 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BookingModal from '@/components/carpooling/BookingModal.vue'
+import { supabaseClean } from '@/config/supabaseClean'
+import { bookingService } from '@/services/bookingService'
 
 const route = useRoute()
 const router = useRouter()
@@ -264,39 +266,147 @@ onMounted(async () => {
   const tripId = route.params.id as string
   
   try {
-    // Aquí iría la llamada al servicio para obtener los detalles del viaje
-    // Por ahora simulamos la carga
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    console.log('🔍 Cargando detalles del viaje:', tripId)
     
-    // Datos simulados - en producción vendrían del servicio
-    trip.value = {
-      id: tripId,
-      driver_name: 'Miguel Torres',
-      driver_avatar: '/images/user/user-01.jpg',
-      driver_rating: '4.7',
-      trips_completed: '50+',
-      origin_name: 'Getafe',
-      destination_name: 'Chamartín',
-      departure_time: '2025-10-25T07:30:00Z',
-      price_per_seat: 8.00,
-      available_seats: 4,
-      description: 'Viaje cómodo y puntual desde Getafe hasta Chamartín. Parada en Nuevos Ministerios disponible.',
-      vehicle: {
-        brand: 'Peugeot',
-        model: '308'
+    // Obtener datos reales desde monthly_trips
+    const { data: tripData, error: tripError } = await supabaseClean
+      .from('monthly_trips')
+      .select(`
+        *,
+        profiles:driver_id (
+          name,
+          avatar_url
+        ),
+        vehicles:vehicle_id (
+          brand,
+          model,
+          year,
+          color,
+          license_plate
+        )
+      `)
+      .eq('id', tripId)
+      .single()
+    
+    if (tripError) {
+      console.error('❌ Error cargando viaje:', tripError)
+      return
+    }
+    
+    if (!tripData) {
+      console.error('❌ Viaje no encontrado')
+      return
+    }
+    
+    console.log('✅ Viaje cargado:', tripData)
+    
+    // Obtener primer horario disponible
+    const departureTime = tripData.monday_time || 
+                         tripData.tuesday_time || 
+                         tripData.wednesday_time || 
+                         tripData.thursday_time || 
+                         tripData.friday_time || 
+                         tripData.saturday_time || 
+                         tripData.sunday_time || 
+                         '08:00'
+    
+    // Normalizar formato de tiempo
+    let normalizedTime = departureTime
+    if (departureTime && departureTime.includes(':')) {
+      const parts = departureTime.split(':')
+      if (parts.length >= 2) {
+        normalizedTime = `${parts[0]}:${parts[1]}`
       }
     }
     
-    bookingInfo.value = {
-      remaining_seats: 4,
-      total_seats: 4,
-      is_fully_booked: false
+    // Crear timestamp
+    const startDate = tripData.start_date || new Date().toISOString().split('T')[0]
+    const departureTimestamp = `${startDate}T${normalizedTime}:00`
+    
+    // Transformar datos a formato esperado
+    trip.value = {
+      id: tripData.id,
+      driver_id: tripData.driver_id,
+      driver_name: tripData.profiles?.name || 'Conductor',
+      driver_avatar: tripData.profiles?.avatar_url || '/images/user/user-01.jpg',
+      driver_rating: '4.7',
+      trips_completed: '50+',
+      origin_name: tripData.origin_name,
+      origin_lat: parseFloat(tripData.origin_lat),
+      origin_lng: parseFloat(tripData.origin_lng),
+      destination_name: tripData.destination_name,
+      destination_lat: parseFloat(tripData.destination_lat),
+      destination_lng: parseFloat(tripData.destination_lng),
+      departure_time: departureTimestamp,
+      price_per_seat: parseFloat(tripData.price_per_seat || 0),
+      monthly_price: parseFloat(tripData.monthly_price || 0),
+      available_seats: tripData.available_seats || 4,
+      description: tripData.description || `Viaje desde ${tripData.origin_name} hasta ${tripData.destination_name}`,
+      start_date: tripData.start_date,
+      end_date: tripData.end_date,
+      monday_time: tripData.monday_time,
+      tuesday_time: tripData.tuesday_time,
+      wednesday_time: tripData.wednesday_time,
+      thursday_time: tripData.thursday_time,
+      friday_time: tripData.friday_time,
+      saturday_time: tripData.saturday_time,
+      sunday_time: tripData.sunday_time,
+      vehicle: tripData.vehicles ? {
+        brand: tripData.vehicles.brand,
+        model: tripData.vehicles.model,
+        year: tripData.vehicles.year,
+        color: tripData.vehicles.color,
+        license_plate: tripData.vehicles.license_plate
+      } : null
     }
     
-    distance.value = 15.2
+    // Obtener información de reservas
+    try {
+      const bookings = await bookingService.getTripsWithBookingInfo()
+      const tripBooking = bookings.find(b => b.id === tripId)
+      if (tripBooking) {
+        bookingInfo.value = {
+          remaining_seats: tripBooking.remaining_seats,
+          total_seats: tripBooking.total_seats,
+          confirmed_bookings: tripBooking.confirmed_bookings,
+          is_fully_booked: tripBooking.is_fully_booked
+        }
+      } else {
+        bookingInfo.value = {
+          remaining_seats: tripData.available_seats || 4,
+          total_seats: tripData.available_seats || 4,
+          confirmed_bookings: 0,
+          is_fully_booked: false
+        }
+      }
+    } catch (bookingError) {
+      console.error('❌ Error cargando reservas:', bookingError)
+      bookingInfo.value = {
+        remaining_seats: tripData.available_seats || 4,
+        total_seats: tripData.available_seats || 4,
+        confirmed_bookings: 0,
+        is_fully_booked: false
+      }
+    }
+    
+    // Calcular distancia
+    const R = 6371 // Radio de la Tierra en kilómetros
+    const lat1Rad = trip.value.origin_lat * Math.PI / 180
+    const lat2Rad = trip.value.destination_lat * Math.PI / 180
+    const deltaLat = (trip.value.destination_lat - trip.value.origin_lat) * Math.PI / 180
+    const deltaLng = (trip.value.destination_lng - trip.value.origin_lng) * Math.PI / 180
+    
+    const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+              Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+              Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    
+    distance.value = Math.round(R * c * 10) / 10
+    
+    console.log('✅ Detalles del viaje cargados correctamente')
     
   } catch (error) {
-    console.error('Error cargando detalles del viaje:', error)
+    console.error('❌ Error cargando detalles del viaje:', error)
   } finally {
     isLoading.value = false
   }
