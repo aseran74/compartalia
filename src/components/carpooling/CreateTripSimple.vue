@@ -334,7 +334,12 @@
         </div>
         
         <div>
-          <label class="block text-xs font-medium mb-2 text-black dark:text-white">💰 Precio por plaza (€)</label>
+          <label class="block text-xs font-medium mb-2 text-black dark:text-white">
+            💰 Precio por plaza (€)
+            <span class="text-xs text-gray-500 block mt-1">
+              {{ form.tipo_viaje === 'semanal' ? 'Por trayecto (semanal recurrente)' : form.tipo_viaje === 'mensual' ? 'Por trayecto (mensual recurrente)' : 'Por trayecto' }}
+            </span>
+          </label>
           <input 
             v-model.number="form.price_per_seat" 
             type="number" 
