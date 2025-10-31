@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen">
-    <main>
+    <main class="mobile-safe-content">
       <slot></slot>
     </main>
   </div>

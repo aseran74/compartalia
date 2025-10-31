@@ -76,6 +76,16 @@
               </select>
             </div>
           </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">👥 Filtro de Amigos</label>
+            <select
+              v-model="showOnlyFriends"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option :value="false">Ver todos</option>
+              <option :value="true">❤️ Solo amigos</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -113,6 +123,16 @@
               <option value="activo">✅ Activo</option>
               <option value="inactivo">⏸️ Inactivo</option>
               <option value="verificado">✅ Verificado</option>
+            </select>
+          </div>
+          <div class="md:w-48">
+            <label class="block text-sm font-medium text-gray-700 mb-2">👥 Filtro de Amigos</label>
+            <select
+              v-model="showOnlyFriends"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option :value="false">Ver todos</option>
+              <option :value="true">❤️ Solo amigos</option>
             </select>
           </div>
         </div>
@@ -493,6 +513,7 @@ const { user, isAuthenticated } = useAuth();
 const searchQuery = ref('');
 const selectedType = ref('');
 const selectedStatus = ref('');
+const showOnlyFriends = ref(false);
 const showFilters = ref(false);
 const showProfileModal = ref(false);
 const selectedMember = ref<any>(null);
@@ -529,6 +550,11 @@ const filteredMembers = computed(() => {
 
   if (selectedStatus.value) {
     filtered = filtered.filter(miembro => miembro.estado === selectedStatus.value);
+  }
+
+  // Filtro de amigos
+  if (showOnlyFriends.value) {
+    filtered = filtered.filter(miembro => miembro.esAmigo);
   }
 
   return filtered;

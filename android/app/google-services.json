@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "754938560838",
+    "project_id": "quincenalia-5eaa2",
+    "storage_bucket": "quincenalia-5eaa2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754938560838:android:97cf6991633bf5faaee547",
+        "android_client_info": {
+          "package_name": "com.compartalia.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "754938560838-o01lqesdlkbil2i012i0eqn6u4irm9a6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.compartalia.app",
+            "certificate_hash": "0c20b756f0653bf10873abb1bb2ab7fb51e61cd1"
+          }
+        },
+        {
+          "client_id": "754938560838-e9qdg9aqgi1i3oaipcf2pvkkr4nj8a7u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFGUkLz7j8ROR_nzLn6Z6Gq8mJooPqQ0w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "754938560838-e9qdg9aqgi1i3oaipcf2pvkkr4nj8a7u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

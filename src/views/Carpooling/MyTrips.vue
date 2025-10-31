@@ -76,246 +76,119 @@
 
     <!-- Lista de Viajes -->
     <div class="space-y-4">
-      <!-- Viaje como Conductor -->
+      <!-- Viajes como Pasajero -->
       <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div class="flex items-start justify-between">
-          <div class="flex-1">
-            <!-- Header del Viaje -->
-            <div class="mb-4 flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                  Conductor
-                </div>
-                <div class="rounded-full bg-success/10 px-3 py-1 text-sm font-medium text-success">
-                  Activo
-                </div>
-              </div>
-              <div class="flex items-center space-x-2">
-                <button class="rounded-md border border-stroke px-3 py-1 text-sm text-body-color hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-700">
-                  Editar
-                </button>
-                <button class="rounded-md bg-warning px-3 py-1 text-sm font-medium text-white hover:bg-opacity-90">
-                  Cancelar
-                </button>
-              </div>
-            </div>
+        <div class="mb-4">
+          <h2 class="text-xl font-semibold text-black dark:text-white">🎫 Mis Reservas</h2>
+          <p class="text-sm text-body-color">Tus viajes como pasajero</p>
+        </div>
 
-            <!-- Información de la Ruta -->
-            <div class="mb-4">
-              <div class="flex items-center space-x-4">
-                <div class="flex flex-col items-center">
-                  <div class="h-3 w-3 rounded-full bg-primary"></div>
-                  <div class="mt-2 h-8 w-0.5 bg-body-color"></div>
-                  <div class="h-3 w-3 rounded-full bg-secondary"></div>
-                </div>
-                <div class="flex-1">
-                  <h3 class="text-lg font-semibold text-black dark:text-white">
-                    Majadahonda → Plaza España
-                  </h3>
-                  <p class="text-sm text-body-color">
-                    Mañana, 8:00 AM • 3 asientos disponibles
-                  </p>
-                </div>
-              </div>
-            </div>
+        <!-- Estado de carga -->
+        <div v-if="isLoading" class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p class="mt-2 text-body-color">Cargando reservas...</p>
+        </div>
 
-            <!-- Detalles del Viaje -->
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-              <div>
-                <p class="text-sm text-body-color">Precio</p>
-                <p class="font-medium text-black dark:text-white">€8 por asiento</p>
-              </div>
-              <div>
-                <p class="text-sm text-body-color">Duración</p>
-                <p class="font-medium text-black dark:text-white">25 minutos</p>
-              </div>
-              <div>
-                <p class="text-sm text-body-color">Vehículo</p>
-                <p class="font-medium text-black dark:text-white">Toyota Prius</p>
-              </div>
-              <div>
-                <p class="text-sm text-body-color">Solicitudes</p>
-                <p class="font-medium text-black dark:text-white">3 pendientes</p>
-              </div>
-            </div>
+        <!-- Sin reservas -->
+        <div v-else-if="userBookings.length === 0" class="text-center py-8">
+          <div class="text-6xl mb-4">🚗</div>
+          <h3 class="text-lg font-semibold text-black dark:text-white mb-2">No tienes reservas</h3>
+          <p class="text-body-color mb-4">¡Busca y reserva tu próximo viaje!</p>
+          <button
+            @click="$router.push('/carpooling/buscar-viajes-hibrido')"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-center font-medium text-white hover:bg-opacity-90"
+          >
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            Buscar Viajes
+          </button>
+        </div>
 
-            <!-- Pasajeros Confirmados -->
-            <div class="mt-4">
-              <h4 class="mb-2 text-sm font-medium text-black dark:text-white">Pasajeros Confirmados</h4>
-              <div class="space-y-2">
-                <div class="flex items-center justify-between rounded-lg border border-stroke p-3 dark:border-strokedark">
+        <!-- Lista de reservas -->
+        <div v-else class="space-y-4">
+          <div 
+            v-for="booking in userBookings" 
+            :key="booking.id"
+            class="border border-stroke rounded-lg p-4 hover:shadow-md transition-shadow dark:border-strokedark"
+          >
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <!-- Header de la Reserva -->
+                <div class="mb-3 flex items-center justify-between">
                   <div class="flex items-center space-x-3">
-                    <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                      </svg>
+                    <div class="rounded-full bg-secondary/10 px-3 py-1 text-sm font-medium text-secondary">
+                      Pasajero
                     </div>
-                    <div>
-                      <p class="text-sm font-medium text-black dark:text-white">Ana García</p>
-                      <p class="text-xs text-body-color">Moncloa → Plaza España</p>
+                    <div :class="`rounded-full px-3 py-1 text-sm font-medium ${getStatusInfo(booking.status).class}`">
+                      {{ getStatusInfo(booking.status).label }}
+                    </div>
+                    <div class="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                      {{ getPaymentMethodInfo(booking.payment_method || '').icon }} {{ getPaymentMethodInfo(booking.payment_method || '').label }}
                     </div>
                   </div>
-                  <div class="text-right">
-                    <p class="text-sm font-medium text-black dark:text-white">€8</p>
-                    <button class="text-xs text-primary hover:text-primary/80">Chat</button>
+                  <div class="flex items-center space-x-2">
+                    <button 
+                      @click="viewTripDetails(booking.trip_id)"
+                      class="rounded-md border border-stroke px-3 py-1 text-sm text-body-color hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-700"
+                    >
+                      Ver Detalles
+                    </button>
+                    <button 
+                      v-if="booking.status === 'pending' || booking.status === 'confirmed'"
+                      @click="cancelBooking(booking.id!)"
+                      class="rounded-md bg-warning px-3 py-1 text-sm font-medium text-white hover:bg-opacity-90"
+                    >
+                      Cancelar
+                    </button>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Viaje como Pasajero -->
-      <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div class="flex items-start justify-between">
-          <div class="flex-1">
-            <!-- Header del Viaje -->
-            <div class="mb-4 flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="rounded-full bg-secondary/10 px-3 py-1 text-sm font-medium text-secondary">
-                  Pasajero
+                <!-- Información de la Ruta -->
+                <div class="flex items-center space-x-3 mb-3">
+                  <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-black dark:text-white">
+                      {{ booking.trip_info?.origin_name || 'Origen no disponible' }} → {{ booking.trip_info?.destination_name || 'Destino no disponible' }}
+                    </h3>
+                    <p class="text-sm text-body-color">
+                      {{ formatDate(booking.trip_info?.departure_time || booking.created_at || '') }} • 
+                      Conductor: {{ booking.trip_info?.driver_name || 'No disponible' }}
+                    </p>
+                  </div>
                 </div>
-                <div class="rounded-full bg-success/10 px-3 py-1 text-sm font-medium text-success">
-                  Confirmado
-                </div>
-              </div>
-              <div class="flex items-center space-x-2">
-                <button class="rounded-md border border-stroke px-3 py-1 text-sm text-body-color hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-700">
-                  Ver Detalles
-                </button>
-                <button class="rounded-md bg-warning px-3 py-1 text-sm font-medium text-white hover:bg-opacity-90">
-                  Cancelar
-                </button>
-              </div>
-            </div>
 
-            <!-- Información de la Ruta -->
-            <div class="mb-4">
-              <div class="flex items-center space-x-4">
-                <div class="flex flex-col items-center">
-                  <div class="h-3 w-3 rounded-full bg-primary"></div>
-                  <div class="mt-2 h-8 w-0.5 bg-body-color"></div>
-                  <div class="h-3 w-3 rounded-full bg-secondary"></div>
+                <!-- Detalles del Viaje -->
+                <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+                  <div>
+                    <p class="text-sm text-body-color">Precio Total</p>
+                    <p class="font-medium text-black dark:text-white">€{{ booking.total_price || 0 }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-body-color">Asientos</p>
+                    <p class="font-medium text-black dark:text-white">{{ booking.seats_requested }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-body-color">Precio por Asiento</p>
+                    <p class="font-medium text-black dark:text-white">€{{ booking.trip_info?.price_per_seat || 0 }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-body-color">Punto de Recogida</p>
+                    <p class="font-medium text-black dark:text-white">{{ booking.pickup_location || 'No especificado' }}</p>
+                  </div>
                 </div>
-                <div class="flex-1">
-                  <h3 class="text-lg font-semibold text-black dark:text-white">
-                    Las Rozas → Nuevos Ministerios
-                  </h3>
+
+                <!-- Notas -->
+                <div v-if="booking.notes" class="mt-3 p-3 bg-gray-50 rounded-lg dark:bg-gray-800">
                   <p class="text-sm text-body-color">
-                    Lunes, 7:30 AM • Conductor: María López
+                    <strong>Notas:</strong> {{ booking.notes }}
                   </p>
                 </div>
-              </div>
-            </div>
 
-            <!-- Detalles del Viaje -->
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-              <div>
-                <p class="text-sm text-body-color">Precio</p>
-                <p class="font-medium text-black dark:text-white">€12</p>
-              </div>
-              <div>
-                <p class="text-sm text-body-color">Duración</p>
-                <p class="font-medium text-black dark:text-white">35 minutos</p>
-              </div>
-              <div>
-                <p class="text-sm text-body-color">Vehículo</p>
-                <p class="font-medium text-black dark:text-white">Volkswagen Golf</p>
-              </div>
-              <div>
-                <p class="text-sm text-body-color">Punto de Recogida</p>
-                <p class="font-medium text-black dark:text-white">Estación Las Rozas</p>
-              </div>
-            </div>
-
-            <!-- Información del Conductor -->
-            <div class="mt-4 flex items-center space-x-3">
-              <div class="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center">
-                <svg class="h-5 w-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-black dark:text-white">María López</p>
-                <div class="flex items-center space-x-2">
-                  <div class="flex items-center">
-                    <svg class="h-3 w-3 text-warning" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                    <span class="ml-1 text-xs text-body-color">4.8</span>
-                  </div>
-                  <span class="text-xs text-body-color">• 23 viajes</span>
+                <!-- Información de Pago -->
+                <div v-if="booking.transaction_id" class="mt-3 text-xs text-body-color">
+                  <p><strong>ID de Transacción:</strong> {{ booking.transaction_id }}</p>
+                  <p><strong>Estado del Pago:</strong> {{ booking.payment_status || 'No especificado' }}</p>
                 </div>
-              </div>
-              <button class="ml-auto rounded-md bg-primary px-3 py-1 text-sm font-medium text-white hover:bg-opacity-90">
-                Chat
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Viaje Completado -->
-      <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div class="flex items-start justify-between">
-          <div class="flex-1">
-            <!-- Header del Viaje -->
-            <div class="mb-4 flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="rounded-full bg-secondary/10 px-3 py-1 text-sm font-medium text-secondary">
-                  Pasajero
-                </div>
-                <div class="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                  Completado
-                </div>
-              </div>
-              <div class="flex items-center space-x-2">
-                <button class="rounded-md border border-stroke px-3 py-1 text-sm text-body-color hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-700">
-                  Ver Detalles
-                </button>
-                <button class="rounded-md bg-primary px-3 py-1 text-sm font-medium text-white hover:bg-opacity-90">
-                  Valorar
-                </button>
-              </div>
-            </div>
-
-            <!-- Información de la Ruta -->
-            <div class="mb-4">
-              <div class="flex items-center space-x-4">
-                <div class="flex flex-col items-center">
-                  <div class="h-3 w-3 rounded-full bg-primary"></div>
-                  <div class="mt-2 h-8 w-0.5 bg-body-color"></div>
-                  <div class="h-3 w-3 rounded-full bg-secondary"></div>
-                </div>
-                <div class="flex-1">
-                  <h3 class="text-lg font-semibold text-black dark:text-white">
-                    Pozuelo → Moncloa
-                  </h3>
-                  <p class="text-sm text-body-color">
-                    Ayer, 8:15 AM • Conductor: Carlos Ruiz
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Detalles del Viaje -->
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-              <div>
-                <p class="text-sm text-body-color">Precio</p>
-                <p class="font-medium text-black dark:text-white">€6</p>
-              </div>
-              <div>
-                <p class="text-sm text-body-color">Duración</p>
-                <p class="font-medium text-black dark:text-white">20 minutos</p>
-              </div>
-              <div>
-                <p class="text-sm text-body-color">Vehículo</p>
-                <p class="font-medium text-black dark:text-white">Ford Focus</p>
-              </div>
-              <div>
-                <p class="text-sm text-body-color">Estado</p>
-                <p class="font-medium text-black dark:text-white">Pendiente de valoración</p>
               </div>
             </div>
           </div>
@@ -323,43 +196,125 @@
       </div>
     </div>
 
-    <!-- Sin Viajes -->
-    <div v-if="false" class="text-center py-12">
-      <svg class="mx-auto h-12 w-12 text-body-color" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47-.881-6.08-2.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      <h3 class="mt-4 text-lg font-medium text-black dark:text-white">
-        No tienes viajes aún
-      </h3>
-      <p class="mt-2 text-sm text-body-color">
-        Crea tu primer viaje o busca viajes disponibles.
-      </p>
-      <div class="mt-6 flex items-center justify-center space-x-4">
-        <button
-          @click="$router.push('/carpooling/create-trip')"
-          class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90"
-        >
-          Crear Viaje
-        </button>
-        <button
-          @click="$router.push('/carpooling/search-trips')"
-          class="rounded-md border border-stroke px-4 py-2 text-sm font-medium text-body-color hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-700"
-        >
-          Buscar Viajes
-        </button>
-      </div>
-    </div>
       </main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import AppSidebar from '@/components/layout/AppSidebar.vue';
-import AppHeader from '@/components/layout/AppHeader.vue';
-import { useSidebar } from '@/composables/useSidebar';
+import { ref, onMounted } from 'vue'
+import AppSidebar from '@/components/layout/AppSidebar.vue'
+import AppHeader from '@/components/layout/AppHeader.vue'
+import { useSidebar } from '@/composables/useSidebar'
+import { useAuth } from '@/composables/useAuth'
+import { bookingService, type Booking } from '@/services/bookingService'
+import { useToast } from '@/composables/useToast'
 
-const activeTab = ref('all');
-const { isExpanded } = useSidebar();
+const activeTab = ref('all')
+const { isExpanded } = useSidebar()
+const { user, userProfile } = useAuth()
+const { success, error: showErrorToast } = useToast()
+
+// Estado de las reservas
+const userBookings = ref<Booking[]>([])
+const isLoading = ref(false)
+
+// Cargar reservas del usuario
+const loadUserBookings = async () => {
+  const userId = userProfile.value?.id || user.value?.uid
+  if (!userId) return
+  
+  isLoading.value = true
+  try {
+    const bookings = await bookingService.getUserBookings(userId)
+    userBookings.value = bookings
+    console.log('📋 Reservas cargadas:', bookings)
+  } catch (error: any) {
+    console.error('Error cargando reservas:', error)
+    showErrorToast('Error', 'No se pudieron cargar tus reservas')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Formatear fecha
+const formatDate = (dateString: string) => {
+  if (!dateString) return 'Fecha no disponible'
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  } catch {
+    return 'Fecha inválida'
+  }
+}
+
+// Formatear hora
+const formatTime = (timeString: string) => {
+  if (!timeString) return 'Hora no disponible'
+  try {
+    const time = new Date(`2000-01-01T${timeString}`)
+    return time.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch {
+    return 'Hora inválida'
+  }
+}
+
+// Obtener estado de la reserva
+const getStatusInfo = (status: string) => {
+  switch (status) {
+    case 'confirmed':
+      return { label: 'Confirmado', class: 'bg-success/10 text-success' }
+    case 'pending':
+      return { label: 'Pendiente', class: 'bg-warning/10 text-warning' }
+    case 'cancelled':
+      return { label: 'Cancelado', class: 'bg-danger/10 text-danger' }
+    case 'completed':
+      return { label: 'Completado', class: 'bg-primary/10 text-primary' }
+    default:
+      return { label: 'Desconocido', class: 'bg-gray/10 text-gray' }
+  }
+}
+
+// Obtener método de pago
+const getPaymentMethodInfo = (method: string) => {
+  switch (method) {
+    case 'cash':
+      return { label: 'Efectivo', icon: '💵' }
+    case 'bizum':
+      return { label: 'Bizum', icon: '📱' }
+    case 'stripe':
+      return { label: 'Tarjeta', icon: '💳' }
+    default:
+      return { label: 'No especificado', icon: '❓' }
+  }
+}
+
+// Cancelar reserva
+const cancelBooking = async (bookingId: string) => {
+  try {
+    await bookingService.cancelBooking(bookingId)
+    success('Reserva cancelada', 'Tu reserva ha sido cancelada exitosamente')
+    await loadUserBookings() // Recargar la lista
+  } catch (error: any) {
+    showErrorToast('Error', 'No se pudo cancelar la reserva')
+  }
+}
+
+// Ver detalles del viaje
+const viewTripDetails = (tripId: string) => {
+  // Navegar a los detalles del viaje
+  window.location.href = `/viaje/${tripId}`
+}
+
+onMounted(() => {
+  loadUserBookings()
+})
 </script>

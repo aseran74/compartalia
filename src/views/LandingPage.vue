@@ -1,6 +1,6 @@
 <template>
 <div class="min-h-screen bg-gray-50 antialiased">
-  <header ref="navbar" class="sticky top-0 z-50 transition-all duration-300 ease-in-out" :class="isScrolled ? 'bg-white shadow-lg' : 'bg-transparent'">
+  <header ref="navbar" class="sticky top-0 z-50 transition-all duration-300 ease-in-out mobile-safe-header" :class="isScrolled ? 'bg-white shadow-lg' : 'bg-transparent'">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center py-4">
         <div class="flex items-center">
@@ -101,14 +101,61 @@
           <a href="#precios" @click="closeMobileMenu" class="text-gray-700 font-semibold hover:text-green-600 transition duration-150 ease-in-out py-3 px-4 rounded-lg hover:bg-green-50">Precios</a>
           <a href="#contacto" @click="closeMobileMenu" class="text-gray-700 font-semibold hover:text-green-600 transition duration-150 ease-in-out py-3 px-4 rounded-lg hover:bg-green-50">Contacto</a>
           <div class="pt-2">
-            <router-link 
-              to="/login"
-              @click="closeMobileMenu()" 
-              class="w-full px-5 py-3 rounded-full shadow-md transition duration-150 ease-in-out font-semibold text-base text-center block"
-              style="background-color: #4CAF50; color: white;"
-            >
-              Acceder
-            </router-link>
+            <!-- Botón de login o perfil según estado de autenticación -->
+            <div v-if="!isAuthenticated">
+              <router-link 
+                to="/login"
+                @click="closeMobileMenu()" 
+                class="w-full px-5 py-3 rounded-full shadow-md transition duration-150 ease-in-out font-semibold text-base text-center block"
+                style="background-color: #4CAF50; color: white;"
+              >
+                Acceder
+              </router-link>
+            </div>
+            
+            <!-- Perfil del usuario cuando está autenticado -->
+            <div v-else class="space-y-3">
+              <!-- Información del usuario -->
+              <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
+                  <span class="text-white text-sm font-semibold">
+                    {{ userProfile?.name?.charAt(0)?.toUpperCase() || 'U' }}
+                  </span>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-900">{{ userProfile?.name || 'Usuario' }}</p>
+                  <p class="text-xs text-gray-500">{{ userProfile?.email }}</p>
+                  <p class="text-xs text-green-600 font-medium">{{ userProfile?.role === 'conductor' ? 'Conductor' : 'Pasajero' }}</p>
+                </div>
+              </div>
+              
+              <!-- Enlaces de navegación -->
+              <div class="space-y-2">
+                <a href="/dashboard" @click="closeMobileMenu" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                  🏠 Dashboard
+                </a>
+                <a href="/carpooling/buscar-viajes-hibrido" @click="closeMobileMenu" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                  🔍 Buscar Viajes
+                </a>
+                <a href="/carpooling/create-trip" @click="closeMobileMenu" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                  ➕ Publicar Viajes
+                </a>
+                <a href="/carpooling/miembros" @click="closeMobileMenu" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                  👥 Miembros
+                </a>
+                <a href="/carpooling/mensajeria" @click="closeMobileMenu" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                  💬 Mensajería
+                </a>
+              </div>
+              
+              <!-- Botón de cerrar sesión -->
+              <button 
+                @click="handleLogout" 
+                class="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-red-200"
+              >
+                🚪 Cerrar Sesión
+              </button>
+            </div>
           </div>
         </nav>
       </div>
@@ -765,10 +812,30 @@
             <li class="flex items-center"><span class="mr-2">📍</span> <span class="text-gray-600">Madrid, España</span></li>
           </ul>
           <div class="flex space-x-4 mt-6">
-            <a href="#" class="text-gray-600 hover:text-green-600 transition-colors text-xl">📘</a>
-            <a href="#" class="text-gray-600 hover:text-green-600 transition-colors text-xl">🐦</a>
-            <a href="#" class="text-gray-600 hover:text-green-600 transition-colors text-xl">📸</a>
-            <a href="#" class="text-gray-600 hover:text-green-600 transition-colors text-xl">💼</a>
+            <!-- Instagram -->
+            <a href="https://instagram.com/compartalia" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-pink-500 transition-colors text-xl">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987s11.987-5.367 11.987-11.987C24.004 5.367 18.637.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.708 13.744 3.708 12.447s.49-2.448 1.418-3.323c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.928.875 1.418 2.026 1.418 3.323s-.49 2.448-1.418 3.244c-.875.807-2.026 1.297-3.323 1.297zm7.83-9.781c-.49 0-.928-.175-1.297-.49-.368-.315-.49-.753-.49-1.243s.122-.928.49-1.243c.369-.315.807-.49 1.297-.49s.928.175 1.297.49c.368.315.49.753.49 1.243s-.122.928-.49 1.243c-.369.315-.807.49-1.297.49z"/>
+              </svg>
+            </a>
+            <!-- Facebook -->
+            <a href="https://facebook.com/compartalia" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-blue-600 transition-colors text-xl">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </a>
+            <!-- TikTok -->
+            <a href="https://tiktok.com/@compartalia" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black transition-colors text-xl">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+              </svg>
+            </a>
+            <!-- LinkedIn -->
+            <a href="https://linkedin.com/company/compartalia" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-blue-700 transition-colors text-xl">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+            </a>
           </div>
         </div>
       </div>

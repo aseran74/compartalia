@@ -16,6 +16,7 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: 'dist',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -25,6 +26,7 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000
   },
+  base: './', // Importante para Capacitor
   server: {
     proxy: {
       '/api/google': {

@@ -758,3 +758,110 @@ span.flatpickr-weekday,
 .edit-button {
   @apply flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto;
 }
+
+/* Safe areas para notch, barra inferior, etc */
+:root {
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+  --safe-area-left: env(safe-area-inset-left);
+  --safe-area-right: env(safe-area-inset-right);
+}
+
+/* Aplicar a tu contenedor principal - sin padding superior */
+#app {
+  padding-bottom: var(--safe-area-bottom);
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
+}
+
+/* Eliminar padding del body */
+body {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Para headers fijos */
+.header-fixed {
+  position: fixed;
+  top: var(--safe-area-top);
+  left: 0;
+  right: 0;
+  padding-top: 0;
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
+}
+
+/* Para footers o navegación inferior */
+.footer-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: calc(1rem + var(--safe-area-bottom));
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
+}
+
+/* Clases helper para safe area padding */
+.safe-area-top {
+  padding-top: var(--safe-area-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: var(--safe-area-bottom);
+}
+
+.safe-area-left {
+  padding-left: var(--safe-area-left);
+}
+
+.safe-area-right {
+  padding-right: var(--safe-area-right);
+}
+
+/* Para móvil nativo - Status Bar con color gris (sin overlay) */
+@media (max-width: 1024px) {
+  @supports (padding-top: env(safe-area-inset-top)) {
+    /* Header empieza justo debajo de la status bar */
+    .mobile-safe-header {
+      top: 0 !important;
+      padding-top: 1rem !important;
+      margin-top: 0 !important;
+      min-height: auto;
+    }
+    
+    /* Contenido sin padding */
+    .mobile-safe-content {
+      padding-top: 0 !important;
+      margin-top: 0 !important;
+    }
+  }
+}
+
+/* Para Android específicamente - Status Bar gris */
+@media (max-width: 1024px) {
+  body.android .mobile-safe-header {
+    top: 0 !important;
+    padding-top: 1rem !important;
+    margin-top: 0 !important;
+    min-height: auto;
+  }
+  
+  body.android .mobile-safe-content {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+}
+
+/* Fallback para navegadores web que no soportan safe-area */
+@supports not (padding-top: env(safe-area-inset-top)) {
+  .mobile-safe-header {
+    top: 0;
+    padding-top: 1rem;
+    min-height: 60px;
+  }
+  
+  .mobile-safe-content {
+    padding-top: 0.5rem;
+  }
+}

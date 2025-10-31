@@ -33,6 +33,24 @@
           </div>
         </div>
 
+        <!-- Botón de búsqueda principal - Arriba del todo -->
+        <div class="mb-6">
+          <button
+            @click="searchTrips"
+            type="button"
+            :disabled="isSearching"
+            class="w-full lg:w-auto flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white shadow-lg hover:bg-blue-700 hover:shadow-xl disabled:opacity-50 transition-all duration-200"
+          >
+            <svg v-if="isSearching" class="h-4 w-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            {{ isSearching ? 'Buscando...' : 'Buscar Viajes' }}
+          </button>
+        </div>
+
         <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-5">
           <!-- Formulario de Búsqueda -->
           <div class="lg:col-span-3">
@@ -220,23 +238,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Botón de búsqueda -->
-              <div class="flex justify-end">
-                <button
-                  type="submit"
-                  :disabled="isSearching"
-                  class="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white shadow-lg hover:bg-blue-700 hover:shadow-xl disabled:opacity-50 transition-all duration-200"
-                >
-                  <svg v-if="isSearching" class="h-4 w-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                  </svg>
-                  <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                  </svg>
-                  {{ isSearching ? 'Buscando...' : 'Buscar Viajes' }}
-                </button>
-              </div>
             </form>
           </div>
 
@@ -309,14 +310,39 @@
                     
                     <!-- Precio y tipo de viaje -->
                     <div class="text-right">
-                      <div class="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
-                        {{ result.trip.price_per_seat }}€
+                      <!-- Precio por día trayecto (ida y vuelta) -->
+                      <div class="mb-2">
+                        <div class="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
+                          {{ (result.trip.price_per_seat * 2).toFixed(2) }}€
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-body-color">día trayecto (ida y vuelta)</div>
                       </div>
-                      <div class="text-xs text-gray-500 dark:text-body-color mb-2">por asiento</div>
-                      <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-                        :class="getTripTypeClass(result.trip)">
-                        {{ getTripTypeLabel(result.trip) }}
-                      </span>
+                      
+                      <!-- Precio mensual o semanal -->
+                      <div class="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <div v-if="isMonthlyTrip(result.trip)" class="text-lg font-semibold text-purple-600 dark:text-purple-400">
+                          {{ formatMonthlyPrice(result.trip) }}€
+                        </div>
+                        <div v-else-if="isWeeklyTrip(result.trip)" class="text-lg font-semibold text-green-600 dark:text-green-400">
+                          {{ formatWeeklyPrice(result.trip) }}€
+                        </div>
+                        <div v-else class="text-sm text-gray-500 dark:text-body-color">
+                          {{ result.trip.price_per_seat }}€/trayecto
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-body-color mt-1">
+                          <span v-if="isMonthlyTrip(result.trip)">mensual</span>
+                          <span v-else-if="isWeeklyTrip(result.trip)">semanal</span>
+                          <span v-else>por asiento</span>
+                        </div>
+                      </div>
+                      
+                      <!-- Badge de tipo de viaje -->
+                      <div class="mt-2">
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+                          :class="getTripTypeClass(result.trip)">
+                          {{ getTripTypeLabel(result.trip) }}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -770,5 +796,96 @@ const getTripTypeClass = (trip: any) => {
     default:
       return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
   }
+}
+
+// Funciones para determinar el tipo de viaje
+const isMonthlyTrip = (trip: any) => {
+  // Debug: log para ver qué tiene el trip
+  console.log('🔍 Verificando si es mensual:', {
+    id: trip.id,
+    monthly_price: trip.monthly_price,
+    price_per_seat: trip.price_per_seat,
+    trip_type: trip.trip_type,
+    start_date: trip.start_date,
+    end_date: trip.end_date
+  })
+  
+  // Verificar por tipo explícito primero
+  const tripType = trip.trip_type || trip.trip_frequency || ''
+  if (tripType && (tripType.toLowerCase() === 'monthly' || tripType.toLowerCase() === 'mensual')) {
+    console.log('✅ Es mensual por trip_type')
+    return true
+  }
+  
+  // Si tiene monthly_price definido y mayor que 0, es mensual
+  if (trip.monthly_price && parseFloat(trip.monthly_price) > 0) {
+    console.log('✅ Es mensual por monthly_price')
+    return true
+  }
+  
+  // Si tiene start_date y end_date con diferencia de un mes o más, probablemente es mensual
+  if (trip.start_date && trip.end_date) {
+    const start = new Date(trip.start_date)
+    const end = new Date(trip.end_date)
+    const diffDays = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    // Si la diferencia es de 25 días o más, consideramos que es mensual
+    if (diffDays >= 25) {
+      console.log('✅ Es mensual por diferencia de fechas:', diffDays, 'días')
+      return true
+    }
+  }
+  
+  console.log('❌ No es mensual')
+  return false
+}
+
+const isWeeklyTrip = (trip: any) => {
+  // Verificar por tipo explícito primero
+  const tripType = trip.trip_type || trip.trip_frequency || ''
+  if (tripType && (tripType.toLowerCase() === 'weekly' || tripType.toLowerCase() === 'semanal')) {
+    return true
+  }
+  
+  // Si tiene start_date y end_date con diferencia de aproximadamente una semana, es semanal
+  if (trip.start_date && trip.end_date) {
+    const start = new Date(trip.start_date)
+    const end = new Date(trip.end_date)
+    const diffDays = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    // Si la diferencia es entre 5 y 24 días, probablemente es semanal
+    if (diffDays >= 5 && diffDays < 25) {
+      return true
+    }
+  }
+  
+  return false
+}
+
+// Funciones para formatear precios
+const formatMonthlyPrice = (trip: any) => {
+  // Si ya existe monthly_price, usarlo directamente
+  if (trip.monthly_price) {
+    return parseFloat(trip.monthly_price).toFixed(2)
+  }
+  
+  // Si no, calcular desde price_per_seat: precio por día (ida y vuelta) * días laborables
+  // Asumimos que price_per_seat es el precio por trayecto de ida
+  // Para mensual: 20 días laborables * (ida + vuelta)
+  const pricePerDirection = parseFloat(trip.price_per_seat || 0)
+  const dailyPrice = pricePerDirection * 2 // ida y vuelta
+  const monthlyPrice = dailyPrice * 20 // 20 días laborables al mes
+  return monthlyPrice.toFixed(2)
+}
+
+const formatWeeklyPrice = (trip: any) => {
+  // Si existe price_per_period, usarlo
+  if (trip.price_per_period) {
+    return parseFloat(trip.price_per_period).toFixed(2)
+  }
+  
+  // Calcular desde price_per_seat: precio por día (ida y vuelta) * 5 días laborables
+  const pricePerDirection = parseFloat(trip.price_per_seat || 0)
+  const dailyPrice = pricePerDirection * 2 // ida y vuelta
+  const weeklyPrice = dailyPrice * 5 // 5 días laborables por semana
+  return weeklyPrice.toFixed(2)
 }
 </script>

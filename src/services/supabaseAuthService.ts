@@ -1,4 +1,7 @@
 import { supabase } from '@/config/supabase';
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 import type { User } from '@supabase/supabase-js';
 
 export interface UserProfile {
@@ -115,17 +118,50 @@ class SupabaseAuthService {
   // Login with Google
   async loginWithGoogle() {
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`
-        }
-      });
-      
-      if (error) throw error;
-      
-      console.log('Google login initiated:', data);
-      return data;
+      if (Capacitor.isNativePlatform()) {
+        // Deep link flow en móvil nativo
+        const redirectUrl = 'compartalia://callback';
+
+        // Listener para capturar el retorno del deep link con tokens
+        const remove = App.addListener('appUrlOpen', async (data) => {
+          try {
+            console.log('App opened with URL:', data.url);
+            const url = new URL(data.url);
+            const access_token = url.searchParams.get('access_token');
+            const refresh_token = url.searchParams.get('refresh_token');
+            if (access_token && refresh_token) {
+              const { error: setErr } = await supabase.auth.setSession({
+                access_token,
+                refresh_token
+              });
+              if (setErr) throw setErr;
+              console.log('Supabase session set via deep link');
+              await Browser.close();
+            }
+          } catch (e) {
+            console.error('Deep link handling error:', e);
+          } finally {
+            // Remover listener una vez manejado
+            if (typeof remove === 'function') remove();
+          }
+        });
+
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: redirectUrl }
+        });
+        if (error) throw error;
+        if (data?.url) await Browser.open({ url: data.url });
+        return data;
+      } else {
+        // Web: popup/redirect normal
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { skipBrowserRedirect: false }
+        });
+        if (error) throw error;
+        return data;
+      }
     } catch (error) {
       console.error('Error logging in with Google:', error);
       throw error;

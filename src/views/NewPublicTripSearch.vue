@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header -->
-    <header class="bg-white shadow-sm">
+    <header class="bg-white shadow-sm mobile-safe-header sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div class="flex justify-between items-center py-4">
           <div class="flex items-center">
@@ -105,13 +105,31 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
       <!-- Hero Section -->
-      <div class="text-center mb-12">
+      <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">
           Busca viajes compartidos
         </h1>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
           Encuentra viajes mensuales desde tu localidad a Madrid sin necesidad de registrarte
         </p>
+        
+        <!-- Botón de búsqueda principal - Arriba del todo -->
+        <div class="mb-6">
+          <button
+            @click="searchTrips"
+            type="button"
+            :disabled="isSearching"
+            class="bg-green-600 text-white px-8 py-4 rounded-full hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
+          >
+            <div class="flex items-center justify-center gap-3">
+              <svg v-if="isSearching" class="h-5 w-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <span v-else class="text-2xl">🔍</span>
+              <span>{{ isSearching ? 'Buscando...' : 'Buscar Viajes' }}</span>
+            </div>
+          </button>
+        </div>
       </div>
 
       <!-- Call to Action Section -->
@@ -132,20 +150,6 @@
             <div class="absolute inset-0 bg-gradient-to-r from-green-600 to-green-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </router-link>
 
-          <!-- Botón Buscar Viajes -->
-          <button 
-            @click="scrollToSearch"
-            class="group relative px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 hover:scale-105"
-          >
-            <div class="flex items-center space-x-3">
-              <span class="text-2xl">🔍</span>
-              <span>Buscar Viajes</span>
-              <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-              </svg>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
         </div>
         
         <!-- Texto descriptivo -->
@@ -360,17 +364,6 @@
             </div>
           </div>
 
-          <!-- Botón de búsqueda -->
-          <div class="text-center">
-            <button
-              type="submit"
-              :disabled="isSearching"
-              class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
-            >
-              <span v-if="isSearching">🔍 Buscando...</span>
-              <span v-else>🚗 Buscar Viajes</span>
-            </button>
-          </div>
         </form>
       </div>
 
@@ -420,10 +413,31 @@
               
               <!-- Precio -->
               <div class="text-right">
-                <div class="text-2xl sm:text-3xl font-bold text-green-600">
-                  {{ result.trip.price_per_seat }}€
+                <!-- Precio por día trayecto (ida y vuelta) -->
+                <div class="mb-2">
+                  <div class="text-2xl sm:text-3xl font-bold text-green-600">
+                    {{ (result.trip.price_per_seat * 2).toFixed(2) }}€
+                  </div>
+                  <div class="text-xs text-gray-500">día trayecto (ida y vuelta)</div>
                 </div>
-                <div class="text-xs text-gray-500">por asiento</div>
+                
+                <!-- Precio mensual o semanal -->
+                <div class="mt-3 pt-2 border-t border-gray-200">
+                  <div v-if="isMonthlyTrip(result.trip)" class="text-lg font-semibold text-purple-600">
+                    {{ formatMonthlyPrice(result.trip) }}€
+                  </div>
+                  <div v-else-if="isWeeklyTrip(result.trip)" class="text-lg font-semibold text-green-600">
+                    {{ formatWeeklyPrice(result.trip) }}€
+                  </div>
+                  <div v-else class="text-sm text-gray-500">
+                    {{ result.trip.price_per_seat }}€/trayecto
+                  </div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    <span v-if="isMonthlyTrip(result.trip)">mensual</span>
+                    <span v-else-if="isWeeklyTrip(result.trip)">semanal</span>
+                    <span v-else>por asiento</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -942,6 +956,24 @@ const formatSearchDate = (dateString: string) => {
 
 // Función para obtener etiqueta del tipo de viaje
 const getTripTypeLabel = (trip: any) => {
+  // Verificar primero por trip_type directo
+  if (trip.trip_type) {
+    switch (trip.trip_type.toLowerCase()) {
+      case 'daily':
+      case 'diario':
+        return 'Diario'
+      case 'weekly':
+      case 'semanal':
+        return 'Semanal'
+      case 'monthly':
+      case 'mensual':
+        return 'Mensual'
+      default:
+        return 'Mensual' // Los viajes de monthly_trips son mensuales por defecto
+    }
+  }
+  
+  // Fallback al método anterior
   const routeData = trip.route_data || {}
   const pricingType = routeData.pricing_type || 'single'
   
@@ -949,8 +981,88 @@ const getTripTypeLabel = (trip: any) => {
     case 'daily': return 'Diario'
     case 'weekly': return 'Semanal'
     case 'monthly': return 'Mensual'
-    default: return 'Único'
+    default: 
+      // Si tiene monthly_price, es mensual
+      if (trip.monthly_price) return 'Mensual'
+      return 'Único'
   }
+}
+
+// Funciones para determinar el tipo de viaje
+const isMonthlyTrip = (trip: any) => {
+  // Verificar por tipo explícito primero
+  const tripType = trip.trip_type || trip.trip_frequency || ''
+  if (tripType && (tripType.toLowerCase() === 'monthly' || tripType.toLowerCase() === 'mensual')) {
+    return true
+  }
+  
+  // Si tiene monthly_price definido y mayor que 0, es mensual
+  if (trip.monthly_price && parseFloat(trip.monthly_price) > 0) {
+    return true
+  }
+  
+  // Si tiene start_date y end_date con diferencia de un mes o más, probablemente es mensual
+  if (trip.start_date && trip.end_date) {
+    const start = new Date(trip.start_date)
+    const end = new Date(trip.end_date)
+    const diffDays = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    // Si la diferencia es de 25 días o más, consideramos que es mensual
+    if (diffDays >= 25) {
+      return true
+    }
+  }
+  
+  return false
+}
+
+const isWeeklyTrip = (trip: any) => {
+  // Verificar por tipo explícito primero
+  const tripType = trip.trip_type || trip.trip_frequency || ''
+  if (tripType && (tripType.toLowerCase() === 'weekly' || tripType.toLowerCase() === 'semanal')) {
+    return true
+  }
+  
+  // Si tiene start_date y end_date con diferencia de aproximadamente una semana, es semanal
+  if (trip.start_date && trip.end_date) {
+    const start = new Date(trip.start_date)
+    const end = new Date(trip.end_date)
+    const diffDays = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    // Si la diferencia es entre 5 y 24 días, probablemente es semanal
+    if (diffDays >= 5 && diffDays < 25) {
+      return true
+    }
+  }
+  
+  return false
+}
+
+// Funciones para formatear precios
+const formatMonthlyPrice = (trip: any) => {
+  // Si ya existe monthly_price, usarlo directamente
+  if (trip.monthly_price && parseFloat(trip.monthly_price) > 0) {
+    return parseFloat(trip.monthly_price).toFixed(2)
+  }
+  
+  // Si no, calcular desde price_per_seat: precio por día (ida y vuelta) * días laborables
+  // Asumimos que price_per_seat es el precio por trayecto de ida
+  // Para mensual: 20 días laborables * (ida + vuelta)
+  const pricePerDirection = parseFloat(trip.price_per_seat || 0)
+  const dailyPrice = pricePerDirection * 2 // ida y vuelta
+  const monthlyPrice = dailyPrice * 20 // 20 días laborables al mes
+  return monthlyPrice.toFixed(2)
+}
+
+const formatWeeklyPrice = (trip: any) => {
+  // Si existe price_per_period, usarlo
+  if (trip.price_per_period && parseFloat(trip.price_per_period) > 0) {
+    return parseFloat(trip.price_per_period).toFixed(2)
+  }
+  
+  // Calcular desde price_per_seat: precio por día (ida y vuelta) * 5 días laborables
+  const pricePerDirection = parseFloat(trip.price_per_seat || 0)
+  const dailyPrice = pricePerDirection * 2 // ida y vuelta
+  const weeklyPrice = dailyPrice * 5 // 5 días laborables por semana
+  return weeklyPrice.toFixed(2)
 }
 
 // Función para resetear búsqueda

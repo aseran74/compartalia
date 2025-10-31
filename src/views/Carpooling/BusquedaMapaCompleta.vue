@@ -64,7 +64,7 @@
             </div>
             
             <!-- Botón flotante para filtros en móvil -->
-            <div class="fixed bottom-4 right-4 z-30">
+            <div class="fixed top-4 right-4 z-30">
               <button
                 @click="showFiltersMobile = !showFiltersMobile"
                 class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors"

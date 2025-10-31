@@ -113,12 +113,28 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal de pago -->
+    <PaymentModal
+      :is-open="showPaymentModal"
+      :total-amount="totalAmount"
+      :seats="bookingForm.seats"
+      :price-per-seat="trip?.price_per_seat || 0"
+      :trip-id="trip?.id || ''"
+      :booking-data="pendingBookingData"
+      @close="closePaymentModal"
+      @payment-success="onPaymentSuccess"
+      @payment-error="onPaymentError"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { bookingService, type Booking } from '@/services/bookingService'
+import PaymentModal from './PaymentModal.vue'
+import { useAuth } from '@/composables/useAuth'
+import { useToast } from '@/composables/useToast'
 
 interface Props {
   isOpen: boolean
@@ -139,12 +155,23 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+const { user, userProfile } = useAuth()
+const { success, error: showErrorToast } = useToast()
+
 const isBooking = ref(false)
+const showPaymentModal = ref(false)
+const pendingBookingData = ref<any>(null)
 
 const bookingForm = ref({
   seats: 1,
   pickupLocation: '',
   notes: ''
+})
+
+// Computed para el total del pago
+const totalAmount = computed(() => {
+  if (!props.trip) return 0
+  return props.trip.price_per_seat * bookingForm.value.seats
 })
 
 // Obtener asientos disponibles
@@ -161,23 +188,36 @@ const formatTime = (time: string) => {
   })
 }
 
-// Confirmar reserva
+// Confirmar reserva (ahora abre el modal de pago)
 const confirmBooking = async () => {
   if (!props.trip) return
   
-  isBooking.value = true
+  // Preparar datos de la reserva
+  pendingBookingData.value = {
+    trip_id: props.trip.id,
+    passenger_id: userProfile.value?.id || user.value?.uid || 'current-user-id',
+    seats_requested: bookingForm.value.seats,
+    status: 'pending' as const,
+    pickup_location: bookingForm.value.pickupLocation || null,
+    notes: bookingForm.value.notes || null,
+    total_price: totalAmount.value
+  }
   
+  // Mostrar modal de pago
+  showPaymentModal.value = true
+}
+
+// Manejar éxito del pago
+const onPaymentSuccess = async (paymentData: any) => {
   try {
-    // Aquí necesitarías obtener el ID del usuario actual
-    const userId = 'current-user-id' // Esto debería venir del contexto de autenticación
+    console.log('💳 Pago exitoso:', paymentData)
     
+    // Crear la reserva con información del pago
     const bookingData = {
-      trip_id: props.trip.id,
-      passenger_id: userId,
-      seats_requested: bookingForm.value.seats,
-      status: 'pending' as const,
-      pickup_location: bookingForm.value.pickupLocation || null,
-      notes: bookingForm.value.notes || null
+      ...pendingBookingData.value,
+      payment_method: paymentData.method,
+      payment_status: 'completed',
+      transaction_id: paymentData.transactionId
     }
     
     const booking = await bookingService.createBooking(bookingData)
@@ -185,16 +225,41 @@ const confirmBooking = async () => {
     if (booking) {
       emit('booking-confirmed', booking)
       closeModal()
+      
+      // Mostrar mensaje de éxito según el método de pago usando Toast
+      switch (paymentData.method) {
+        case 'cash':
+          success('¡Reserva confirmada!', 'Recuerda pagar al conductor al inicio del viaje.')
+          break
+        case 'bizum':
+          success('¡Reserva confirmada!', 'El conductor te enviará una solicitud de Bizum.')
+          break
+        case 'stripe':
+          success('¡Reserva confirmada!', 'El pago se ha procesado correctamente.')
+          break
+        default:
+          success('¡Reserva confirmada!', 'Tu reserva ha sido registrada exitosamente.')
+      }
     }
   } catch (error: any) {
-    console.error('Error al confirmar reserva:', error)
-    alert(error.message || 'Error al confirmar la reserva')
-  } finally {
-    isBooking.value = false
+    console.error('Error creando reserva después del pago:', error)
+    showErrorToast('Error al confirmar la reserva', error.message || 'Error desconocido')
   }
 }
 
-// Cerrar modal
+// Manejar error del pago
+const onPaymentError = (error: string) => {
+  console.error('Error en el pago:', error)
+  showErrorToast('Error en el pago', error)
+}
+
+// Cerrar modal de pago
+const closePaymentModal = () => {
+  showPaymentModal.value = false
+  pendingBookingData.value = null
+}
+
+// Cerrar modal principal
 const closeModal = () => {
   emit('close')
   // Resetear formulario
@@ -203,5 +268,8 @@ const closeModal = () => {
     pickupLocation: '',
     notes: ''
   }
+  showPaymentModal.value = false
+  pendingBookingData.value = null
 }
 </script>
+

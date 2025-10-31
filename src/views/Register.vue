@@ -1,35 +1,35 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex items-center justify-center">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <img class="mx-auto h-12 w-auto" src="/images/logo/Compartalia2.png" alt="Compartalia" />
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-6 sm:space-y-8">
+      <div class="mb-6 sm:mb-8">
+        <img class="mx-auto h-12 w-auto mb-6 sm:mb-8" src="/images/logo/Compartalia2.png" alt="Compartalia" />
+        <h2 class="text-center text-3xl font-extrabold text-gray-900">
           Crea tu cuenta
         </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
+        <p class="mt-3 sm:mt-4 text-center text-sm text-gray-600">
           O
           <router-link to="/login" class="font-medium text-green-600 hover:text-green-500">
             inicia sesión aquí
           </router-link>
         </p>
       </div>
-      <form class="mt-8 space-y-6" @submit.prevent="handleRegister">
-        <div class="space-y-4">
+      <form class="space-y-5 sm:space-y-6" @submit.prevent="handleRegister">
+        <div class="space-y-4 sm:space-y-5">
           <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">Nombre completo</label>
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nombre completo</label>
             <input
               id="name"
               v-model="form.name"
               name="name"
               type="text"
               required
-              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              class="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-shadow"
               placeholder="Tu nombre completo"
             />
           </div>
           
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
             <input
               id="email"
               v-model="form.email"
@@ -37,13 +37,13 @@
               type="email"
               autocomplete="email"
               required
-              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              class="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-shadow"
               placeholder="tu@email.com"
             />
           </div>
           
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
             <input
               id="password"
               v-model="form.password"
@@ -51,13 +51,13 @@
               type="password"
               autocomplete="new-password"
               required
-              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              class="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-shadow"
               placeholder="Mínimo 6 caracteres"
             />
           </div>
           
           <div>
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar contraseña</label>
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirmar contraseña</label>
             <input
               id="confirmPassword"
               v-model="form.confirmPassword"
@@ -65,48 +65,48 @@
               type="password"
               autocomplete="new-password"
               required
-              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              class="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-shadow"
               placeholder="Repite tu contraseña"
             />
           </div>
         </div>
 
-        <div class="flex items-center">
+        <div class="flex items-start pt-2">
           <input
             id="terms"
             name="terms"
             type="checkbox"
             required
-            class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            class="h-4 w-4 mt-1 text-green-600 focus:ring-green-500 border-gray-300 rounded"
           />
-          <label for="terms" class="ml-2 block text-sm text-gray-900">
+          <label for="terms" class="ml-3 block text-sm text-gray-900 leading-relaxed">
             Acepto los 
-            <a href="#" class="text-green-600 hover:text-green-500">términos y condiciones</a>
+            <a href="#" class="text-green-600 hover:text-green-500 underline">términos y condiciones</a>
           </label>
         </div>
 
-        <div>
+        <div class="pt-2">
           <button
             type="submit"
             :disabled="isLoading || !isFormValid"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md hover:shadow-lg"
           >
             <span v-if="isLoading">Creando cuenta...</span>
             <span v-else>Crear cuenta</span>
           </button>
         </div>
 
-        <div class="mt-6">
+        <div class="pt-4 sm:pt-6">
           <div class="relative">
             <div class="absolute inset-0 flex items-center">
               <div class="w-full border-t border-gray-300" />
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-gray-50 text-gray-500">O regístrate con</span>
+              <span class="px-3 bg-gray-50 text-gray-500">O regístrate con</span>
             </div>
           </div>
 
-          <div class="mt-6 grid grid-cols-1 gap-3">
+          <div class="mt-5 sm:mt-6 grid grid-cols-1 gap-3">
             <button
               @click="handleGoogleRegister"
               type="button"

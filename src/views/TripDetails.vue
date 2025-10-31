@@ -79,7 +79,7 @@
 
           <!-- Información detallada -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Fecha y hora -->
+            <!-- Rango de fechas -->
             <div class="bg-gray-50 rounded-lg p-4">
               <div class="flex items-center space-x-3 mb-2">
                 <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -88,8 +88,33 @@
                   </svg>
                 </div>
                 <div>
-                  <div class="font-semibold text-gray-900">Fecha y Hora</div>
-                  <div class="text-sm text-gray-600">{{ formatDateTime(trip.departure_time) }}</div>
+                  <div class="font-semibold text-gray-900">Período</div>
+                  <div class="text-sm text-gray-600">
+                    <div v-if="trip.start_date && trip.end_date">
+                      Del {{ formatDate(trip.start_date) }} al {{ formatDate(trip.end_date) }}
+                    </div>
+                    <div v-else-if="trip.start_date">
+                      Desde {{ formatDate(trip.start_date) }}
+                    </div>
+                    <div v-else>
+                      {{ formatDateTime(trip.departure_time) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Hora de salida -->
+            <div v-if="trip.start_date || trip.end_date" class="bg-gray-50 rounded-lg p-4">
+              <div class="flex items-center space-x-3 mb-2">
+                <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                  <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-semibold text-gray-900">Hora</div>
+                  <div class="text-sm text-gray-600">{{ formatTime(trip.departure_time) }}</div>
                 </div>
               </div>
             </div>
@@ -450,12 +475,34 @@ const getTripTypeLabel = (trip: any) => {
 
 // Formatear fecha y hora
 const formatDateTime = (dateTime: string) => {
+  if (!dateTime) return 'N/A'
   const date = new Date(dateTime)
   return date.toLocaleString('es-ES', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+// Formatear solo la fecha
+const formatDate = (dateString: string) => {
+  if (!dateString) return 'N/A'
+  const date = new Date(dateString)
+  return date.toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
+
+// Formatear solo la hora
+const formatTime = (dateTime: string) => {
+  if (!dateTime) return 'N/A'
+  const date = new Date(dateTime)
+  return date.toLocaleTimeString('es-ES', {
     hour: '2-digit',
     minute: '2-digit'
   })
@@ -477,7 +524,19 @@ const onBookingConfirmed = (booking: any) => {
 
 // Contactar conductor
 const contactDriver = () => {
-  // Aquí iría la lógica para contactar al conductor
-  console.log('Contactando conductor:', trip.value?.driver_name)
+  if (!trip.value?.driver_id) {
+    console.error('No se puede contactar: ID del conductor no disponible')
+    return
+  }
+  
+  // Navegar a la vista de mensajería con el conductor específico
+  router.push({
+    name: 'Mensajeria',
+    query: {
+      driverId: trip.value.driver_id,
+      tripId: trip.value.id,
+      driverName: trip.value.driver_name
+    }
+  })
 }
 </script>

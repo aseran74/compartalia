@@ -116,13 +116,13 @@
         </div>
 
         <!-- Estadísticas -->
-        <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
           <!-- Viajes Activos -->
           <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-body-color">Viajes Activos</p>
-                <h4 class="text-2xl font-bold text-black dark:text-white">12</h4>
+                <h4 class="text-2xl font-bold text-black dark:text-white">{{ stats.totalTrips }}</h4>
               </div>
               <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                 <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,12 +132,12 @@
             </div>
           </div>
 
-          <!-- Pasajeros Hoy -->
+          <!-- Reservas Confirmadas -->
           <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium text-body-color">Pasajeros Hoy</p>
-                <h4 class="text-2xl font-bold text-black dark:text-white">8</h4>
+                <p class="text-sm font-medium text-body-color">Reservas Confirmadas</p>
+                <h4 class="text-2xl font-bold text-black dark:text-white">{{ stats.activeBookings }}</h4>
               </div>
               <div class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
                 <svg class="h-6 w-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,7 +152,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-body-color">Ahorro Total</p>
-                <h4 class="text-2xl font-bold text-black dark:text-white">€156</h4>
+                <h4 class="text-2xl font-bold text-black dark:text-white">{{ formatCurrency(stats.totalSaved) }}</h4>
               </div>
               <div class="flex h-12 w-12 items-center justify-center rounded-full bg-success/10">
                 <svg class="h-6 w-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,11 +167,26 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-body-color">CO2 Ahorrado</p>
-                <h4 class="text-2xl font-bold text-black dark:text-white">24kg</h4>
+                <h4 class="text-2xl font-bold text-black dark:text-white">{{ stats.co2Saved }}kg</h4>
               </div>
               <div class="flex h-12 w-12 items-center justify-center rounded-full bg-warning/10">
                 <svg class="h-6 w-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Amigos Conectados -->
+          <div class="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-body-color">Amigos Conectados</p>
+                <h4 class="text-2xl font-bold text-black dark:text-white">{{ stats.friendsCount }}</h4>
+              </div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-full bg-success/10">
+                <svg class="h-6 w-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
               </div>
             </div>
@@ -186,9 +201,26 @@
             </h3>
           </div>
           <div class="p-6">
-            <div class="flex flex-col space-y-4">
-              <!-- Viaje 1 -->
-              <div class="flex items-center justify-between rounded-lg border border-stroke p-4 dark:border-strokedark">
+            <!-- Estado de carga -->
+            <div v-if="loading" class="text-center py-8">
+              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p class="mt-2 text-body-color">Cargando viajes...</p>
+            </div>
+
+            <!-- Sin viajes -->
+            <div v-else-if="recentTrips.length === 0" class="text-center py-8">
+              <div class="text-4xl mb-4">🚗</div>
+              <h3 class="text-lg font-semibold text-black dark:text-white mb-2">No hay viajes recientes</h3>
+              <p class="text-body-color mb-4">¡Crea tu primer viaje o busca viajes disponibles!</p>
+            </div>
+
+            <!-- Lista de viajes -->
+            <div v-else class="flex flex-col space-y-4">
+              <div 
+                v-for="trip in recentTrips" 
+                :key="trip.id"
+                class="flex items-center justify-between rounded-lg border border-stroke p-4 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
                 <div class="flex items-center space-x-4">
                   <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                     <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,52 +229,12 @@
                     </svg>
                   </div>
                   <div>
-                    <h4 class="font-medium text-black dark:text-white">Majadahonda → Moncloa</h4>
-                    <p class="text-sm text-body-color">Hoy, 8:00 AM • 3 asientos disponibles</p>
+                    <h4 class="font-medium text-black dark:text-white">{{ trip.origin }} → {{ trip.destination }}</h4>
+                    <p class="text-sm text-body-color">{{ formatDate(trip.createdAt) }}</p>
                   </div>
                 </div>
                 <div class="text-right">
-                  <p class="font-medium text-black dark:text-white">€8</p>
-                  <p class="text-sm text-body-color">por asiento</p>
-                </div>
-              </div>
-
-              <!-- Viaje 2 -->
-              <div class="flex items-center justify-between rounded-lg border border-stroke p-4 dark:border-strokedark">
-                <div class="flex items-center space-x-4">
-                  <div class="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center">
-                    <svg class="h-5 w-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 class="font-medium text-black dark:text-white">Las Rozas → Plaza España</h4>
-                    <p class="text-sm text-body-color">Mañana, 7:30 AM • 2 asientos disponibles</p>
-                  </div>
-                </div>
-                <div class="text-right">
-                  <p class="font-medium text-black dark:text-white">€12</p>
-                  <p class="text-sm text-body-color">por asiento</p>
-                </div>
-              </div>
-
-              <!-- Viaje 3 -->
-              <div class="flex items-center justify-between rounded-lg border border-stroke p-4 dark:border-strokedark">
-                <div class="flex items-center space-x-4">
-                  <div class="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
-                    <svg class="h-5 w-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 class="font-medium text-black dark:text-white">Pozuelo → Nuevos Ministerios</h4>
-                    <p class="text-sm text-body-color">Lunes, 8:15 AM • 1 asiento disponible</p>
-                  </div>
-                </div>
-                <div class="text-right">
-                  <p class="font-medium text-black dark:text-white">€6</p>
+                  <p class="font-medium text-black dark:text-white">{{ formatCurrency(trip.price) }}</p>
                   <p class="text-sm text-body-color">por asiento</p>
                 </div>
               </div>
@@ -258,101 +250,227 @@
             </div>
           </div>
         </div>
+
+        <!-- Mis Reservas Recientes -->
+        <div class="mt-8 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+          <div class="border-b border-stroke px-6 py-4 dark:border-strokedark">
+            <h3 class="font-medium text-black dark:text-white">
+              Mis Reservas Recientes
+            </h3>
+          </div>
+          <div class="p-6">
+            <!-- Estado de carga -->
+            <div v-if="loading" class="text-center py-8">
+              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p class="mt-2 text-body-color">Cargando reservas...</p>
+            </div>
+
+            <!-- Sin reservas -->
+            <div v-else-if="recentBookings.length === 0" class="text-center py-8">
+              <div class="text-4xl mb-4">🎫</div>
+              <h3 class="text-lg font-semibold text-black dark:text-white mb-2">No tienes reservas</h3>
+              <p class="text-body-color mb-4">¡Busca y reserva tu próximo viaje!</p>
+            </div>
+
+            <!-- Lista de reservas -->
+            <div v-else class="flex flex-col space-y-4">
+              <div 
+                v-for="booking in recentBookings" 
+                :key="booking.id"
+                class="flex items-center justify-between rounded-lg border border-stroke p-4 dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                <div class="flex items-center space-x-4">
+                  <div class="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center">
+                    <svg class="h-5 w-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-black dark:text-white">
+                      {{ booking.trip_info?.origin_name || 'Origen' }} → {{ booking.trip_info?.destination_name || 'Destino' }}
+                    </h4>
+                    <p class="text-sm text-body-color">{{ formatDate(booking.created_at) }} • {{ booking.status }}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-black dark:text-white">{{ formatCurrency(parseFloat(booking.total_price) || 0) }}</p>
+                  <p class="text-sm text-body-color">{{ booking.seats_requested }} asiento(s)</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 text-center">
+              <button 
+                @click="navigateToMyTrips"
+                class="inline-flex items-center justify-center rounded-md bg-secondary px-6 py-2.5 text-center font-medium text-white hover:bg-opacity-90"
+              >
+                Ver Mis Viajes
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Últimos Mensajes y Amigos -->
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Últimos Mensajes -->
+          <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div class="border-b border-stroke px-6 py-4 dark:border-strokedark">
+              <h3 class="font-medium text-black dark:text-white">
+                💬 Últimos Mensajes
+              </h3>
+            </div>
+            <div class="p-6">
+              <!-- Estado de carga -->
+              <div v-if="loading" class="text-center py-4">
+                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <p class="mt-2 text-sm text-body-color">Cargando mensajes...</p>
+              </div>
+
+              <!-- Sin mensajes -->
+              <div v-else-if="recentMessages.length === 0" class="text-center py-4">
+                <div class="text-3xl mb-2">💬</div>
+                <h4 class="text-sm font-semibold text-black dark:text-white mb-1">No hay mensajes</h4>
+                <p class="text-xs text-body-color">¡Inicia una conversación!</p>
+              </div>
+
+              <!-- Lista de mensajes -->
+              <div v-else class="space-y-3">
+                <div 
+                  v-for="message in recentMessages" 
+                  :key="message.id"
+                  class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  @click="navigateToMessages"
+                >
+                  <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-500 mb-1">{{ message.otherUserName }}</p>
+                    <p class="text-sm font-medium text-black dark:text-white truncate">
+                      {{ message.content }}
+                    </p>
+                    <p class="text-xs text-body-color">{{ formatDate(message.createdAt) }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4 text-center">
+                <button 
+                  @click="navigateToMessages"
+                  class="inline-flex items-center justify-center rounded-md bg-warning px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 text-sm"
+                >
+                  Ver Mensajes
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Últimos Amigos -->
+          <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div class="border-b border-stroke px-6 py-4 dark:border-strokedark">
+              <h3 class="font-medium text-black dark:text-white">
+                👥 Últimos Amigos
+              </h3>
+            </div>
+            <div class="p-6">
+              <!-- Estado de carga -->
+              <div v-if="loading" class="text-center py-4">
+                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <p class="mt-2 text-sm text-body-color">Cargando amigos...</p>
+              </div>
+
+              <!-- Sin amigos -->
+              <div v-else-if="friends.length === 0" class="text-center py-4">
+                <div class="text-3xl mb-2">👥</div>
+                <h4 class="text-sm font-semibold text-black dark:text-white mb-1">No hay amigos</h4>
+                <p class="text-xs text-body-color">¡Conecta con otros usuarios!</p>
+              </div>
+
+              <!-- Lista de amigos -->
+              <div v-else class="space-y-3">
+                <div 
+                  v-for="friend in friends.slice(0, 5)" 
+                  :key="friend.id"
+                  class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <img
+                    :src="friend.avatar || '/images/user/default-avatar.png'"
+                    :alt="friend.name"
+                    class="h-8 w-8 rounded-full object-cover bg-gray-200"
+                    loading="lazy"
+                    @error.once="(event: any) => event.target.src = '/images/user/default-avatar.png'"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-black dark:text-white truncate">
+                      {{ friend.name }}
+                    </p>
+                    <p class="text-xs text-body-color">{{ friend.role }}</p>
+                  </div>
+                  <div class="flex items-center space-x-1">
+                    <span
+                      :class="[
+                        'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                        friend.role === 'conductor' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                      ]"
+                    >
+                      {{ friend.role === 'conductor' ? '🚗' : '👤' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4 text-center">
+                <button 
+                  @click="router.push('/carpooling/miembros')"
+                  class="inline-flex items-center justify-center rounded-md bg-success px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 text-sm"
+                >
+                  Ver Miembros
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AppSidebar from '@/components/layout/AppSidebar.vue';
 import AppHeader from '@/components/layout/AppHeader.vue';
-import { useCarpoolingData } from '@/composables/useCarpoolingData';
 import { useSidebar } from '@/composables/useSidebar';
+import { useDashboardData } from '@/composables/useDashboardData';
 
 const router = useRouter();
 const { isExpanded } = useSidebar();
 const { 
-  loadAllData, 
-  loadTrips, 
-  loadBookings, 
-  trips, 
-  bookings, 
-  loading, 
-  error 
-} = useCarpoolingData();
-
-// Estado reactivo
-const stats = ref({
-  totalTrips: 0,
-  activeBookings: 0,
-  totalSaved: 0,
-  rating: 4.5
-});
-
-const recentTrips = ref([]);
-const upcomingBookings = ref([]);
+  loading,
+  error,
+  recentTrips,
+  recentBookings,
+  recentMessages,
+  friends,
+  stats,
+  loadDashboardData,
+  formatDate,
+  formatCurrency
+} = useDashboardData();
 
 // Cargar datos al montar el componente
 onMounted(async () => {
-  await loadAllData();
-  updateStats();
-  updateRecentData();
+  await loadDashboardData();
 });
-
-const updateStats = () => {
-  stats.value.totalTrips = trips.value.length;
-  stats.value.activeBookings = bookings.value.filter(b => b.status === 'confirmed').length;
-  stats.value.totalSaved = bookings.value
-    .filter(b => b.status === 'confirmed')
-    .reduce((total, booking) => total + booking.totalPrice, 0);
-};
-
-const updateRecentData = () => {
-  // Últimos 5 viajes creados
-  recentTrips.value = trips.value
-    .slice(0, 5)
-    .map(trip => ({
-      id: trip.id,
-      from: trip.origin.name,
-      to: trip.destination.name,
-      time: new Date(trip.departureTime).toLocaleTimeString('es-ES', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      }),
-      date: new Date(trip.departureTime).toLocaleDateString('es-ES', { 
-        day: 'numeric', 
-        month: 'short' 
-      }),
-      availableSeats: trip.availableSeats,
-      price: trip.pricePerSeat
-    }));
-
-  // Próximas 5 reservas
-  upcomingBookings.value = bookings.value
-    .filter(booking => booking.status === 'confirmed' || booking.status === 'pending')
-    .slice(0, 5)
-    .map(booking => ({
-      id: booking.id,
-      from: 'Origen', // Se puede obtener del trip
-      to: 'Destino', // Se puede obtener del trip
-      time: '08:00', // Se puede obtener del trip
-      date: new Date(booking.createdAt).toLocaleDateString('es-ES', { 
-        day: 'numeric', 
-        month: 'short' 
-      }),
-      driver: 'Conductor', // Se puede obtener del trip
-      status: booking.status
-    }));
-};
 
 const navigateToCreateTrip = () => {
   router.push('/carpooling/create-trip');
 };
 
 const navigateToSearchTrips = () => {
-  router.push('/carpooling/search-trips');
+  router.push('/carpooling/buscar-viajes-hibrido');
 };
 
 const navigateToMyTrips = () => {
@@ -360,13 +478,6 @@ const navigateToMyTrips = () => {
 };
 
 const navigateToMessages = () => {
-  router.push('/carpooling/messages');
-};
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: 'EUR'
-  }).format(amount);
+  router.push('/carpooling/mensajeria');
 };
 </script>

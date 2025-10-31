@@ -370,6 +370,22 @@ const router = createRouter({
       },
     },
     {
+      path: '/perfil',
+      name: 'Perfil',
+      component: () => import('../views/Others/UserProfile.vue'),
+      meta: {
+        title: 'Perfil',
+      },
+    },
+    {
+      path: '/notificaciones',
+      name: 'Notificaciones',
+      component: () => import('../views/Others/Notificaciones.vue'),
+      meta: {
+        title: 'Notificaciones',
+      },
+    },
+    {
       path: '/form-elements',
       name: 'Form Elements',
       component: () => import('../views/Forms/FormElements.vue'),

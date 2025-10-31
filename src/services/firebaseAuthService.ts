@@ -1,12 +1,16 @@
 import { auth } from '@/config/firebase';
+import { supabase } from '@/config/supabase';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithCredential
 } from 'firebase/auth';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import { Capacitor } from '@capacitor/core';
 import type { User } from 'firebase/auth';
 
 export interface UserProfile {
@@ -35,17 +39,52 @@ class FirebaseAuthService {
       this.currentUser = user;
       
       if (user) {
-        console.log('User logged in, creating profile...');
-        // Create user profile from Firebase user
-        this.userProfile = {
-          id: user.uid,
-          email: user.email || '',
-          name: user.displayName || user.email?.split('@')[0] || 'Usuario',
-          role: 'pasajero', // Default role
-          avatar_url: user.photoURL || null,
-          phone: user.phoneNumber || null,
-          preferences: {}
-        };
+        console.log('User logged in, fetching profile from database...');
+        // Try to get user profile from Supabase database
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('email', user.email)
+            .single();
+
+          if (profile && !error) {
+            console.log('Profile found in database:', profile);
+            this.userProfile = {
+              id: profile.id,
+              email: profile.email,
+              name: profile.name,
+              role: profile.role,
+              avatar_url: profile.avatar_url,
+              phone: profile.phone,
+              preferences: profile.preferences || {}
+            };
+          } else {
+            console.log('Profile not found in database, creating default...');
+            // Create user profile from Firebase user
+            this.userProfile = {
+              id: user.uid,
+              email: user.email || '',
+              name: user.displayName || user.email?.split('@')[0] || 'Usuario',
+              role: 'pasajero', // Default role
+              avatar_url: user.photoURL || null,
+              phone: user.phoneNumber || null,
+              preferences: {}
+            };
+          }
+        } catch (error) {
+          console.error('Error fetching profile from database:', error);
+          // Fallback to Firebase user data
+          this.userProfile = {
+            id: user.uid,
+            email: user.email || '',
+            name: user.displayName || user.email?.split('@')[0] || 'Usuario',
+            role: 'pasajero',
+            avatar_url: user.photoURL || null,
+            phone: user.phoneNumber || null,
+            preferences: {}
+          };
+        }
       } else {
         console.log('User logged out, clearing profile...');
         this.userProfile = null;
@@ -124,30 +163,27 @@ class FirebaseAuthService {
     }
   }
 
-  // Login with Google
+  // Login with Google (universal: mobile nativo + web)
   async loginWithGoogle() {
     try {
-      console.log('=== FIREBASE GOOGLE LOGIN START ===');
-      
-      const provider = new GoogleAuthProvider();
-      
-      // Configure the provider
-      provider.addScope('email');
-      provider.addScope('profile');
-      provider.setCustomParameters({
-        prompt: 'select_account'
-      });
-      
-      console.log('Attempting Google Sign-In with popup...');
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      
-      console.log('Firebase Google login successful:', user);
-      console.log('User display name:', user.displayName);
-      console.log('User email:', user.email);
-      console.log('User photo URL:', user.photoURL);
-      
-      return user;
+      if (Capacitor.isNativePlatform()) {
+        // Móvil nativo
+        const { credential } = await FirebaseAuthentication.signInWithGoogle();
+        if (!credential?.idToken) throw new Error('No se obtuvo idToken de Google');
+        const provider = new GoogleAuthProvider();
+        const firebaseCredential = GoogleAuthProvider.credential(credential.idToken);
+        const result = await signInWithCredential(auth, firebaseCredential);
+        const user = result.user;
+        return user;
+      } else {
+        // Web
+        const provider = new GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const result = await signInWithPopup(auth, provider);
+        return result.user;
+      }
     } catch (error: any) {
       console.error('Firebase Google login error:', error);
       

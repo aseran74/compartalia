@@ -988,12 +988,17 @@ onMounted(async () => {
     // Suscribirse a actualizaciones de conversaciones en tiempo real
     subscribeToConversations();
     
-    // Verificar si hay un parámetro de usuario en la URL
+    // Verificar si hay parámetros de usuario en la URL
     const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('user');
+    const userId = urlParams.get('user') || urlParams.get('driverId');
+    const driverName = urlParams.get('driverName');
+    const tripId = urlParams.get('tripId');
     
     if (userId) {
       console.log('Usuario específico solicitado:', userId);
+      console.log('Nombre del conductor:', driverName);
+      console.log('ID del viaje:', tripId);
+      
       // Buscar el usuario en la lista de usuarios disponibles
       const targetUser = usuariosDisponibles.value.find(u => u.id === userId);
       if (targetUser) {
@@ -1003,6 +1008,24 @@ onMounted(async () => {
       } else {
         console.log('Usuario no encontrado en la lista:', userId);
         console.log('Usuarios disponibles:', usuariosDisponibles.value);
+        
+        // Si no se encuentra en la lista, crear un usuario temporal para mostrar
+        if (driverName) {
+          console.log('Creando usuario temporal para:', driverName);
+          const tempUser = {
+            id: userId,
+            name: driverName,
+            email: 'conductor@compartalia.com',
+            avatar: '/images/user/default-avatar.png',
+            role: 'conductor'
+          };
+          
+          // Añadir a la lista temporalmente
+          usuariosDisponibles.value.push(tempUser);
+          
+          // Crear conversación automáticamente
+          await iniciarNuevaConversacionConUsuario(tempUser);
+        }
       }
     }
   } else {

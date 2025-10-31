@@ -386,14 +386,60 @@ export class MessagingService {
     try {
       if (!currentUserId) return [];
 
-      const { data, error } = await this.supabase
+      // Obtener usuarios de profiles
+      const { data: profiles, error: profilesError } = await this.supabase
         .from('profiles')
         .select('id, name, avatar_url, role')
         .neq('id', currentUserId)
         .order('name');
 
-      if (error) throw error;
-      return data || [];
+      if (profilesError) {
+        console.error('Error obteniendo profiles:', profilesError);
+      }
+
+      // Obtener conductores únicos de monthly_trips
+      const { data: drivers, error: driversError } = await this.supabase
+        .from('monthly_trips')
+        .select('driver_id, driver_name')
+        .not('driver_id', 'is', null)
+        .not('driver_name', 'is', null);
+
+      if (driversError) {
+        console.error('Error obteniendo conductores:', driversError);
+      }
+
+      // Crear lista de usuarios únicos
+      const users = new Map();
+      
+      // Añadir usuarios de profiles
+      if (profiles) {
+        profiles.forEach(profile => {
+          users.set(profile.id, {
+            id: profile.id,
+            name: profile.name,
+            avatar_url: profile.avatar_url,
+            role: profile.role,
+            email: profile.email || 'usuario@compartalia.com'
+          });
+        });
+      }
+
+      // Añadir conductores de monthly_trips que no estén en profiles
+      if (drivers) {
+        drivers.forEach(trip => {
+          if (trip.driver_id && !users.has(trip.driver_id)) {
+            users.set(trip.driver_id, {
+              id: trip.driver_id,
+              name: trip.driver_name,
+              avatar_url: null,
+              role: 'conductor',
+              email: 'conductor@compartalia.com'
+            });
+          }
+        });
+      }
+
+      return Array.from(users.values()).sort((a, b) => a.name.localeCompare(b.name));
     } catch (error) {
       console.error('Error obteniendo usuarios disponibles:', error);
       return [];

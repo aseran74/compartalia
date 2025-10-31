@@ -537,7 +537,11 @@ export class HybridTripService {
       destination_lng: parseFloat(monthlyTrip.destination_lng),
       departure_time: departureTimestamp,
       available_seats: monthlyTrip.available_seats,
-      price_per_seat: parseFloat(monthlyTrip.monthly_price || monthlyTrip.price_per_seat || 0),
+      price_per_seat: parseFloat(monthlyTrip.price_per_seat || 0), // Precio por trayecto (solo ida)
+      monthly_price: parseFloat(monthlyTrip.monthly_price || 0), // Precio mensual
+      start_date: monthlyTrip.start_date,
+      end_date: monthlyTrip.end_date,
+      trip_type: 'monthly' as const, // Los viajes de monthly_trips son siempre mensuales
       description: monthlyTrip.description || `Viaje recurrente de ${monthlyTrip.origin_name} a ${monthlyTrip.destination_name}`,
       status: monthlyTrip.is_active ? 'active' : 'inactive',
       route_data: null,

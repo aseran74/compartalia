@@ -37,7 +37,7 @@
       <div
         class="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-800"
       >
-        <h5 class="text-lg font-semibold text-gray-800 dark:text-white/90">Notification</h5>
+        <h5 class="text-lg font-semibold text-gray-800 dark:text-white/90">Notificaciones</h5>
 
         <button @click="closeDropdown" class="text-gray-500 dark:text-gray-400">
           <svg
@@ -94,11 +94,11 @@
       </ul>
 
       <router-link
-        to="#"
+        to="/notificaciones"
         class="mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
         @click="handleViewAllClick"
       >
-        View All Notification
+        Ver Todas las Notificaciones
       </router-link>
     </div>
     <!-- Dropdown End -->
@@ -116,85 +116,74 @@ const dropdownRef = ref(null)
 const notifications = ref([
   {
     id: 1,
-    userName: 'Terry Franci',
+    userName: 'María García',
     userImage: '/images/user/user-02.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
+    action: 'confirmó tu reserva en el viaje a',
+    project: 'Madrid Centro',
+    type: 'Viaje',
+    time: 'Hace 5 minutos',
     status: 'online',
   },
   {
     id: 2,
-    userName: 'Terry Franci',
+    userName: 'Juan Pérez',
     userImage: '/images/user/user-03.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
+    action: 'canceló el viaje',
+    project: 'Alcalá de Henares → Madrid',
+    type: 'Viaje',
+    time: 'Hace 15 minutos',
     status: 'offline',
   },
   {
     id: 3,
-    userName: 'Terry Franci',
+    userName: 'Ana López',
     userImage: '/images/user/user-04.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
+    action: 'envió un nuevo mensaje sobre',
+    project: 'tu reserva',
+    type: 'Mensaje',
+    time: 'Hace 1 hora',
     status: 'online',
   },
   {
     id: 4,
-    userName: 'Terry Franci',
+    userName: 'Carlos Ruiz',
     userImage: '/images/user/user-05.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
+    action: 'publicó un nuevo viaje desde',
+    project: 'Getafe',
+    type: 'Nuevo viaje',
+    time: 'Hace 2 horas',
     status: 'online',
   },
   {
     id: 5,
-    userName: 'Terry Franci',
+    userName: 'Laura Martínez',
     userImage: '/images/user/user-06.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
+    action: 'calificó tu viaje',
+    project: 'Madrid → Alcalá',
+    type: 'Calificación',
+    time: 'Hace 3 horas',
     status: 'offline',
   },
   {
     id: 6,
-    userName: 'Terry Franci',
+    userName: 'Pedro Sánchez',
     userImage: '/images/user/user-07.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
+    action: 'aceptó tu solicitud de reserva para',
+    project: 'Madrid Centro',
+    type: 'Reserva',
+    time: 'Hace 1 día',
     status: 'online',
   },
   {
     id: 7,
-    userName: 'Terry Franci',
+    userName: 'Sofía Torres',
     userImage: '/images/user/user-08.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
+    action: 'recordatorio: tu viaje es mañana a las',
+    project: '8:00 AM',
+    type: 'Recordatorio',
+    time: 'Hace 2 días',
     status: 'online',
   },
-  {
-    id: 7,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-09.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  // Add more notifications here...
 ])
 
 const toggleDropdown = () => {
@@ -219,10 +208,8 @@ const handleItemClick = (event) => {
   closeDropdown()
 }
 
-const handleViewAllClick = (event) => {
-  event.preventDefault()
-  // Handle the "View All Notification" action here
-  console.log('View All Notifications clicked')
+const handleViewAllClick = () => {
+  // El router-link ya maneja la navegación
   closeDropdown()
 }
 
