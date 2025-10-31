@@ -1,7 +1,7 @@
 <template>
   <nav
     v-if="showBottomNav"
-    class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center shadow-lg z-50 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] lg:hidden"
+    class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center shadow-lg z-50 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] lg:hidden bottom-nav"
   >
     <router-link to="/" class="flex flex-col items-center justify-center text-gray-600 transition-colors px-4 py-2 flex-1 max-w-[100px]" exact-active-class="router-link-active">
       <Home class="w-6 h-6" />
@@ -46,5 +46,16 @@ const showBottomNav = computed(() => !(route.path.startsWith('/login') || route.
 }
 .router-link-active span {
   font-weight: 600;
+}
+
+/* Asegurar que la navbar se muestre en móvil web (Netlify) */
+.bottom-nav {
+  display: flex !important;
+}
+
+@media (min-width: 1024px) {
+  .bottom-nav {
+    display: none !important;
+  }
 }
 </style>
