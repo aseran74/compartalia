@@ -74,32 +74,97 @@ class FirebaseAuthService {
             };
           } else {
             console.log('📝 Profile not found in database, creating via upsert_profile_from_firebase...');
+            console.log('📝 User data:', {
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName,
+              photoURL: user.photoURL,
+              phoneNumber: user.phoneNumber
+            });
             
             // Llamar a la función RPC para crear/actualizar el perfil automáticamente
-            const { data: newProfile, error: upsertError } = await supabase.rpc(
-              'upsert_profile_from_firebase',
-              {
-                p_id: user.uid,
-                p_email: user.email || '',
-                p_name: user.displayName || null,
-                p_avatar_url: user.photoURL || null,
-                p_phone: user.phoneNumber || null
-              }
-            );
+            try {
+              const { data: newProfile, error: upsertError } = await supabase.rpc(
+                'upsert_profile_from_firebase',
+                {
+                  p_id: user.uid,
+                  p_email: user.email || '',
+                  p_name: user.displayName || null,
+                  p_avatar_url: user.photoURL || null,
+                  p_phone: user.phoneNumber || null
+                }
+              );
 
-            if (newProfile && !upsertError) {
-              console.log('✅ Profile created/updated in database:', newProfile);
-              this.userProfile = {
-                id: newProfile.id,
-                email: newProfile.email,
-                name: newProfile.name,
-                role: newProfile.role || 'pasajero',
-                avatar_url: newProfile.avatar_url,
-                phone: newProfile.phone,
-                preferences: newProfile.preferences || {}
-              };
-            } else {
-              console.error('❌ Error creating profile via RPC:', upsertError);
+              console.log('📝 RPC Response:', { newProfile, upsertError });
+
+              if (newProfile && !upsertError) {
+                console.log('✅ Profile created/updated in database:', newProfile);
+                this.userProfile = {
+                  id: newProfile.id,
+                  email: newProfile.email,
+                  name: newProfile.name,
+                  role: newProfile.role || 'pasajero',
+                  avatar_url: newProfile.avatar_url,
+                  phone: newProfile.phone,
+                  preferences: newProfile.preferences || {}
+                };
+              } else {
+                console.error('❌ Error creating profile via RPC:', upsertError);
+                console.error('❌ RPC Error details:', {
+                  code: upsertError?.code,
+                  message: upsertError?.message,
+                  details: upsertError?.details,
+                  hint: upsertError?.hint
+                });
+                
+                // Intentar insertar directamente como fallback
+                try {
+                  console.log('🔄 Intentando inserción directa como fallback...');
+                  const { data: directInsert, error: insertError } = await supabase
+                    .from('profiles')
+                    .insert({
+                      id: user.uid,
+                      email: user.email || '',
+                      name: user.displayName || user.email?.split('@')[0] || 'Usuario',
+                      avatar_url: user.photoURL || null,
+                      phone: user.phoneNumber || null,
+                      role: 'pasajero',
+                      preferences: {}
+                    })
+                    .select()
+                    .single();
+
+                  if (directInsert && !insertError) {
+                    console.log('✅ Profile created via direct insert:', directInsert);
+                    this.userProfile = {
+                      id: directInsert.id,
+                      email: directInsert.email,
+                      name: directInsert.name,
+                      role: directInsert.role || 'pasajero',
+                      avatar_url: directInsert.avatar_url,
+                      phone: directInsert.phone,
+                      preferences: directInsert.preferences || {}
+                    };
+                  } else {
+                    console.error('❌ Error en inserción directa:', insertError);
+                    throw insertError || new Error('Failed to create profile');
+                  }
+                } catch (insertErr) {
+                  console.error('❌ Fallback insert failed:', insertErr);
+                  // Último fallback: crear perfil localmente
+                  this.userProfile = {
+                    id: user.uid,
+                    email: user.email || '',
+                    name: user.displayName || user.email?.split('@')[0] || 'Usuario',
+                    role: 'pasajero',
+                    avatar_url: user.photoURL || null,
+                    phone: user.phoneNumber || null,
+                    preferences: {}
+                  };
+                }
+              }
+            } catch (rpcError: any) {
+              console.error('❌ Exception calling RPC:', rpcError);
               // Fallback: crear perfil localmente
               this.userProfile = {
                 id: user.uid,
