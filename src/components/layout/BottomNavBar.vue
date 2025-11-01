@@ -46,35 +46,19 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from "vue";
+import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Home, Search, LayoutDashboard, Plus } from 'lucide-vue-next';
-import { supabase } from '@/config/supabase';
+import { useAuth } from '@/composables/useAuth';
 
 const route = useRoute();
 const router = useRouter();
 
+// Usar el composable de autenticación de Firebase
+const { isAuthenticated } = useAuth();
+
 // Mostrar navbar solo si no estamos en login o registro
 const showBottomNav = computed(() => !(route.path.startsWith('/login') || route.path.startsWith('/registro')));
-
-// Estado del usuario logueado
-const currentUserId = ref(null);
-
-// Obtener usuario actual
-const getCurrentUser = async () => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    currentUserId.value = user?.id || null;
-  } catch (error) {
-    console.error('Error obteniendo usuario:', error);
-    currentUserId.value = null;
-  }
-};
-
-// Escuchar cambios de autenticación
-supabase.auth.onAuthStateChange(async (event, session) => {
-  currentUserId.value = session?.user?.id || null;
-});
 
 // Handlers de navegación
 
@@ -90,7 +74,7 @@ const handleSearchClick = () => {
 
 // 3. Dashboard - Requiere login
 const handleDashboardClick = () => {
-  if (currentUserId.value) {
+  if (isAuthenticated.value) {
     router.push('/dashboard');
   } else {
     router.push({ path: '/login', query: { redirect: '/dashboard' } });
@@ -99,16 +83,12 @@ const handleDashboardClick = () => {
 
 // 4. Publicar Viaje - Requiere login
 const handleCreateTripClick = () => {
-  if (currentUserId.value) {
+  if (isAuthenticated.value) {
     router.push('/carpooling/create-trip');
   } else {
     router.push({ path: '/login', query: { redirect: '/carpooling/create-trip' } });
   }
 };
-
-onMounted(async () => {
-  await getCurrentUser();
-});
 </script>
 
 <style scoped>
