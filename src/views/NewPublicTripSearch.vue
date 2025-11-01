@@ -1,239 +1,117 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
-      <!-- Hero Section -->
-      <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">
-          Busca viajes compartidos
-        </h1>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
-          Encuentra viajes mensuales desde tu localidad a Madrid sin necesidad de registrarte
-        </p>
-        
-        <!-- Botón de búsqueda principal - Arriba del todo -->
-        <div class="mb-6">
-          <button
-            @click="searchTrips"
-            type="button"
-            :disabled="isSearching"
-            class="bg-green-600 text-white px-8 py-4 rounded-full hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
-          >
-            <div class="flex items-center justify-center gap-3">
-              <svg v-if="isSearching" class="h-5 w-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-              </svg>
-              <span v-else class="text-2xl">🔍</span>
-              <span>{{ isSearching ? 'Buscando...' : 'Buscar Viajes' }}</span>
-            </div>
-          </button>
+  <div class="min-h-screen bg-gray-50 antialiased">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      
+
+      <header class="text-center mb-10 sm:mb-14">
+        <div class="max-w-3xl mx-auto">
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
+            Busca tu <span class="text-green-600">Viaje Compartido</span>
+          </h1>
+          <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Encuentra tu ruta mensual desde tu localidad a Madrid, rápido y sin registro.
+          </p>
         </div>
-      </div>
+      </header>
 
-      <!-- Call to Action Section -->
-      <div class="text-center mb-12">
-        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
-          <!-- Botón Regístrate -->
-          <router-link 
-            to="/register"
-            class="group relative px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 hover:scale-105"
-          >
-            <div class="flex items-center space-x-3">
-              <span class="text-2xl">🚀</span>
-              <span>Regístrate Gratis</span>
-              <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-              </svg>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-r from-green-600 to-green-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </router-link>
 
-        </div>
+      <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 sm:p-8 mb-8 sm:mb-12 transition-all duration-300">
         
-        <!-- Texto descriptivo -->
-        <p class="text-gray-600 mt-6 text-lg">
-          <span class="font-semibold text-green-600">Gratis</span> para empezar • 
-          <span class="font-semibold text-blue-600">Sin compromiso</span> • 
-          <span class="font-semibold text-purple-600">Ahorra dinero</span>
-        </p>
-      </div>
 
-      <!-- Search Form -->
-      <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
-        <h2 class="text-xl font-semibold mb-4">📝 Información del Viaje</h2>
+        <div class="flex items-center gap-3 mb-6">
+          <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2v5m0-5h2m-2 0H8m6 4H8m0 4h6m-2 0v5m0-5V3m0 5h2m-2 0H8m6 4H8m0 4h6m-2 0v5m0-5V3m0 5h2m-2 0H8"/>
+            </svg>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Configura tu Búsqueda</h2>
+        </div>
 
-        <form @submit.prevent="searchTrips" class="space-y-3 sm:space-y-4">
-          <!-- Origen Específico -->
+        <form @submit.prevent="searchTrips" class="space-y-6 sm:space-y-8">
+          
+
           <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700 mb-2">📍 Origen</label>
+            <label class="block text-sm sm:text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span class="text-xl">➡️</span>
+              <span>Origen</span>
+            </label>
             
-            <!-- Selector de tipo de origen -->
-            <div class="mb-2">
+            <div class="mb-4 bg-gray-100 p-1 rounded-xl">
               <div class="grid grid-cols-2 gap-1">
                 <button
                   @click="originType = 'predefined'"
                   type="button"
                   :class="[
-                    'px-2 py-1.5 rounded-lg border-2 transition-colors text-center text-xs',
+                    'px-4 py-2.5 rounded-xl border transition-all text-center text-sm font-semibold',
                     originType === 'predefined' 
-                      ? 'bg-green-50 border-green-300 text-green-700' 
-                      : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                      ? 'bg-white border-green-500 text-green-700 shadow-md' 
+                      : 'bg-transparent border-transparent text-gray-600 hover:text-green-600'
                   ]"
                 >
-                  🏙️ Ciudad
+                  🏙️ Ciudad Cercana
                 </button>
                 <button
                   @click="originType = 'specific'"
                   type="button"
                   :class="[
-                    'px-2 py-1.5 rounded-lg border-2 transition-colors text-center text-xs',
+                    'px-4 py-2.5 rounded-xl border transition-all text-center text-sm font-semibold',
                     originType === 'specific' 
-                      ? 'bg-blue-50 border-blue-300 text-blue-700' 
-                      : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                      ? 'bg-white border-blue-500 text-blue-700 shadow-md' 
+                      : 'bg-transparent border-transparent text-gray-600 hover:text-blue-600'
                   ]"
                 >
-                  📍 Dirección
+                  📍 Dirección Exacta
                 </button>
               </div>
             </div>
 
-            <!-- Origen Predefinido -->
             <div v-if="originType === 'predefined'">
               <button
                 @click="openOriginModal"
                 type="button"
-                class="w-full px-4 py-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg text-green-700 hover:bg-green-100 hover:border-green-400 transition-colors text-center mb-3"
+                class="w-full px-4 py-3 bg-white border-2 border-dashed border-green-300 rounded-xl text-green-700 hover:bg-green-50 hover:border-green-400 transition-colors text-center mb-3 text-sm font-medium"
               >
-                🏙️ Seleccionar ciudad del extrarradio de Madrid
+                <span v-if="searchForm.origin">{{ searchForm.origin }}</span>
+                <span v-else>🏙️ Seleccionar ciudad del extrarradio...</span>
               </button>
               
               <AutocompleteInput
                 v-model="searchForm.origin"
-                placeholder="Escribe tu ciudad de origen..."
+                placeholder="O escribe tu ciudad (ej: Alcorcón)..."
                 :suggestions="originSuggestions"
                 :is-loading="isLoadingOrigin"
                 @input="handleOriginInput"
                 @select="handleOriginSelect"
-                input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                input-class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
               />
             </div>
-
-            <!-- Origen Específico -->
+            
             <div v-if="originType === 'specific'">
-                <div class="relative">
-                  <input
-                    v-model="specificOrigin"
-                    @input="handleSpecificOriginInput"
-                    @focus="showOriginSuggestionsSpecific = true"
-                    @blur="hideOriginSuggestionsSpecific"
-                    type="text"
-                    placeholder="Ej: Calle Gran Vía 1, Madrid"
-                    class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <span class="text-gray-400">📍</span>
-                  </div>
-                  
-                  <!-- Sugerencias de origen específico -->
-                  <div v-if="showOriginSuggestionsSpecific && originSuggestionsSpecific.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    <div class="p-2">
-                      <div
-                        v-for="(suggestion, index) in originSuggestionsSpecific"
-                        :key="index"
-                        @click="selectSpecificOrigin(suggestion)"
-                        class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors border-b border-gray-100 last:border-b-0"
-                      >
-                        <div class="font-semibold text-gray-900">{{ suggestion.main_text }}</div>
-                        <div class="text-sm text-gray-500">{{ suggestion.secondary_text }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            <!-- Destino Específico -->
-            <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 mb-2">🎯 Destino</label>
-              
-              <!-- Selector de tipo de destino -->
-              <div class="mb-2">
-                <div class="grid grid-cols-2 gap-1">
-                  <button
-                    @click="destinationType = 'predefined'"
-                    type="button"
-                    :class="[
-                      'px-2 py-1.5 rounded-lg border-2 transition-colors text-center text-xs',
-                      destinationType === 'predefined' 
-                        ? 'bg-green-50 border-green-300 text-green-700' 
-                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-                    ]"
-                  >
-                    🏢 Destino
-                  </button>
-                  <button
-                    @click="destinationType = 'specific'"
-                    type="button"
-                    :class="[
-                      'px-2 py-1.5 rounded-lg border-2 transition-colors text-center text-xs',
-                      destinationType === 'specific' 
-                        ? 'bg-blue-50 border-blue-300 text-blue-700' 
-                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-                    ]"
-                  >
-                    📍 Dirección
-                  </button>
-                </div>
-              </div>
-
-              <!-- Destino Predefinido -->
-              <div v-if="destinationType === 'predefined'">
-                <button
-                  @click="openDestinationModal"
-                  type="button"
-                  class="w-full px-4 py-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg text-green-700 hover:bg-green-100 hover:border-green-400 transition-colors text-center mb-3"
-                >
-                  🏢 Seleccionar destino en Madrid
-                </button>
-                
-                <AutocompleteInput
-                  v-model="searchForm.destination"
-                  placeholder="Escribe tu destino en Madrid..."
-                  :suggestions="destinationSuggestions"
-                  :is-loading="isLoadingDestination"
-                  @input="handleDestinationInput"
-                  @select="handleDestinationSelect"
-                  input-class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              <div class="relative">
+                <input
+                  v-model="specificOrigin"
+                  @input="handleSpecificOriginInput"
+                  @focus="showOriginSuggestionsSpecific = true"
+                  @blur="hideOriginSuggestionsSpecific"
+                  type="text"
+                  placeholder="Ej: Calle Gran Vía 1, Madrid"
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
-              </div>
-
-              <!-- Destino Específico -->
-              <div v-if="destinationType === 'specific'">
-                <div class="relative">
-                  <input
-                    v-model="specificDestination"
-                    @input="handleSpecificDestinationInput"
-                    @focus="showDestinationSuggestionsSpecific = true"
-                    @blur="hideDestinationSuggestionsSpecific"
-                    type="text"
-                    placeholder="Ej: Hospital La Paz, Madrid"
-                    class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <span class="text-gray-400">🎯</span>
-                  </div>
-                  
-                  <!-- Sugerencias de destino específico -->
-                  <div v-if="showDestinationSuggestionsSpecific && destinationSuggestionsSpecific.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    <div class="p-2">
-                      <div
-                        v-for="(suggestion, index) in destinationSuggestionsSpecific"
-                        :key="index"
-                        @click="selectSpecificDestination(suggestion)"
-                        class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors border-b border-gray-100 last:border-b-0"
-                      >
-                        <div class="font-semibold text-gray-900">{{ suggestion.main_text }}</div>
-                        <div class="text-sm text-gray-500">{{ suggestion.secondary_text }}</div>
-                      </div>
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <span class="text-blue-500 text-lg">📍</span>
+                </div>
+                
+                <!-- Sugerencias de origen específico -->
+                <div v-if="showOriginSuggestionsSpecific && originSuggestionsSpecific.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <div class="p-2">
+                    <div
+                      v-for="(suggestion, index) in originSuggestionsSpecific"
+                      :key="index"
+                      @click="selectSpecificOrigin(suggestion)"
+                      class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <div class="font-semibold text-gray-900">{{ suggestion.main_text }}</div>
+                      <div class="text-sm text-gray-500">{{ suggestion.secondary_text }}</div>
                     </div>
                   </div>
                 </div>
@@ -241,202 +119,484 @@
             </div>
           </div>
 
-          <!-- Fecha y Hora -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="form-group">
+            <label class="block text-sm sm:text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span class="text-xl">⬅️</span>
+              <span>Destino en Madrid</span>
+            </label>
+            
+            <div class="mb-4 bg-gray-100 p-1 rounded-xl">
+              <div class="grid grid-cols-2 gap-1">
+                <button
+                  @click="destinationType = 'predefined'"
+                  type="button"
+                  :class="[
+                    'px-4 py-2.5 rounded-xl border transition-all text-center text-sm font-semibold',
+                    destinationType === 'predefined' 
+                      ? 'bg-white border-green-500 text-green-700 shadow-md' 
+                      : 'bg-transparent border-transparent text-gray-600 hover:text-green-600'
+                  ]"
+                >
+                  🏢 Centro de Interés
+                </button>
+                <button
+                  @click="destinationType = 'specific'"
+                  type="button"
+                  :class="[
+                    'px-4 py-2.5 rounded-xl border transition-all text-center text-sm font-semibold',
+                    destinationType === 'specific' 
+                      ? 'bg-white border-blue-500 text-blue-700 shadow-md' 
+                      : 'bg-transparent border-transparent text-gray-600 hover:text-blue-600'
+                  ]"
+                >
+                  📍 Dirección Exacta
+                </button>
+              </div>
+            </div>
+
+            <div v-if="destinationType === 'predefined'">
+              <button
+                @click="openDestinationModal"
+                type="button"
+                class="w-full px-4 py-3 bg-white border-2 border-dashed border-green-300 rounded-xl text-green-700 hover:bg-green-50 hover:border-green-400 transition-colors text-center mb-3 text-sm font-medium"
+              >
+                <span v-if="searchForm.destination">{{ searchForm.destination }}</span>
+                <span v-else>🏢 Seleccionar un destino común en Madrid...</span>
+              </button>
+              
+              <AutocompleteInput
+                v-model="searchForm.destination"
+                placeholder="O escribe tu destino (ej: Plaza Castilla)..."
+                :suggestions="destinationSuggestions"
+                :is-loading="isLoadingDestination"
+                @input="handleDestinationInput"
+                @select="handleDestinationSelect"
+                input-class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              />
+            </div>
+
+            <div v-if="destinationType === 'specific'">
+              <div class="relative">
+                <input
+                  v-model="specificDestination"
+                  @input="handleSpecificDestinationInput"
+                  @focus="showDestinationSuggestionsSpecific = true"
+                  @blur="hideDestinationSuggestionsSpecific"
+                  type="text"
+                  placeholder="Ej: Hospital La Paz, Madrid"
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <span class="text-blue-500 text-lg">🎯</span>
+                </div>
+                
+                <!-- Sugerencias de destino específico -->
+                <div v-if="showDestinationSuggestionsSpecific && destinationSuggestionsSpecific.length > 0" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <div class="p-2">
+                    <div
+                      v-for="(suggestion, index) in destinationSuggestionsSpecific"
+                      :key="index"
+                      @click="selectSpecificDestination(suggestion)"
+                      class="px-4 py-3 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <div class="font-semibold text-gray-900">{{ suggestion.main_text }}</div>
+                      <div class="text-sm text-gray-500">{{ suggestion.secondary_text }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 mb-1">📅 Fecha</label>
+              <label class="block text-sm sm:text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <span class="text-xl">📅</span>
+                <span>Fecha</span>
+              </label>
               <DatePicker
                 v-model="searchForm.date"
                 :min-date="today"
-                placeholder="Selecciona la fecha del viaje"
+                placeholder="Selecciona la fecha"
+                input-class="w-full px-4 sm:px-4 py-4 sm:py-3 text-base sm:text-sm border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors text-gray-900 min-h-[52px] sm:min-h-[44px]"
               />
             </div>
             
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 mb-1">🕐 Hora</label>
+              <label class="block text-sm sm:text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <span class="text-xl">🕐</span>
+                <span>Hora</span>
+              </label>
               <input
                 v-model="searchForm.time"
                 type="time"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                class="w-full px-4 sm:px-4 py-4 sm:py-3 text-base sm:text-sm border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors text-gray-900 min-h-[52px] sm:min-h-[44px]"
               />
             </div>
+          </div>
+          
+          <div class="pt-4 flex justify-center">
+            <button
+              type="submit"
+              :disabled="isSearching"
+              class="inline-flex items-center justify-center gap-3 w-full sm:w-auto bg-green-600 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed font-bold text-base sm:text-lg transition-all duration-300 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-green-300 transform hover:-translate-y-0.5"
+            >
+              <svg v-if="isSearching" class="h-6 w-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <svg v-else class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <span>{{ isSearching ? 'Buscando...' : 'Buscar Viajes' }}</span>
+            </button>
           </div>
 
         </form>
       </div>
 
-      <!-- Resultados -->
-      <div v-if="hasSearched" class="bg-white rounded-lg shadow-lg p-6">
-        <h3 class="text-xl font-semibold mb-4">
-          {{ searchResults.length > 0 ? `Encontrados ${searchResults.length} viajes` : 'No se encontraron viajes' }}
+
+      
+
+      <div v-if="hasSearched" class="rounded-xl p-0">
+
+        <h3 class="text-2xl font-bold text-gray-900 mb-6 px-2">
+
+          {{ searchResults.length > 0 ? `Resultados: ${searchResults.length} viajes encontrados 🚗` : 'No se encontraron viajes 😔' }}
+
         </h3>
+
         
-        <div v-if="searchResults.length > 0" class="space-y-4">
+
+        <div v-if="searchResults.length > 0" class="space-y-5">
+
           <div
+
             v-for="result in searchResults"
+
             :key="result.trip.id"
-            class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:border-green-300"
+
+            class="bg-white border border-gray-200 rounded-xl p-5 sm:p-6 hover:shadow-xl transition-all duration-300 hover:border-green-400 group relative"
+
           >
-            <!-- Header con conductor y precio -->
-            <div class="flex items-start justify-between mb-4">
-              <!-- Información del conductor -->
-              <div class="flex items-center space-x-3">
-                <div class="relative">
-                <img 
-                  :src="result.trip.profiles?.avatar_url || '/images/user/user-01.jpg'" 
-                  :alt="result.trip.profiles?.name || 'Conductor'"
-                  class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-green-200"
-                  @error="(event: any) => event.target.src = '/images/user/user-01.jpg'"
-                />
-                  <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <h4 class="font-semibold text-gray-900 text-sm sm:text-base truncate">
-                    {{ result.trip.profiles?.name || 'Conductor' }}
-                  </h4>
-                  <div class="flex items-center space-x-1 text-xs text-gray-500 mb-1">
-                    <span>⭐</span>
-                    <span>{{ (result.trip as any).driver_rating || '4.8' }}</span>
-                    <span>•</span>
-                    <span>{{ (result.trip as any).trips_completed || '50+' }} viajes</span>
-                  </div>
-                  <div class="flex items-center space-x-1 text-xs text-blue-600 font-medium">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    <span>{{ searchForm.date ? new Date(searchForm.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }) : 'Hoy' }}</span>
-                  </div>
-                </div>
-              </div>
+
+            
+
+            <div class="md:grid md:grid-cols-3 md:gap-6">
+
               
-              <!-- Precio -->
-              <div class="text-right">
-                <!-- Precio por día trayecto (ida y vuelta) -->
-                <div class="mb-2">
-                  <div class="text-2xl sm:text-3xl font-bold text-green-600">
-                    {{ (result.trip.price_per_seat * 2).toFixed(2) }}€
+
+              <div class="col-span-1 border-b md:border-b-0 md:border-r border-gray-100 pb-4 md:pr-4 mb-4 md:mb-0">
+
+                <div class="flex items-center space-x-3 mb-4">
+
+                  <div class="relative flex-shrink-0">
+
+                    <img 
+
+                      :src="result.trip.profiles?.avatar_url || '/images/user/user-01.jpg'" 
+
+                      :alt="result.trip.profiles?.name || 'Conductor'"
+
+                      class="w-14 h-14 rounded-full object-cover border-3 border-green-500 shadow-md"
+
+                      @error="(event: any) => event.target.src = '/images/user/user-01.jpg'"
+
+                    />
+
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+
                   </div>
-                  <div class="text-xs text-gray-500">día trayecto (ida y vuelta)</div>
+
+                  <div class="flex-1 min-w-0">
+
+                    <h4 class="font-bold text-lg text-gray-900 truncate">
+
+                      {{ result.trip.profiles?.name || 'Conductor' }}
+
+                    </h4>
+
+                    <div class="flex items-center space-x-2 text-sm text-gray-500">
+
+                      <span class="text-yellow-500">⭐</span>
+
+                      <span>{{ (result.trip as any).driver_rating || '4.8' }}</span>
+
+                      <span>•</span>
+
+                      <span>{{ (result.trip as any).trips_completed || '50+' }} viajes</span>
+
+                    </div>
+
+                  </div>
+
                 </div>
+
                 
-                <!-- Precio mensual o semanal -->
-                <div class="mt-3 pt-2 border-t border-gray-200">
-                  <div v-if="isMonthlyTrip(result.trip)" class="text-lg font-semibold text-purple-600">
-                    {{ formatMonthlyPrice(result.trip) }}€
-                  </div>
-                  <div v-else-if="isWeeklyTrip(result.trip)" class="text-lg font-semibold text-green-600">
-                    {{ formatWeeklyPrice(result.trip) }}€
-                  </div>
-                  <div v-else class="text-sm text-gray-500">
-                    {{ result.trip.price_per_seat }}€/trayecto
-                  </div>
-                  <div class="text-xs text-gray-500 mt-1">
-                    <span v-if="isMonthlyTrip(result.trip)">mensual</span>
-                    <span v-else-if="isWeeklyTrip(result.trip)">semanal</span>
-                    <span v-else>por asiento</span>
-                  </div>
+
+                <div class="space-y-2 text-sm text-gray-600">
+
+                    <div class="flex items-center gap-2">
+
+                        <span class="text-lg">📅</span>
+
+                        <span>{{ searchForm.date ? new Date(searchForm.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' }) : 'Hoy' }}</span>
+
+                    </div>
+
+                    <div class="flex items-center gap-2">
+
+                        <span class="text-lg">Tipo</span>
+
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+
+                            {{ getTripTypeLabel(result.trip) }}
+
+                        </span>
+
+                    </div>
+
                 </div>
+
+
+
+                <div v-if="result.bookingInfo" class="mt-4 pt-3 border-t border-gray-100">
+
+                    <div v-if="result.bookingInfo.remaining_seats > 0" class="flex items-center space-x-2 bg-green-50 text-green-700 p-2 rounded-lg">
+
+                      <span class="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
+
+                      <span class="text-sm font-bold">
+
+                        {{ result.bookingInfo.remaining_seats }} asientos disponibles
+
+                      </span>
+
+                    </div>
+
+                    <div v-else class="flex items-center space-x-2 bg-red-50 text-red-700 p-2 rounded-lg">
+
+                      <span class="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
+
+                      <span class="text-sm font-bold">Completamente ocupado</span>
+
+                    </div>
+
+                </div>
+
+
+
               </div>
+
+
+
+              <div class="col-span-1 py-4 md:pr-4 border-b md:border-b-0 md:border-r border-gray-100 mb-4 md:mb-0">
+
+                <div class="text-sm font-semibold text-gray-900 mb-3">Ruta y Horarios</div>
+
+                <div class="space-y-4">
+
+                    <div class="flex items-start gap-3">
+
+                        <div class="flex flex-col items-center">
+
+                            <span class="w-3 h-3 bg-green-600 rounded-full ring-4 ring-green-100 flex-shrink-0"></span>
+
+                            <div class="w-px h-10 bg-gray-300 my-1"></div>
+
+                        </div>
+
+                        <div>
+
+                            <div class="text-xs font-medium text-gray-500">Salida</div>
+
+                            <div class="font-bold text-base text-gray-900">{{ formatTime(result.trip.departure_time) }}</div>
+
+                            <div class="text-sm text-gray-700">{{ result.trip.origin_name }}</div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="flex items-start gap-3">
+
+                        <div class="flex flex-col items-center">
+
+                            <span class="w-3 h-3 bg-blue-600 rounded-full ring-4 ring-blue-100 flex-shrink-0"></span>
+
+                        </div>
+
+                        <div>
+
+                            <div class="text-xs font-medium text-gray-500">Llegada Estimada</div>
+
+                            <div class="font-bold text-base text-gray-900">{{ (() => { const arrival = calculateArrivalTime(result.trip); return arrival ? formatTime(arrival) : 'N/A'; })() }}</div>
+
+                            <div class="text-sm text-gray-700">{{ result.trip.destination_name }}</div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-gray-100">
+
+                    <div class="text-left">
+
+                        <div class="text-xs font-medium text-gray-500 mb-1">📏 Distancia</div>
+
+                        <div class="font-bold text-sm">
+
+                            {{ result.distance ? `${result.distance.toFixed(1)} km` : 'N/A' }}
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-left">
+
+                        <div class="text-xs font-medium text-gray-500 mb-1">🪑 Asientos Totales</div>
+
+                        <div class="font-bold text-sm">
+
+                            {{ (() => { const total = getTotalSeats(result.trip, result.bookingInfo); return total > 0 ? total : 'N/A'; })() }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+              </div>
+
+
+
+              <div class="col-span-1 py-4 md:p-0 flex flex-col justify-between">
+
+                
+
+                <div class="text-center mb-4 md:mb-0">
+
+                    <div class="text-xs font-bold text-gray-500 uppercase mb-1">Precio por Asiento (Ida y Vuelta)</div>
+
+                    <div class="text-4xl sm:text-5xl font-extrabold text-green-600 leading-none">
+
+                        {{ (result.trip.price_per_seat * 2).toFixed(2) }}€
+
+                    </div>
+
+                    <div class="text-sm text-gray-500">/día trayecto</div>
+
+                </div>
+
+                
+
+                <div class="mt-4 pt-3 border-t border-gray-200 text-center">
+
+                    <div v-if="isMonthlyTrip(result.trip)" class="text-xl font-bold text-purple-600">
+
+                        {{ formatMonthlyPrice(result.trip) }}€ <span class="text-sm font-medium text-gray-500">mensual</span>
+
+                    </div>
+
+                    <div v-else-if="isWeeklyTrip(result.trip)" class="text-xl font-bold text-green-600">
+
+                        {{ formatWeeklyPrice(result.trip) }}€ <span class="text-sm font-medium text-gray-500">semanal</span>
+
+                    </div>
+
+                    <div v-else class="text-sm text-gray-500">
+
+                        <span class="font-semibold">{{ result.trip.price_per_seat }}€</span> / trayecto (solo ida)
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="flex flex-col gap-3 mt-6">
+
+                  <button
+
+                    v-if="!result.bookingInfo || result.bookingInfo.remaining_seats > 0"
+
+                    @click="openBookingModal(result.trip, result.bookingInfo)"
+
+                    class="w-full bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 text-base font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+
+                  >
+
+                    ¡Reservar Ahora!
+
+                  </button>
+
+                  <div
+
+                    v-else
+
+                    class="w-full bg-gray-300 text-gray-600 px-6 py-3 rounded-xl text-base font-bold text-center cursor-not-allowed"
+
+                  >
+
+                    Sin asientos
+
+                  </div>
+
+                  
+
+                  <button
+
+                    @click="viewTripDetails(result.trip.id)"
+
+                    class="w-full bg-white text-blue-600 border border-blue-200 px-4 py-2 rounded-xl hover:bg-blue-50 text-sm font-medium transition-colors shadow-sm"
+
+                  >
+
+                    Ver Detalles del Viaje
+
+                  </button>
+
+                </div>
+
+              </div>
+
             </div>
 
-            <!-- Ruta -->
-            <div class="mb-4">
-              <div class="flex items-center space-x-2 mb-2">
-                <div class="flex-shrink-0 w-3 h-3 bg-green-500 rounded-full"></div>
-                <span class="font-medium text-gray-900 text-sm sm:text-base">{{ result.trip.origin_name }}</span>
-              </div>
-              <div class="flex items-center space-x-2 ml-1.5">
-                <div class="w-px h-4 bg-gray-300 ml-1"></div>
-                <div class="flex-1 h-px bg-gray-300"></div>
-                <span class="text-gray-400 text-xs">→</span>
-                <div class="flex-1 h-px bg-gray-300"></div>
-              </div>
-              <div class="flex items-center space-x-2 mt-2">
-                <div class="flex-shrink-0 w-3 h-3 bg-red-500 rounded-full"></div>
-                <span class="font-medium text-gray-900 text-sm sm:text-base">{{ result.trip.destination_name }}</span>
-              </div>
-            </div>
 
-            <!-- Información del viaje -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-              <div class="text-center sm:text-left">
-                <div class="text-xs text-gray-500 mb-1">🕐 Salida</div>
-                <div class="font-medium text-sm">{{ formatTime(result.trip.departure_time) }}</div>
-              </div>
-              <div class="text-center sm:text-left">
-                <div class="text-xs text-gray-500 mb-1">🪑 Asientos</div>
-                <div class="font-medium text-sm">
-                  <span v-if="result.bookingInfo">{{ result.bookingInfo.remaining_seats }}/{{ result.bookingInfo.total_seats }}</span>
-                  <span v-else>{{ result.trip.available_seats }}</span>
-                </div>
-              </div>
-              <div class="text-center sm:text-left">
-                <div class="text-xs text-gray-500 mb-1">📏 Distancia</div>
-                <div class="font-medium text-sm">
-                  <span v-if="result.distance">{{ result.distance.toFixed(1) }} km</span>
-                  <span v-else>N/A</span>
-                </div>
-              </div>
-              <div class="text-center sm:text-left">
-                <div class="text-xs text-gray-500 mb-1">Tipo</div>
-                <div class="font-medium text-sm">
-                  <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                    {{ getTripTypeLabel(result.trip) }}
-                  </span>
-                </div>
-              </div>
-            </div>
 
-            <!-- Indicador de disponibilidad -->
-            <div v-if="result.bookingInfo" class="mb-4">
-              <div v-if="result.bookingInfo.remaining_seats > 0" class="flex items-center space-x-2">
-                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span class="text-sm text-green-700 font-medium">
-                  {{ result.bookingInfo.remaining_seats }} asiento{{ result.bookingInfo.remaining_seats > 1 ? 's' : '' }} disponible{{ result.bookingInfo.remaining_seats > 1 ? 's' : '' }}
-                </span>
-              </div>
-              <div v-else class="flex items-center space-x-2">
-                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
-                <span class="text-sm text-red-700 font-medium">Completamente ocupado</span>
-              </div>
-            </div>
-
-            <!-- Botones de acción -->
-            <div class="flex justify-between items-center">
-              <button
-                @click="viewTripDetails(result.trip.id)"
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-              >
-                Ver Detalles
-              </button>
-              
-              <button
-                v-if="!result.bookingInfo || result.bookingInfo.remaining_seats > 0"
-                @click="openBookingModal(result.trip, result.bookingInfo)"
-                class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 text-sm font-medium transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-              >
-                Reservar Ahora
-              </button>
-              <div
-                v-else
-                class="bg-gray-300 text-gray-600 px-6 py-3 rounded-lg text-sm cursor-not-allowed"
-              >
-                Sin asientos
-              </div>
-            </div>
           </div>
+
         </div>
+
         
-        <div v-else class="text-center py-8">
-          <p class="text-gray-500 mb-4">No se encontraron viajes para tu búsqueda</p>
+
+        <div v-else class="text-center bg-white rounded-xl shadow-lg p-10 mt-8">
+
+          <p class="text-gray-600 mb-6 text-lg">
+
+            ¡Lo sentimos! No encontramos viajes compartidos que coincidan con tu búsqueda. 😟
+
+          </p>
+
           <button
+
             @click="resetSearch"
-            class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+
+            class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-semibold shadow-md"
+
           >
-            Nueva Búsqueda
+
+            Ajustar Búsqueda
+
           </button>
+
         </div>
+
       </div>
+
     </main>
 
     <!-- Modal de Ciudades de Origen -->
@@ -832,6 +992,67 @@ const formatTime = (time: string) => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+// Función para calcular hora de llegada estimada
+const calculateArrivalTime = (trip: any): string | null => {
+  if (!trip.departure_time) return null
+  
+  try {
+    const departure = new Date(trip.departure_time)
+    
+    // Intentar obtener duración desde route_data
+    let durationMinutes = 0
+    
+    if (trip.route_data) {
+      // Puede estar en diferentes formatos
+      if (trip.route_data.duration_minutes) {
+        durationMinutes = trip.route_data.duration_minutes
+      } else if (trip.route_data.duration) {
+        durationMinutes = trip.route_data.duration / 60 // Si está en segundos
+      } else if (trip.route_data.route_duration) {
+        durationMinutes = trip.route_data.route_duration / 60 // Si está en segundos
+      }
+    }
+    
+    // Si no hay duración en route_data, calcular una estimación básica
+    // basada en distancia (asumiendo velocidad promedio de 60 km/h en ciudad)
+    if (durationMinutes === 0 && trip.route_data?.distance_km) {
+      const distanceKm = trip.route_data.distance_km
+      // Estimación: 60 km/h promedio en ciudad = 1 km/minuto
+      durationMinutes = Math.round(distanceKm)
+    }
+    
+    // Si aún no tenemos duración, usar una estimación conservadora de 30 minutos
+    if (durationMinutes === 0) {
+      durationMinutes = 30
+    }
+    
+    const arrival = new Date(departure.getTime() + durationMinutes * 60 * 1000)
+    return arrival.toISOString()
+  } catch (error) {
+    console.error('Error calculando hora de llegada:', error)
+    return null
+  }
+}
+
+// Función para obtener asientos totales
+const getTotalSeats = (trip: any, bookingInfo?: any): number => {
+  // Si tenemos bookingInfo con total_seats, usarlo
+  if (bookingInfo?.total_seats) {
+    return bookingInfo.total_seats
+  }
+  
+  // Si no, intentar obtener desde el trip
+  // En algunos casos, available_seats puede ser el total si no hay reservas
+  // Pero generalmente necesitamos el total del vehículo
+  // Por ahora, usaremos available_seats + confirmed_bookings si está disponible
+  if (bookingInfo?.confirmed_bookings !== undefined && trip.available_seats !== undefined) {
+    return trip.available_seats + bookingInfo.confirmed_bookings
+  }
+  
+  // Fallback: usar available_seats como estimación (no es ideal pero es lo que tenemos)
+  return trip.available_seats || 0
 }
 
 // Función para formatear la fecha de búsqueda
