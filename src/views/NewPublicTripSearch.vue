@@ -1,107 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm mobile-safe-header sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-4">
-          <div class="flex items-center">
-            <img src="/images/logo/Compartalia2.png" alt="Compartalia Logo" class="h-8 w-auto object-contain" />
-          </div>
-          
-          <!-- Navbar dinámica basada en el estado de autenticación -->
-          <div class="flex items-center space-x-4">
-            <router-link to="/" class="text-gray-600 hover:text-green-600 font-medium">
-              Inicio
-            </router-link>
-            
-            <!-- Debug info (temporal) -->
-            <div v-if="user" class="text-xs text-gray-500 mr-4">
-              Debug: {{ user.email }} | {{ userProfile?.name || 'Sin perfil' }}
-            </div>
-            
-            <!-- Si el usuario está logueado -->
-            <div v-if="user" class="flex items-center space-x-4">
-              <router-link to="/dashboard" class="text-gray-600 hover:text-green-600 font-medium">
-                Dashboard
-              </router-link>
-              <router-link to="/carpooling/buscar-viajes-hibrido" class="text-gray-600 hover:text-green-600 font-medium">
-                Búsqueda Avanzada
-              </router-link>
-              
-              <!-- Dropdown del perfil -->
-              <div class="relative">
-                <button
-                  @click="toggleProfileDropdown"
-                  class="flex items-center space-x-2 text-gray-700 hover:text-green-600 transition-colors"
-                >
-                  <img
-                    :src="userProfile?.avatar_url || '/images/user/user-01.jpg'"
-                    :alt="userProfile?.name || 'Usuario'"
-                    class="h-8 w-8 rounded-full object-cover"
-                  />
-                  <span class="font-medium">{{ userProfile?.name || 'Usuario' }}</span>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </button>
-                
-                <!-- Dropdown menu -->
-                <div
-                  v-if="showProfileDropdown"
-                  class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
-                >
-                  <div class="py-2">
-                    <div class="px-4 py-2 border-b border-gray-100">
-                      <p class="text-sm font-medium text-gray-900">{{ userProfile?.name || 'Usuario' }}</p>
-                      <p class="text-xs text-gray-500">{{ userProfile?.email || user?.email }}</p>
-                    </div>
-                    <router-link
-                      to="/profile"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      @click="closeProfileDropdown"
-                    >
-                      👤 Mi Perfil
-                    </router-link>
-                    <router-link
-                      to="/dashboard"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      @click="closeProfileDropdown"
-                    >
-                      📊 Dashboard
-                    </router-link>
-                    <router-link
-                      to="/carpooling/my-trips"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      @click="closeProfileDropdown"
-                    >
-                      🚗 Mis Viajes
-                    </router-link>
-                    <div class="border-t border-gray-100"></div>
-                    <button
-                      @click="handleLogout"
-                      class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      🚪 Cerrar Sesión
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Si el usuario NO está logueado -->
-            <div v-else class="flex items-center space-x-4">
-              <router-link to="/login" class="text-gray-600 hover:text-green-600 font-medium">
-                Iniciar Sesión
-              </router-link>
-              <router-link to="/register" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                Registrarse
-              </router-link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
       <!-- Hero Section -->
@@ -652,7 +550,6 @@ const hasSearched = ref(false)
 // Estados de autenticación
 const user = ref<User | null>(null)
 const userProfile = ref<any>(null)
-const showProfileDropdown = ref(false)
 
 // Estados del modal de localidades
 const showOriginModal = ref(false)
@@ -1135,10 +1032,6 @@ const fetchUserProfile = async (userId: string) => {
   }
 }
 
-// Funciones del dropdown del perfil
-const toggleProfileDropdown = () => {
-  showProfileDropdown.value = !showProfileDropdown.value
-}
 
 // Funciones para búsqueda específica con Google Places
 const handleSpecificOriginInput = async () => {
@@ -1273,29 +1166,6 @@ const hideDestinationSuggestionsSpecific = () => {
   }, 200)
 }
 
-const closeProfileDropdown = () => {
-  showProfileDropdown.value = false
-}
-
-const handleLogout = async () => {
-  try {
-    await supabase.auth.signOut()
-    user.value = null
-    userProfile.value = null
-    showProfileDropdown.value = false
-    console.log('Usuario deslogueado exitosamente')
-  } catch (error) {
-    console.error('Error al cerrar sesión:', error)
-  }
-}
-
-// Cerrar dropdown al hacer click fuera
-const handleClickOutside = (event: Event) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.relative')) {
-    showProfileDropdown.value = false
-  }
-}
 
 // Variables para cleanup
 let authSubscription: any = null
@@ -1330,9 +1200,6 @@ onMounted(async () => {
   })
   
   authSubscription = subscription
-  
-  // Agregar listener para cerrar dropdown
-  document.addEventListener('click', handleClickOutside)
 })
 
 // Funciones de autocompletado
@@ -1393,7 +1260,6 @@ onUnmounted(() => {
   if (authSubscription) {
     authSubscription.unsubscribe()
   }
-  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
