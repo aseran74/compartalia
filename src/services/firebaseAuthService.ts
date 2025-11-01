@@ -42,38 +42,78 @@ class FirebaseAuthService {
         console.log('User logged in, fetching profile from database...');
         // Try to get user profile from Supabase database
         try {
-          const { data: profile, error } = await supabase
+          // Primero intentar buscar por ID (Firebase UID)
+          let { data: profile, error } = await supabase
             .from('profiles')
             .select('*')
-            .eq('email', user.email)
+            .eq('id', user.uid)
             .single();
 
+          // Si no se encuentra por ID, buscar por email
+          if (!profile && user.email) {
+            const { data: profileByEmail, error: emailError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('email', user.email)
+              .single();
+            
+            profile = profileByEmail;
+            error = emailError;
+          }
+
           if (profile && !error) {
-            console.log('Profile found in database:', profile);
+            console.log('✅ Profile found in database:', profile);
             this.userProfile = {
               id: profile.id,
               email: profile.email,
               name: profile.name,
-              role: profile.role,
+              role: profile.role || 'pasajero',
               avatar_url: profile.avatar_url,
               phone: profile.phone,
               preferences: profile.preferences || {}
             };
           } else {
-            console.log('Profile not found in database, creating default...');
-            // Create user profile from Firebase user
-            this.userProfile = {
-              id: user.uid,
-              email: user.email || '',
-              name: user.displayName || user.email?.split('@')[0] || 'Usuario',
-              role: 'pasajero', // Default role
-              avatar_url: user.photoURL || null,
-              phone: user.phoneNumber || null,
-              preferences: {}
-            };
+            console.log('📝 Profile not found in database, creating via upsert_profile_from_firebase...');
+            
+            // Llamar a la función RPC para crear/actualizar el perfil automáticamente
+            const { data: newProfile, error: upsertError } = await supabase.rpc(
+              'upsert_profile_from_firebase',
+              {
+                p_id: user.uid,
+                p_email: user.email || '',
+                p_name: user.displayName || null,
+                p_avatar_url: user.photoURL || null,
+                p_phone: user.phoneNumber || null
+              }
+            );
+
+            if (newProfile && !upsertError) {
+              console.log('✅ Profile created/updated in database:', newProfile);
+              this.userProfile = {
+                id: newProfile.id,
+                email: newProfile.email,
+                name: newProfile.name,
+                role: newProfile.role || 'pasajero',
+                avatar_url: newProfile.avatar_url,
+                phone: newProfile.phone,
+                preferences: newProfile.preferences || {}
+              };
+            } else {
+              console.error('❌ Error creating profile via RPC:', upsertError);
+              // Fallback: crear perfil localmente
+              this.userProfile = {
+                id: user.uid,
+                email: user.email || '',
+                name: user.displayName || user.email?.split('@')[0] || 'Usuario',
+                role: 'pasajero',
+                avatar_url: user.photoURL || null,
+                phone: user.phoneNumber || null,
+                preferences: {}
+              };
+            }
           }
         } catch (error) {
-          console.error('Error fetching profile from database:', error);
+          console.error('❌ Error fetching/creating profile from database:', error);
           // Fallback to Firebase user data
           this.userProfile = {
             id: user.uid,
