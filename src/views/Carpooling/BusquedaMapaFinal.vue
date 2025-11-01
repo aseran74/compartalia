@@ -34,7 +34,7 @@
         </div>
 
         <!-- Botón flotante para filtros en móvil -->
-        <div class="fixed top-4 right-4 z-50 lg:hidden">
+        <div class="fixed top-20 sm:top-16 right-4 z-50 lg:hidden">
           <button
             @click="showFiltersMobile = !showFiltersMobile"
             class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors"

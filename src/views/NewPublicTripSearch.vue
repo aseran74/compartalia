@@ -1,12 +1,24 @@
 <template>
   <div class="min-h-screen bg-gray-50 antialiased">
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-8 pb-8 sm:pb-12">
       
+      <!-- Botón para ir al inicio -->
+      <div class="mb-6 sm:mb-8">
+        <router-link 
+          to="/"
+          class="inline-flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors font-medium text-sm sm:text-base"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          <span>Volver al Inicio</span>
+        </router-link>
+      </div>
 
       <header class="text-center mb-10 sm:mb-14">
         <div class="max-w-3xl mx-auto">
-          <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
-            Busca tu <span class="text-green-600">Viaje Compartido</span>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 sm:mb-4 leading-tight">
+            Busca tu <span class="text-green-600">Viaje Compartido</span><br class="sm:hidden" />
           </h1>
           <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Encuentra tu ruta mensual desde tu localidad a Madrid, rápido y sin registro.

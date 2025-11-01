@@ -168,26 +168,81 @@ class FirebaseAuthService {
     try {
       if (Capacitor.isNativePlatform()) {
         // Móvil nativo
+        console.log('🔵 Iniciando login con Google en plataforma nativa...');
         const result = await FirebaseAuthentication.signInWithGoogle({
           webClientId: '754938560838-e9qdg9aqgi1i3oaipcf2pvkkr4nj8a7u.apps.googleusercontent.com'
         });
-        if (!result.credential?.idToken) throw new Error('No se obtuvo idToken de Google');
-        const provider = new GoogleAuthProvider();
-        const firebaseCredential = GoogleAuthProvider.credential(result.credential.idToken);
+        
+        console.log('🔵 Resultado de Capacitor Firebase Auth:', result);
+        console.log('🔵 Credential:', result.credential);
+        console.log('🔵 ID Token:', result.credential?.idToken);
+        console.log('🔵 Access Token:', result.credential?.accessToken);
+        
+        if (!result.credential?.idToken) {
+          throw new Error('No se obtuvo idToken de Google');
+        }
+        
+        // Crear credencial de Firebase con idToken y accessToken si está disponible
+        const idToken = result.credential.idToken;
+        const accessToken = result.credential.accessToken;
+        
+        let firebaseCredential;
+        // GoogleAuthProvider.credential acepta idToken solo, o idToken + accessToken
+        // Si accessToken está presente y es válido, usarlo; si no, solo idToken
+        if (accessToken && typeof accessToken === 'string' && accessToken.length > 0) {
+          // Si tenemos accessToken válido, usarlo también (más completo)
+          console.log('🔵 Usando idToken + accessToken para credencial');
+          firebaseCredential = GoogleAuthProvider.credential(idToken, accessToken);
+        } else {
+          // Solo con idToken (suficiente para Firebase Auth)
+          console.log('🔵 Usando solo idToken para credencial');
+          firebaseCredential = GoogleAuthProvider.credential(idToken);
+        }
+        
+        console.log('🔵 Firebase credential creada:', firebaseCredential);
+        
         const signInResult = await signInWithCredential(auth, firebaseCredential);
         const user = signInResult.user;
+        console.log('🔵 Login exitoso, usuario:', user.email);
         return user;
       } else {
         // Web
+        console.log('🌐 Iniciando login con Google en web...');
+        
+        // Verificar que auth esté inicializado
+        if (!auth) {
+          throw new Error('Firebase Auth no está inicializado. Verifica la configuración.');
+        }
+        
         const provider = new GoogleAuthProvider();
         provider.addScope('email');
         provider.addScope('profile');
         provider.setCustomParameters({ prompt: 'select_account' });
-        const result = await signInWithPopup(auth, provider);
-        return result.user;
+        
+        console.log('🌐 Auth instance:', auth);
+        console.log('🌐 Auth current user before:', auth.currentUser);
+        console.log('🌐 Provider:', provider);
+        
+        try {
+          const result = await signInWithPopup(auth, provider);
+          console.log('🌐 Login exitoso, usuario:', result.user.email);
+          return result.user;
+        } catch (popupError: any) {
+          console.error('🌐 Error en signInWithPopup:', popupError);
+          
+          // Si falla signInWithPopup, podría ser problema de dominio o configuración
+          if (popupError.code === 'auth/unauthorized-domain') {
+            throw new Error('Este dominio no está autorizado en Firebase. Verifica compartalia.netlify.app en Firebase Console > Authentication > Settings > Authorized domains.');
+          }
+          
+          throw popupError;
+        }
       }
     } catch (error: any) {
-      console.error('Firebase Google login error:', error);
+      console.error('❌ Firebase Google login error:', error);
+      console.error('❌ Error code:', error?.code);
+      console.error('❌ Error message:', error?.message);
+      console.error('❌ Error stack:', error?.stack);
       
       // Handle specific error cases
       if (error.code === 'auth/popup-closed-by-user') {
@@ -198,6 +253,8 @@ class FirebaseAuthService {
         throw new Error('Dominio no autorizado. Contacta al administrador.');
       } else if (error.code === 'auth/operation-not-allowed') {
         throw new Error('Google Sign-In no está habilitado. Contacta al administrador.');
+      } else if (error.code === 'auth/argument-error') {
+        throw new Error('Error en los argumentos de autenticación. Verifica la configuración de Firebase.');
       } else {
         throw new Error(error.message || 'Error al iniciar sesión con Google');
       }
