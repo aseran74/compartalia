@@ -64,14 +64,10 @@ export function useAuth() {
       console.log('Current user before login:', user.value);
       console.log('Current profile before login:', userProfile.value);
       
-      // En móvil (Capacitor), usar flujo Supabase + deep link
-      if (Capacitor.isNativePlatform()) {
-        console.log('Using Supabase OAuth deep link (native)');
-        await supabaseAuthService.loginWithGoogle();
-      } else {
-        console.log('Using Firebase popup (web)');
-        await firebaseAuthService.loginWithGoogle();
-      }
+      // Usar Firebase para todas las plataformas (web y móvil nativo)
+      // firebaseAuthService ya maneja la diferencia entre web y móvil
+      console.log('Using Firebase Google login (universal)');
+      await firebaseAuthService.loginWithGoogle();
       
       // Update local state
       user.value = firebaseAuthService.getCurrentUser();

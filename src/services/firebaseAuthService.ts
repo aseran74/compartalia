@@ -168,12 +168,14 @@ class FirebaseAuthService {
     try {
       if (Capacitor.isNativePlatform()) {
         // Móvil nativo
-        const { credential } = await FirebaseAuthentication.signInWithGoogle();
-        if (!credential?.idToken) throw new Error('No se obtuvo idToken de Google');
+        const result = await FirebaseAuthentication.signInWithGoogle({
+          webClientId: '754938560838-e9qdg9aqgi1i3oaipcf2pvkkr4nj8a7u.apps.googleusercontent.com'
+        });
+        if (!result.credential?.idToken) throw new Error('No se obtuvo idToken de Google');
         const provider = new GoogleAuthProvider();
-        const firebaseCredential = GoogleAuthProvider.credential(credential.idToken);
-        const result = await signInWithCredential(auth, firebaseCredential);
-        const user = result.user;
+        const firebaseCredential = GoogleAuthProvider.credential(result.credential.idToken);
+        const signInResult = await signInWithCredential(auth, firebaseCredential);
+        const user = signInResult.user;
         return user;
       } else {
         // Web

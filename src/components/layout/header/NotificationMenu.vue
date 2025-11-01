@@ -5,12 +5,10 @@
       @click="toggleDropdown"
     >
       <span
-        :class="{ hidden: !notifying, flex: notifying }"
-        class="absolute right-0 top-0.5 z-1 h-2 w-2 rounded-full bg-orange-400"
+        v-if="unreadCount > 0"
+        class="absolute right-0 top-0.5 z-1 h-5 w-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold"
       >
-        <span
-          class="absolute inline-flex w-full h-full bg-orange-400 rounded-full opacity-75 -z-1 animate-ping"
-        ></span>
+        {{ unreadCount > 9 ? '9+' : unreadCount }}
       </span>
       <svg
         class="fill-current"
@@ -58,21 +56,29 @@
         </button>
       </div>
 
-      <ul class="flex flex-col h-auto overflow-y-auto custom-scrollbar">
-        <li v-for="notification in notifications" :key="notification.id" @click="handleItemClick">
+      <div v-if="isLoading" class="flex items-center justify-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
+      </div>
+      <ul v-else-if="notifications.length > 0" class="flex flex-col h-auto overflow-y-auto custom-scrollbar">
+        <li v-for="notification in notifications" :key="notification.id" @click="handleItemClick(notification)">
           <a
-            class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+            class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5 cursor-pointer"
+            :class="{ 'bg-blue-50 dark:bg-blue-900/20': !notification.read }"
             href="#"
           >
-            <span class="relative block w-full h-10 rounded-full z-1 max-w-10">
-              <img :src="notification.userImage" alt="User" class="overflow-hidden rounded-full" />
+            <span class="relative block w-full h-10 rounded-full z-1 max-w-10 flex-shrink-0">
+              <img 
+                :src="notification.userImage || '/images/user/user-01.jpg'" 
+                alt="User" 
+                class="w-10 h-10 overflow-hidden rounded-full object-cover" 
+              />
               <span
                 :class="notification.status === 'online' ? 'bg-success-500' : 'bg-error-500'"
                 class="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white dark:border-gray-900"
               ></span>
             </span>
 
-            <span class="block">
+            <span class="block flex-1 min-w-0">
               <span class="mb-1.5 block text-theme-sm text-gray-500 dark:text-gray-400">
                 <span class="font-medium text-gray-800 dark:text-white/90">
                   {{ notification.userName }}
@@ -84,14 +90,19 @@
               </span>
 
               <span class="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                <span>{{ notification.type }}</span>
+                <span>{{ notification.type === 'message' ? 'Mensaje' : notification.type === 'booking_request' ? 'Reserva' : notification.type }}</span>
                 <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
                 <span>{{ notification.time }}</span>
               </span>
             </span>
+            
+            <span v-if="!notification.read" class="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></span>
           </a>
         </li>
       </ul>
+      <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+        No hay notificaciones
+      </div>
 
       <router-link
         to="/notificaciones"
@@ -106,89 +117,50 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { useNotifications } from '@/composables/useNotifications'
+import { supabase } from '@/config/supabase'
 
+const router = useRouter()
 const dropdownOpen = ref(false)
-const notifying = ref(true)
 const dropdownRef = ref(null)
+const currentUserId = ref<string | null>(null)
 
-const notifications = ref([
-  {
-    id: 1,
-    userName: 'María García',
-    userImage: '/images/user/user-02.jpg',
-    action: 'confirmó tu reserva en el viaje a',
-    project: 'Madrid Centro',
-    type: 'Viaje',
-    time: 'Hace 5 minutos',
-    status: 'online',
-  },
-  {
-    id: 2,
-    userName: 'Juan Pérez',
-    userImage: '/images/user/user-03.jpg',
-    action: 'canceló el viaje',
-    project: 'Alcalá de Henares → Madrid',
-    type: 'Viaje',
-    time: 'Hace 15 minutos',
-    status: 'offline',
-  },
-  {
-    id: 3,
-    userName: 'Ana López',
-    userImage: '/images/user/user-04.jpg',
-    action: 'envió un nuevo mensaje sobre',
-    project: 'tu reserva',
-    type: 'Mensaje',
-    time: 'Hace 1 hora',
-    status: 'online',
-  },
-  {
-    id: 4,
-    userName: 'Carlos Ruiz',
-    userImage: '/images/user/user-05.jpg',
-    action: 'publicó un nuevo viaje desde',
-    project: 'Getafe',
-    type: 'Nuevo viaje',
-    time: 'Hace 2 horas',
-    status: 'online',
-  },
-  {
-    id: 5,
-    userName: 'Laura Martínez',
-    userImage: '/images/user/user-06.jpg',
-    action: 'calificó tu viaje',
-    project: 'Madrid → Alcalá',
-    type: 'Calificación',
-    time: 'Hace 3 horas',
-    status: 'offline',
-  },
-  {
-    id: 6,
-    userName: 'Pedro Sánchez',
-    userImage: '/images/user/user-07.jpg',
-    action: 'aceptó tu solicitud de reserva para',
-    project: 'Madrid Centro',
-    type: 'Reserva',
-    time: 'Hace 1 día',
-    status: 'online',
-  },
-  {
-    id: 7,
-    userName: 'Sofía Torres',
-    userImage: '/images/user/user-08.jpg',
-    action: 'recordatorio: tu viaje es mañana a las',
-    project: '8:00 AM',
-    type: 'Recordatorio',
-    time: 'Hace 2 días',
-    status: 'online',
-  },
-])
+const { notifications, unreadCount, isLoading, loadNotifications, markAsRead, subscribeToNotifications, unsubscribe } = useNotifications()
+
+// Mostrar indicador si hay notificaciones no leídas
+const notifying = computed(() => unreadCount.value > 0)
+
+// Obtener usuario actual
+const getCurrentUser = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    currentUserId.value = user?.id || null
+    
+    if (user?.id) {
+      await loadNotifications(user.id)
+      subscribeToNotifications(user.id)
+    }
+  } catch (error) {
+    console.error('Error obteniendo usuario:', error)
+  }
+}
+
+// Escuchar cambios de autenticación
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUserId.value = session.user.id
+    await loadNotifications(session.user.id)
+    subscribeToNotifications(session.user.id)
+  } else {
+    currentUserId.value = null
+    unsubscribe()
+  }
+})
 
 const toggleDropdown = () => {
   dropdownOpen.value = !dropdownOpen.value
-  notifying.value = false
 }
 
 const closeDropdown = () => {
@@ -201,23 +173,33 @@ const handleClickOutside = (event) => {
   }
 }
 
-const handleItemClick = (event) => {
+const handleItemClick = async (notification) => {
   event.preventDefault()
-  // Handle the item click action here
-  console.log('Notification item clicked')
+  
+  // Marcar como leída
+  await markAsRead(notification.id)
+  
+  // Navegar según el tipo de notificación
+  if (notification.type === 'message') {
+    router.push(`/carpooling/mensajeria?tripId=${notification.relatedId}`)
+  } else if (notification.type === 'booking_request') {
+    router.push(`/carpooling/my-trips?bookingId=${notification.id.replace('booking_', '')}`)
+  }
+  
   closeDropdown()
 }
 
 const handleViewAllClick = () => {
-  // El router-link ya maneja la navegación
   closeDropdown()
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
+  await getCurrentUser()
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  unsubscribe()
 })
 </script>

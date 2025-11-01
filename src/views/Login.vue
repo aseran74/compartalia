@@ -173,11 +173,28 @@ const handleGoogleLogin = async () => {
   isLoading.value = true
   
   try {
+    console.log('=== INICIANDO LOGIN CON GOOGLE ===')
     await loginWithGoogle()
+    console.log('Login con Google exitoso, redirigiendo...')
     router.push('/dashboard')
   } catch (error: any) {
-    console.error('Google login error:', error)
-    errorMessage.value = error.message || 'Error al iniciar sesión con Google'
+    console.error('=== ERROR EN LOGIN CON GOOGLE ===')
+    console.error('Error completo:', error)
+    console.error('Error code:', error?.code)
+    console.error('Error message:', error?.message)
+    
+    // Mensajes de error más específicos
+    if (error?.code === 'auth/operation-not-allowed') {
+      errorMessage.value = 'Google Sign-In no está habilitado en Firebase. Contacta al administrador o habilita Google en Firebase Console > Authentication > Sign-in method.'
+    } else if (error?.code === 'auth/unauthorized-domain') {
+      errorMessage.value = 'Este dominio no está autorizado. Verifica la configuración en Firebase Console > Authentication > Settings > Authorized domains.'
+    } else if (error?.code === 'auth/popup-blocked') {
+      errorMessage.value = 'El popup fue bloqueado por el navegador. Por favor, permite popups para este sitio.'
+    } else if (error?.code === 'auth/popup-closed-by-user') {
+      errorMessage.value = 'El popup fue cerrado. Por favor, intenta de nuevo.'
+    } else {
+      errorMessage.value = error?.message || 'Error al iniciar sesión con Google. Verifica la configuración de Firebase.'
+    }
   } finally {
     isLoading.value = false
   }
