@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { initializeAuth, indexedDBLocalPersistence, getAuth } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
@@ -17,25 +17,35 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Authentication with persistent storage suitable for WebView/Capacitor
-// Fallback a getAuth si ya está inicializado por alguna razón
+// Initialize Firebase Authentication
+// Usar getAuth directamente para mejor compatibilidad en todos los entornos (web, Netlify, Android)
 let authInstance;
 try {
-  authInstance = initializeAuth(app, {
-    persistence: indexedDBLocalPersistence,
-  });
-} catch (e) {
   authInstance = getAuth(app);
+  // Configure auth settings for better Google Sign-In support
+  if (authInstance) {
+    authInstance.useDeviceLanguage();
+    console.log('✅ Firebase Auth inicializado correctamente');
+  }
+} catch (error) {
+  console.error('❌ Error inicializando Firebase Auth:', error);
+  throw error;
 }
 
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = authInstance;
 
-// Configure auth settings for better Google Sign-In support
-auth.useDeviceLanguage();
-
-// Initialize Analytics (only in browser)
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+// Initialize Analytics (only in browser and if available)
+let analyticsInstance = null;
+try {
+  if (typeof window !== 'undefined' && window.navigator) {
+    analyticsInstance = getAnalytics(app);
+    console.log('✅ Firebase Analytics inicializado');
+  }
+} catch (error) {
+  console.warn('⚠️ Firebase Analytics no disponible (normal en SSR o algunos entornos):', error);
+}
+export const analytics = analyticsInstance;
 
 // Debug function to check Firebase configuration
 export const debugFirebaseConfig = () => {
