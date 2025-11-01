@@ -78,7 +78,7 @@
             
             <!-- Panel de filtros móvil -->
             <div v-if="showFiltersMobile" class="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden">
-              <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-boxdark rounded-t-lg shadow-lg max-h-[80vh] overflow-y-auto">
+              <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-boxdark rounded-t-lg shadow-lg max-h-[85vh] overflow-y-auto pb-20">
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                   <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-black dark:text-white">
@@ -95,7 +95,7 @@
                   </div>
                 </div>
                 
-                <div class="p-4">
+                <div class="p-4 pb-6">
                   <!-- Usar el mismo formulario que funciona -->
                   <form @submit.prevent="searchTrips" class="space-y-4">
                     <!-- Sección de Origen -->
