@@ -1579,8 +1579,18 @@ const showResultsOnMap = async (results: SearchResult[]) => {
   }
   
   console.log(`✅ Mapa verificado y listo. Procesando ${results.length} resultados...`)
+  console.log(`📋 Lista completa de resultados a procesar:`)
+  results.forEach((r, idx) => {
+    if (r && r.trip) {
+      console.log(`   ${idx + 1}. ${r.trip.origin_name} → ${r.trip.destination_name} (ID: ${r.trip.id})`)
+    } else {
+      console.warn(`   ${idx + 1}. ⚠️ Resultado inválido:`, r)
+    }
+  })
   
   // Crear marcadores para cada resultado
+  let processedCount = 0
+  let errorCount = 0
   for (let i = 0; i < results.length; i++) {
     const result = results[i]
     if (!result || !result.trip) {
@@ -1798,18 +1808,34 @@ const showResultsOnMap = async (results: SearchResult[]) => {
           console.log(`✅ Viaje ${i + 1}: Línea recta dibujada en el mapa correcto`)
         }
       }
+      
+      processedCount++
+      console.log(`✅ Viaje ${i + 1}/${results.length} completado exitosamente`)
     } catch (error) {
+      errorCount++
       console.error(`❌ Error procesando viaje ${i + 1}:`, error)
+      console.error(`   Error detalle:`, error.message || error)
+      console.error(`   Stack:`, error.stack)
       // Continuar con el siguiente viaje aunque este falle
+      console.log(`   ⏭️ Continuando con el siguiente viaje...`)
       continue
     }
   }
   
   console.log(`\n📊 ========== RESUMEN FINAL ==========`)
-  console.log(`✅ Total viajes procesados: ${results.length}`)
+  console.log(`✅ Total viajes a procesar: ${results.length}`)
+  console.log(`✅ Total viajes procesados exitosamente: ${processedCount}`)
+  console.log(`❌ Total viajes con errores: ${errorCount}`)
   console.log(`✅ Total marcadores creados: ${currentMarkers.length}`)
   console.log(`✅ Total rutas creadas: ${currentPolylines.length}`)
   console.log(`📍 Mapa usado: ${isMobile ? 'MÓVIL' : 'DESKTOP'}`)
+  
+  // Verificar que se procesaron todos los resultados
+  const expectedMarkers = results.length * 2 // 2 marcadores por viaje (origen + destino)
+  if (currentMarkers.length < expectedMarkers) {
+    console.warn(`⚠️ ADVERTENCIA: Se esperaban ${expectedMarkers} marcadores (2 por viaje), pero solo se crearon ${currentMarkers.length}`)
+    console.warn(`   Diferencia: ${expectedMarkers - currentMarkers.length} marcadores faltantes`)
+  }
   
   // Verificar cuántos marcadores están realmente visibles en el mapa
   const visibleMarkers = currentMarkers.filter(m => {
