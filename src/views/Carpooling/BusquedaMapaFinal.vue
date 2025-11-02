@@ -21,15 +21,57 @@
                 Encuentra viajes usando el mapa interactivo
               </p>
             </div>
-            <button
-              @click="$router.go(-1)"
-              class="flex items-center space-x-2 rounded-md border border-stroke px-4 py-2 text-sm font-medium text-body-color hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-800"
+            <div class="flex items-center gap-2">
+              <!-- Enlaces rápidos -->
+              <router-link
+                to="/busqueda-express"
+                class="hidden sm:flex items-center space-x-2 rounded-md border border-green-600 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-100 dark:border-green-500 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30"
+              >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span>Búsqueda Express</span>
+              </router-link>
+              <router-link
+                to="/dashboard"
+                class="hidden sm:flex items-center space-x-2 rounded-md border border-blue-600 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 dark:border-blue-500 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
+              >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span>Dashboard</span>
+              </router-link>
+              <button
+                @click="$router.go(-1)"
+                class="flex items-center space-x-2 rounded-md border border-stroke px-4 py-2 text-sm font-medium text-body-color hover:bg-gray-50 dark:border-strokedark dark:hover:bg-gray-800"
+              >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <span>Volver</span>
+              </button>
+            </div>
+          </div>
+          <!-- Enlaces móviles -->
+          <div class="sm:hidden mt-4 flex gap-2">
+            <router-link
+              to="/busqueda-express"
+              class="flex-1 flex items-center justify-center space-x-2 rounded-md border border-green-600 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 hover:bg-green-100"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
               </svg>
-              <span>Volver</span>
-            </button>
+              <span>Express</span>
+            </router-link>
+            <router-link
+              to="/dashboard"
+              class="flex-1 flex items-center justify-center space-x-2 rounded-md border border-blue-600 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-700 hover:bg-blue-100"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+              <span>Dashboard</span>
+            </router-link>
           </div>
         </div>
 
@@ -1268,15 +1310,29 @@ const showResultsOnMap = async (results: SearchResult[]) => {
   }
   
   // Determinar qué mapa usar basado en el tamaño de pantalla
-  const isMobile = window.innerWidth < 1024
-  const map = isMobile ? mapMobile : mapDesktop
+  // Usar una función helper que siempre verifica el tamaño actual
+  const getCurrentMap = () => {
+    const currentIsMobile = window.innerWidth < 1024
+    const map = currentIsMobile ? mapMobile : mapDesktop
+    
+    if (!map) {
+      console.error('❌ Mapa no inicializado después de verificación.')
+      console.error('📱 Mapa móvil:', mapMobile ? '✅ Inicializado' : '❌ No inicializado')
+      console.error('🖥️ Mapa desktop:', mapDesktop ? '✅ Inicializado' : '❌ No inicializado')
+      console.error('📏 Ancho actual:', window.innerWidth)
+      return null
+    }
+    
+    console.log('✅ Usando mapa:', currentIsMobile ? 'móvil' : 'desktop', map)
+    return { map, isMobile: currentIsMobile }
+  }
   
-  if (!map) {
-    console.error('❌ Mapa no inicializado después de verificación. Móvil:', mapMobile, 'Desktop:', mapDesktop)
+  const mapInfo = getCurrentMap()
+  if (!mapInfo) {
     return
   }
   
-  console.log('✅ Usando mapa:', isMobile ? 'móvil' : 'desktop', map)
+  const { map, isMobile } = mapInfo
 
   // Limpiar marcadores anteriores
   clearMapMarkers()
@@ -1324,6 +1380,10 @@ const showResultsOnMap = async (results: SearchResult[]) => {
   ]
 
   console.log(`🗺️ Creando marcadores para ${results.length} viajes...`)
+  console.log(`📍 Mapa seleccionado: ${isMobile ? 'MÓVIL' : 'DESKTOP'}`)
+  console.log(`📍 Instancia mapa móvil:`, mapMobile)
+  console.log(`📍 Instancia mapa desktop:`, mapDesktop)
+  console.log(`📍 Mapa que se usará:`, map)
   
   // Crear marcadores para cada resultado
   for (let i = 0; i < results.length; i++) {
@@ -1332,6 +1392,7 @@ const showResultsOnMap = async (results: SearchResult[]) => {
     const routeColor = routeColors[i % routeColors.length]
     
     console.log(`📍 Procesando viaje ${i + 1}/${results.length}: ${trip.origin_name} → ${trip.destination_name}`)
+    console.log(`📍 Coordenadas: origen (${trip.origin_lat}, ${trip.origin_lng}), destino (${trip.destination_lat}, ${trip.destination_lng})`)
     
     try {
       // Obtener información del conductor
@@ -1362,7 +1423,14 @@ const showResultsOnMap = async (results: SearchResult[]) => {
         }
       })
       currentMarkers.push(originMarker)
-      console.log(`✅ Marcador origen ${i + 1} creado`)
+      console.log(`✅ Marcador origen ${i + 1} creado y agregado al mapa ${isMobile ? 'móvil' : 'desktop'}`)
+      
+      // Verificar que el marcador esté visible
+      if (!originMarker.getMap()) {
+        console.error(`❌ ERROR: Marcador origen ${i + 1} NO está en el mapa!`)
+      } else {
+        console.log(`✅ Marcador origen ${i + 1} está visible en el mapa`)
+      }
 
       // Crear InfoWindow con la card del viaje
       const cardContent = createTripCardContent(result)
@@ -1499,15 +1567,43 @@ const showResultsOnMap = async (results: SearchResult[]) => {
   }
   
   console.log(`✅ Procesados ${results.length} viajes. Marcadores: ${currentMarkers.length}, Rutas: ${currentPolylines.length}`)
+  
+  // Verificar cuántos marcadores están realmente visibles en el mapa
+  const visibleMarkers = currentMarkers.filter(m => m.getMap() !== null).length
+  console.log(`✅ Marcadores visibles en el mapa: ${visibleMarkers}/${currentMarkers.length}`)
+  
+  if (visibleMarkers < currentMarkers.length) {
+    console.warn(`⚠️ ADVERTENCIA: ${currentMarkers.length - visibleMarkers} marcadores NO están visibles en el mapa`)
+  }
 
   // Ajustar la vista para mostrar todos los marcadores
-  if (results.length > 0) {
+  if (results.length > 0 && visibleMarkers > 0) {
     const bounds = new google.maps.LatLngBounds()
-    results.forEach(result => {
-      bounds.extend({ lat: result.trip.origin_lat, lng: result.trip.origin_lng })
-      bounds.extend({ lat: result.trip.destination_lat, lng: result.trip.destination_lng })
+    
+    // Solo incluir marcadores que estén visibles
+    currentMarkers.forEach(marker => {
+      if (marker.getMap()) {
+        const position = marker.getPosition()
+        if (position) {
+          bounds.extend(position)
+        }
+      }
     })
-    map.fitBounds(bounds)
+    
+    if (!bounds.isEmpty()) {
+      // Añadir padding para que los marcadores no queden en el borde
+      const padding = isMobile ? 50 : 100
+      map.fitBounds(bounds, {
+        top: padding,
+        right: padding,
+        bottom: padding,
+        left: padding
+      })
+      
+      console.log(`✅ Vista ajustada para mostrar ${visibleMarkers} marcadores visibles`)
+    } else {
+      console.warn('⚠️ No hay marcadores visibles para ajustar la vista')
+    }
   }
 }
 
