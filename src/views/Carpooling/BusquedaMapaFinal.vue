@@ -1797,15 +1797,12 @@ const showResultsOnMap = async (results: SearchResult[]) => {
       // Usar Routes API (New) ahora que está habilitada
       console.log(`🚀 Viaje ${i + 1}/${results.length}: Calculando ruta...`)
       
-      // Procesar la ruta en paralelo sin bloquear el bucle principal
-      // Usar Promise para que no bloquee otros resultados
-      const processRoute = async () => {
-        try {
-          const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
-          const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
-          
-          const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
-          console.log(`✅ Viaje ${i + 1}: Ruta calculada exitosamente`)
+      try {
+        const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
+        const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
+        
+        const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
+        console.log(`✅ Viaje ${i + 1}: Ruta calculada exitosamente`)
         
         // Dibujar la ruta en el mapa con color único
         let routePolyline
@@ -1879,15 +1876,8 @@ const showResultsOnMap = async (results: SearchResult[]) => {
           const isOnCorrectMap = polylineMap === map
           console.log(`✅ Viaje ${i + 1}: Ruta dibujada ${isOnCorrectMap ? 'en el mapa correcto' : 'EN EL MAPA INCORRECTO'} (color: ${routeColor})`)
         }
-        } catch (routeError) {
-          console.error(`❌ Viaje ${i + 1}: Error procesando ruta:`, routeError)
-          throw routeError
-        }
-      }
-      
-      // Ejecutar async pero no esperar - dibujar línea recta inmediatamente
-      processRoute().catch((error) => {
-        console.error(`❌ Viaje ${i + 1}: Error calculando ruta con Routes API:`, error)
+      } catch (routeError) {
+        console.error(`❌ Viaje ${i + 1}: Error calculando ruta con Routes API:`, routeError)
         console.log(`⚠️ Viaje ${i + 1}: Usando fallback a línea recta`)
         
         // Fallback a línea recta con color único
