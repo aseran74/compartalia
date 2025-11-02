@@ -194,10 +194,10 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { HybridTripService, type SearchResult } from '@/services/hybridTripService'
+import { HybridTripService } from '@/services/hybridTripService'
 import { GeolocationService } from '@/services/geolocation'
 import AutocompleteInput from '@/components/AutocompleteInput.vue'
-import { SimpleAutocompleteService, type AutocompleteSuggestion } from '@/services/simpleAutocompleteService'
+import { SimpleAutocompleteService } from '@/services/simpleAutocompleteService'
 
 const router = useRouter()
 
