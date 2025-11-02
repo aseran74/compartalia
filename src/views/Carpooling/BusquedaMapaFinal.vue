@@ -1080,12 +1080,37 @@ let currentInfoWindows: google.maps.InfoWindow[] = []
 
 // Función para limpiar marcadores anteriores
 const clearMapMarkers = () => {
-  currentMarkers.forEach(marker => marker.setMap(null))
-  currentPolylines.forEach(polyline => polyline.setMap(null))
-  currentInfoWindows.forEach(infoWindow => infoWindow.close())
+  console.log(`   Eliminando ${currentMarkers.length} marcadores del mapa...`)
+  currentMarkers.forEach((marker, idx) => {
+    try {
+      marker.setMap(null)
+    } catch (e) {
+      console.warn(`   ⚠️ Error eliminando marcador ${idx}:`, e)
+    }
+  })
+  
+  console.log(`   Eliminando ${currentPolylines.length} rutas del mapa...`)
+  currentPolylines.forEach((polyline, idx) => {
+    try {
+      polyline.setMap(null)
+    } catch (e) {
+      console.warn(`   ⚠️ Error eliminando ruta ${idx}:`, e)
+    }
+  })
+  
+  console.log(`   Cerrando ${currentInfoWindows.length} info windows...`)
+  currentInfoWindows.forEach((infoWindow, idx) => {
+    try {
+      infoWindow.close()
+    } catch (e) {
+      console.warn(`   ⚠️ Error cerrando info window ${idx}:`, e)
+    }
+  })
+  
   currentMarkers = []
   currentPolylines = []
   currentInfoWindows = []
+  console.log(`   ✅ Todos los elementos limpiados correctamente`)
 }
 
 // Función para mostrar un viaje específico en el mapa
@@ -1616,11 +1641,19 @@ const showResultsOnMap = async (results: SearchResult[]) => {
         }
       }
       
+      // Ajustar posición ligeramente para evitar superposición completa
+      // Si hay múltiples viajes con las mismas coordenadas, los desplazamos ligeramente
+      const offsetLat = (i % 3) * 0.0001 // Desplazar ligeramente en latitud
+      const offsetLng = (Math.floor(i / 3)) * 0.0001 // Desplazar ligeramente en longitud
+      
       // Marcador de origen con icono personalizado más visible
       const originMarker = new google.maps.Marker({
-        position: { lat: trip.origin_lat, lng: trip.origin_lng },
+        position: { 
+          lat: trip.origin_lat + offsetLat, 
+          lng: trip.origin_lng + offsetLng 
+        },
         map: map,
-        title: `${trip.origin_name} → ${trip.destination_name}`,
+        title: `${trip.origin_name} → ${trip.destination_name} (Viaje ${i + 1})`,
         icon: {
           url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
           scaledSize: new google.maps.Size(32, 32)
@@ -1631,7 +1664,8 @@ const showResultsOnMap = async (results: SearchResult[]) => {
           color: 'white',
           fontSize: '12px',
           fontWeight: 'bold'
-        }
+        },
+        zIndex: 1000 + i // Asegurar que los marcadores más recientes estén arriba
       })
       currentMarkers.push(originMarker)
       
@@ -1670,11 +1704,14 @@ const showResultsOnMap = async (results: SearchResult[]) => {
         infoWindow.open(map, originMarker)
       })
 
-      // Marcador de destino
+      // Marcador de destino (también con desplazamiento)
       const destinationMarker = new google.maps.Marker({
-        position: { lat: trip.destination_lat, lng: trip.destination_lng },
+        position: { 
+          lat: trip.destination_lat + offsetLat, 
+          lng: trip.destination_lng + offsetLng 
+        },
         map: map,
-        title: `Destino: ${trip.destination_name}`,
+        title: `Destino: ${trip.destination_name} (Viaje ${i + 1})`,
         icon: {
           url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
           scaledSize: new google.maps.Size(24, 24)
@@ -1684,7 +1721,8 @@ const showResultsOnMap = async (results: SearchResult[]) => {
           color: 'white',
           fontSize: '10px',
           fontWeight: 'bold'
-        }
+        },
+        zIndex: 1000 + i // Asegurar que los marcadores más recientes estén arriba
       })
       currentMarkers.push(destinationMarker)
       
