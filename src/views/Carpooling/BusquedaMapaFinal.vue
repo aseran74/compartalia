@@ -1311,103 +1311,194 @@ const showResultsOnMap = async (results: SearchResult[]) => {
     router.push(`/viaje/${tripId}`)
   }
 
+  // Colores diferentes para cada ruta (para diferenciarlas visualmente)
+  const routeColors = [
+    '#3B82F6', // Azul
+    '#10B981', // Verde
+    '#F59E0B', // Amarillo
+    '#EF4444', // Rojo
+    '#8B5CF6', // Morado
+    '#EC4899', // Rosa
+    '#06B6D4', // Cyan
+    '#F97316'  // Naranja
+  ]
+
+  console.log(`🗺️ Creando marcadores para ${results.length} viajes...`)
+  
   // Crear marcadores para cada resultado
-  for (const result of results) {
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i]
     const trip = result.trip
+    const routeColor = routeColors[i % routeColors.length]
     
-    // Obtener información del conductor
-    if (!trip.profiles) {
-      const driverProfile = driverProfilesMap.get(trip.driver_id)
-      if (driverProfile) {
-        trip.profiles = driverProfile
-      } else {
-        trip.profiles = { name: 'Conductor', avatar_url: null }
-      }
-    }
-    
-    // Marcador de origen con icono personalizado más visible
-    const originMarker = new google.maps.Marker({
-      position: { lat: trip.origin_lat, lng: trip.origin_lng },
-      map: map,
-      title: `${trip.origin_name} → ${trip.destination_name}`,
-      icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
-        scaledSize: new google.maps.Size(32, 32)
-      },
-      animation: google.maps.Animation.DROP
-    })
-    currentMarkers.push(originMarker)
-
-    // Crear InfoWindow con la card del viaje
-    const cardContent = createTripCardContent(result)
-    const infoWindow = new google.maps.InfoWindow({
-      content: cardContent,
-      maxWidth: 320
-    })
-    currentInfoWindows.push(infoWindow)
-
-    // Mostrar InfoWindow al hacer click en el marcador
-    originMarker.addListener('click', () => {
-      // Cerrar otros info windows
-      currentInfoWindows.forEach(iw => iw.close())
-      infoWindow.open(map, originMarker)
-    })
-
-    // Marcador de destino
-    const destinationMarker = new google.maps.Marker({
-      position: { lat: trip.destination_lat, lng: trip.destination_lng },
-      map: map,
-      title: `Destino: ${trip.destination_name}`,
-      icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-        scaledSize: new google.maps.Size(24, 24)
-      }
-    })
-    currentMarkers.push(destinationMarker)
-
-    // Usar Routes API (New) ahora que está habilitada
-    console.log('🚀 INICIANDO CÁLCULO DE RUTA...')
-    console.log('📍 Viaje:', trip.origin_name, '→', trip.destination_name)
-    console.log('📍 Coordenadas origen:', trip.origin_lat, trip.origin_lng)
-    console.log('📍 Coordenadas destino:', trip.destination_lat, trip.destination_lng)
+    console.log(`📍 Procesando viaje ${i + 1}/${results.length}: ${trip.origin_name} → ${trip.destination_name}`)
     
     try {
-      console.log('🛣️ Calculando ruta con Routes API (New)...')
-      const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
-      const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
+      // Obtener información del conductor
+      if (!trip.profiles) {
+        const driverProfile = driverProfilesMap.get(trip.driver_id)
+        if (driverProfile) {
+          trip.profiles = driverProfile
+        } else {
+          trip.profiles = { name: 'Conductor', avatar_url: null }
+        }
+      }
       
-      console.log('📍 Coordenadas preparadas:', { originCoords, destinationCoords })
-      console.log('🔧 Llamando a routesApiService.calculateRoute...')
-      
-      const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
-      console.log('✅ Ruta calculada exitosamente:', routeInfo)
-      
-      // Dibujar la ruta en el mapa
-      console.log('🎨 Dibujando ruta en el mapa...')
-      const routePolyline = routesApiService.drawRouteOnMap(map, originCoords, destinationCoords, routeInfo.polyline)
-      currentPolylines.push(routePolyline)
-      
-      console.log('✅ Ruta real dibujada en el mapa')
-      
-    } catch (error) {
-      console.error('❌ Error calculando ruta con Routes API:', error)
-      console.log('⚠️ Usando fallback a línea recta (Routes API falló)')
-      
-      // Fallback a línea recta
-      const fallbackPolyline = new google.maps.Polyline({
-        path: [
-          { lat: trip.origin_lat, lng: trip.origin_lng },
-          { lat: trip.destination_lat, lng: trip.destination_lng }
-        ],
+      // Marcador de origen con icono personalizado más visible
+      const originMarker = new google.maps.Marker({
+        position: { lat: trip.origin_lat, lng: trip.origin_lng },
         map: map,
-        strokeColor: '#3B82F6',
-        strokeOpacity: 0.8,
-        strokeWeight: 4,
-        geodesic: true
+        title: `${trip.origin_name} → ${trip.destination_name}`,
+        icon: {
+          url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+          scaledSize: new google.maps.Size(32, 32)
+        },
+        animation: google.maps.Animation.DROP,
+        label: {
+          text: String(i + 1),
+          color: 'white',
+          fontSize: '12px',
+          fontWeight: 'bold'
+        }
       })
-      currentPolylines.push(fallbackPolyline)
+      currentMarkers.push(originMarker)
+      console.log(`✅ Marcador origen ${i + 1} creado`)
+
+      // Crear InfoWindow con la card del viaje
+      const cardContent = createTripCardContent(result)
+      const infoWindow = new google.maps.InfoWindow({
+        content: cardContent,
+        maxWidth: 320
+      })
+      currentInfoWindows.push(infoWindow)
+
+      // Mostrar InfoWindow al hacer click en el marcador
+      originMarker.addListener('click', () => {
+        // Cerrar otros info windows
+        currentInfoWindows.forEach(iw => iw.close())
+        infoWindow.open(map, originMarker)
+      })
+
+      // Marcador de destino
+      const destinationMarker = new google.maps.Marker({
+        position: { lat: trip.destination_lat, lng: trip.destination_lng },
+        map: map,
+        title: `Destino: ${trip.destination_name}`,
+        icon: {
+          url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+          scaledSize: new google.maps.Size(24, 24)
+        },
+        label: {
+          text: String(i + 1),
+          color: 'white',
+          fontSize: '10px',
+          fontWeight: 'bold'
+        }
+      })
+      currentMarkers.push(destinationMarker)
+      console.log(`✅ Marcador destino ${i + 1} creado`)
+
+      // Usar Routes API (New) ahora que está habilitada
+      console.log(`🚀 Viaje ${i + 1}/${results.length}: Calculando ruta...`)
+      
+      try {
+        const originCoords: Coords = { lat: trip.origin_lat, lng: trip.origin_lng }
+        const destinationCoords: Coords = { lat: trip.destination_lat, lng: trip.destination_lng }
+        
+        const routeInfo = await routesApiService.calculateRoute(originCoords, destinationCoords)
+        console.log(`✅ Viaje ${i + 1}: Ruta calculada exitosamente`)
+        
+        // Dibujar la ruta en el mapa con color único
+        let routePolyline
+        
+        if (routeInfo.polyline) {
+          // Decodificar la polyline manualmente
+          const decodePolyline = (encoded) => {
+            const points = []
+            let index = 0
+            const len = encoded.length
+            let lat = 0
+            let lng = 0
+            
+            while (index < len) {
+              let b, shift = 0, result = 0
+              do {
+                b = encoded.charCodeAt(index++) - 63
+                result |= (b & 0x1f) << shift
+                shift += 5
+              } while (b >= 0x20)
+              const dlat = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
+              lat += dlat
+              
+              shift = 0
+              result = 0
+              do {
+                b = encoded.charCodeAt(index++) - 63
+                result |= (b & 0x1f) << shift
+                shift += 5
+              } while (b >= 0x20)
+              const dlng = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
+              lng += dlng
+              
+              points.push({ lat: lat * 1e-5, lng: lng * 1e-5 })
+            }
+            return points
+          }
+          
+          const decodedPath = decodePolyline(routeInfo.polyline)
+          routePolyline = new google.maps.Polyline({
+            path: decodedPath,
+            map: map,
+            strokeColor: routeColor,
+            strokeOpacity: 0.7,
+            strokeWeight: 4,
+            geodesic: true
+          })
+        } else {
+          // Fallback a línea recta
+          routePolyline = new google.maps.Polyline({
+            path: [
+              { lat: trip.origin_lat, lng: trip.origin_lng },
+              { lat: trip.destination_lat, lng: trip.destination_lng }
+            ],
+            map: map,
+            strokeColor: routeColor,
+            strokeOpacity: 0.7,
+            strokeWeight: 4,
+            geodesic: true
+          })
+        }
+        
+        currentPolylines.push(routePolyline)
+        console.log(`✅ Viaje ${i + 1}: Ruta dibujada en el mapa (color: ${routeColor})`)
+        
+      } catch (error) {
+        console.error(`❌ Viaje ${i + 1}: Error calculando ruta con Routes API:`, error)
+        console.log(`⚠️ Viaje ${i + 1}: Usando fallback a línea recta`)
+        
+        // Fallback a línea recta con color único
+        const fallbackPolyline = new google.maps.Polyline({
+          path: [
+            { lat: trip.origin_lat, lng: trip.origin_lng },
+            { lat: trip.destination_lat, lng: trip.destination_lng }
+          ],
+          map: map,
+          strokeColor: routeColor,
+          strokeOpacity: 0.7,
+          strokeWeight: 4,
+          geodesic: true
+        })
+        currentPolylines.push(fallbackPolyline)
+        console.log(`✅ Viaje ${i + 1}: Línea recta dibujada`)
+      }
+    } catch (error) {
+      console.error(`❌ Error procesando viaje ${i + 1}:`, error)
+      // Continuar con el siguiente viaje aunque este falle
+      continue
     }
   }
+  
+  console.log(`✅ Procesados ${results.length} viajes. Marcadores: ${currentMarkers.length}, Rutas: ${currentPolylines.length}`)
 
   // Ajustar la vista para mostrar todos los marcadores
   if (results.length > 0) {

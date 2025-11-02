@@ -87,6 +87,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/busqueda-express',
+      name: 'BusquedaExpress',
+      component: () => import('../views/BusquedaExpress.vue'),
+      meta: {
+        title: 'Búsqueda Express - Compartalia',
+      },
+    },
+    {
       path: '/viaje/:id',
       name: 'TripDetails',
       component: () => import('../views/TripDetails.vue'),
