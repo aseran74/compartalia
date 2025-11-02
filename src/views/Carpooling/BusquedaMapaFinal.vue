@@ -996,24 +996,54 @@ const initializeMap = () => {
 
 // Función para asegurar que el mapa esté inicializado
 const ensureMapInitialized = async (): Promise<boolean> => {
-  const isMobile = window.innerWidth < 1024
-  const map = isMobile ? mapMobile : mapDesktop
+  const currentIsMobile = window.innerWidth < 1024
+  
+  console.log('🔍 Verificando inicialización del mapa...')
+  console.log('📏 Ancho de ventana:', window.innerWidth)
+  console.log('📱 Es móvil:', currentIsMobile)
+  console.log('📱 Mapa móvil existe:', !!mapMobile)
+  console.log('🖥️ Mapa desktop existe:', !!mapDesktop)
+  
+  const map = currentIsMobile ? mapMobile : mapDesktop
   
   if (map) {
+    console.log('✅ Mapa ya está inicializado')
     return true
   }
   
   // Si el mapa no está inicializado, intentar inicializarlo
   if (typeof window.google !== 'undefined' && window.google.maps) {
     console.log('🔄 El mapa no está inicializado, inicializando ahora...')
+    
+    // Verificar que el elemento del mapa exista
+    const mapElementId = currentIsMobile ? 'map-mobile' : 'map-desktop'
+    const mapElement = document.getElementById(mapElementId)
+    
+    console.log(`🔍 Buscando elemento: ${mapElementId}`)
+    console.log(`📄 Elemento encontrado:`, !!mapElement)
+    
+    if (!mapElement) {
+      console.error(`❌ El elemento ${mapElementId} no existe en el DOM`)
+      // Intentar esperar un poco más por si el DOM no está listo
+      await new Promise(resolve => setTimeout(resolve, 500))
+      const retryElement = document.getElementById(mapElementId)
+      if (!retryElement) {
+        console.error(`❌ El elemento ${mapElementId} sigue sin existir después de esperar`)
+        return false
+      }
+    }
+    
     initializeMap()
     
-    // Esperar un poco y verificar de nuevo
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    const mapAfter = isMobile ? mapMobile : mapDesktop
+    // Esperar un poco más para asegurar la inicialización
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    const mapAfter = currentIsMobile ? mapMobile : mapDesktop
+    console.log(`✅ Verificación final - Mapa ${currentIsMobile ? 'móvil' : 'desktop'} inicializado:`, !!mapAfter)
     return !!mapAfter
   }
   
+  console.error('❌ Google Maps no está disponible')
   return false
 }
 
@@ -1332,7 +1362,8 @@ const showResultsOnMap = async (results: SearchResult[]) => {
     return
   }
   
-  const { map, isMobile } = mapInfo
+  // Usar let para poder reasignar si es necesario
+  let { map, isMobile } = mapInfo
 
   // Limpiar marcadores anteriores
   clearMapMarkers()
@@ -1380,19 +1411,96 @@ const showResultsOnMap = async (results: SearchResult[]) => {
   ]
 
   console.log(`🗺️ Creando marcadores para ${results.length} viajes...`)
-  console.log(`📍 Mapa seleccionado: ${isMobile ? 'MÓVIL' : 'DESKTOP'}`)
+  console.log(`📍 Mapa seleccionado inicialmente: ${isMobile ? 'MÓVIL' : 'DESKTOP'}`)
   console.log(`📍 Instancia mapa móvil:`, mapMobile)
   console.log(`📍 Instancia mapa desktop:`, mapDesktop)
-  console.log(`📍 Mapa que se usará:`, map)
+  console.log(`📍 Mapa que se usará inicialmente:`, map)
+  console.log(`📍 Mapa actual tiene getCenter:`, map?.getCenter ? 'Sí' : 'No')
+  
+  // Verificación crítica: asegurar que el mapa sea el correcto
+  const currentIsMobile = window.innerWidth < 1024
+  const correctMap = currentIsMobile ? mapMobile : mapDesktop
+  
+  if (map !== correctMap) {
+    console.warn('⚠️ ADVERTENCIA: El mapa seleccionado NO coincide con el tamaño de pantalla actual!')
+    console.warn(`   Tamaño inicial: ${isMobile ? 'móvil' : 'desktop'}`)
+    console.warn(`   Tamaño actual: ${currentIsMobile ? 'móvil' : 'desktop'}`)
+    console.warn(`   Corrigiendo para usar el mapa correcto...`)
+    
+    if (!correctMap) {
+      console.error('❌ El mapa correcto tampoco está inicializado')
+      console.error('   Intentando inicializar el mapa correcto...')
+      
+      // Forzar inicialización del mapa correcto
+      const mapElementId = currentIsMobile ? 'map-mobile' : 'map-desktop'
+      const mapElement = document.getElementById(mapElementId)
+      
+      if (mapElement && typeof window.google !== 'undefined' && window.google.maps) {
+        if (currentIsMobile && !mapMobile) {
+          console.log('📱 Inicializando mapa móvil manualmente...')
+          mapMobile = new window.google.maps.Map(mapElement, {
+            center: { lat: 40.4168, lng: -3.7038 },
+            zoom: 10,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+          })
+          map = mapMobile
+          isMobile = true
+          console.log('✅ Mapa móvil inicializado manualmente')
+        } else if (!currentIsMobile && !mapDesktop) {
+          console.log('🖥️ Inicializando mapa desktop manualmente...')
+          mapDesktop = new window.google.maps.Map(mapElement, {
+            center: { lat: 40.4168, lng: -3.7038 },
+            zoom: 10,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+          })
+          map = mapDesktop
+          isMobile = false
+          console.log('✅ Mapa desktop inicializado manualmente')
+        }
+      }
+      
+      if (!map) {
+        console.error('❌ No se pudo inicializar el mapa correcto')
+        return
+      }
+    } else {
+      // Usar el mapa correcto
+      map = correctMap
+      isMobile = currentIsMobile
+      console.log(`✅ Corregido: Ahora usando mapa ${isMobile ? 'móvil' : 'desktop'}`)
+    }
+  }
+  
+  console.log(`📍 Mapa final que se usará: ${isMobile ? 'MÓVIL' : 'DESKTOP'}`, map)
+  
+  // Verificar que el mapa esté realmente disponible antes de procesar
+  if (!map) {
+    console.error('❌ ERROR FATAL: El mapa no está disponible después de todas las verificaciones')
+    return
+  }
+  
+  // Verificar que el mapa tenga el método setMap (es realmente una instancia de google.maps.Map)
+  if (typeof map.setCenter !== 'function') {
+    console.error('❌ ERROR: El mapa no es una instancia válida de google.maps.Map')
+    return
+  }
+  
+  console.log(`✅ Mapa verificado y listo. Procesando ${results.length} resultados...`)
   
   // Crear marcadores para cada resultado
   for (let i = 0; i < results.length; i++) {
     const result = results[i]
+    if (!result || !result.trip) {
+      console.warn(`⚠️ Resultado ${i + 1} es inválido, saltando...`)
+      continue
+    }
+    
     const trip = result.trip
     const routeColor = routeColors[i % routeColors.length]
     
-    console.log(`📍 Procesando viaje ${i + 1}/${results.length}: ${trip.origin_name} → ${trip.destination_name}`)
-    console.log(`📍 Coordenadas: origen (${trip.origin_lat}, ${trip.origin_lng}), destino (${trip.destination_lat}, ${trip.destination_lng})`)
+    console.log(`\n📍 [${i + 1}/${results.length}] Procesando viaje: ${trip.origin_name} → ${trip.destination_name}`)
+    console.log(`   Coordenadas: origen (${trip.origin_lat}, ${trip.origin_lng}), destino (${trip.destination_lat}, ${trip.destination_lng})`)
+    console.log(`   Mapa en uso: ${isMobile ? 'MÓVIL' : 'DESKTOP'}`, map)
     
     try {
       // Obtener información del conductor
@@ -1423,13 +1531,25 @@ const showResultsOnMap = async (results: SearchResult[]) => {
         }
       })
       currentMarkers.push(originMarker)
-      console.log(`✅ Marcador origen ${i + 1} creado y agregado al mapa ${isMobile ? 'móvil' : 'desktop'}`)
       
-      // Verificar que el marcador esté visible
-      if (!originMarker.getMap()) {
-        console.error(`❌ ERROR: Marcador origen ${i + 1} NO está en el mapa!`)
+      // Verificar inmediatamente que el marcador esté en el mapa
+      const markerMap = originMarker.getMap()
+      if (!markerMap) {
+        console.error(`❌ ERROR CRÍTICO: Marcador origen ${i + 1} NO está en el mapa!`)
+        console.error(`   Intentando agregar manualmente...`)
+        originMarker.setMap(map)
+        const retryMap = originMarker.getMap()
+        if (!retryMap) {
+          console.error(`   ❌ FALLO: Marcador origen ${i + 1} no se pudo agregar al mapa`)
+        } else {
+          console.log(`   ✅ ÉXITO: Marcador origen ${i + 1} agregado manualmente`)
+        }
       } else {
-        console.log(`✅ Marcador origen ${i + 1} está visible en el mapa`)
+        const isOnCorrectMap = markerMap === map
+        console.log(`✅ Marcador origen ${i + 1} creado y ${isOnCorrectMap ? 'en el mapa correcto' : 'EN EL MAPA INCORRECTO!'}`)
+        if (!isOnCorrectMap) {
+          console.error(`   ❌ ADVERTENCIA: Marcador en mapa diferente al esperado`)
+        }
       }
 
       // Crear InfoWindow con la card del viaje
@@ -1464,7 +1584,16 @@ const showResultsOnMap = async (results: SearchResult[]) => {
         }
       })
       currentMarkers.push(destinationMarker)
-      console.log(`✅ Marcador destino ${i + 1} creado`)
+      
+      // Verificar que el marcador de destino esté en el mapa
+      const destMarkerMap = destinationMarker.getMap()
+      if (!destMarkerMap) {
+        console.error(`❌ ERROR: Marcador destino ${i + 1} NO está en el mapa!`)
+        destinationMarker.setMap(map)
+      } else {
+        const isOnCorrectMap = destMarkerMap === map
+        console.log(`✅ Marcador destino ${i + 1} creado y ${isOnCorrectMap ? 'en el mapa correcto' : 'EN EL MAPA INCORRECTO!'}`)
+      }
 
       // Usar Routes API (New) ahora que está habilitada
       console.log(`🚀 Viaje ${i + 1}/${results.length}: Calculando ruta...`)
@@ -1538,7 +1667,16 @@ const showResultsOnMap = async (results: SearchResult[]) => {
         }
         
         currentPolylines.push(routePolyline)
-        console.log(`✅ Viaje ${i + 1}: Ruta dibujada en el mapa (color: ${routeColor})`)
+        
+        // Verificar que la ruta esté en el mapa
+        const polylineMap = routePolyline.getMap()
+        if (!polylineMap) {
+          console.error(`❌ ERROR: Ruta ${i + 1} NO está en el mapa!`)
+          routePolyline.setMap(map)
+        } else {
+          const isOnCorrectMap = polylineMap === map
+          console.log(`✅ Viaje ${i + 1}: Ruta dibujada ${isOnCorrectMap ? 'en el mapa correcto' : 'EN EL MAPA INCORRECTO'} (color: ${routeColor})`)
+        }
         
       } catch (error) {
         console.error(`❌ Viaje ${i + 1}: Error calculando ruta con Routes API:`, error)
@@ -1557,7 +1695,15 @@ const showResultsOnMap = async (results: SearchResult[]) => {
           geodesic: true
         })
         currentPolylines.push(fallbackPolyline)
-        console.log(`✅ Viaje ${i + 1}: Línea recta dibujada`)
+        
+        // Verificar que la línea recta esté en el mapa
+        const fallbackMap = fallbackPolyline.getMap()
+        if (!fallbackMap) {
+          console.error(`❌ ERROR: Línea recta ${i + 1} NO está en el mapa!`)
+          fallbackPolyline.setMap(map)
+        } else {
+          console.log(`✅ Viaje ${i + 1}: Línea recta dibujada en el mapa correcto`)
+        }
       }
     } catch (error) {
       console.error(`❌ Error procesando viaje ${i + 1}:`, error)
@@ -1566,15 +1712,51 @@ const showResultsOnMap = async (results: SearchResult[]) => {
     }
   }
   
-  console.log(`✅ Procesados ${results.length} viajes. Marcadores: ${currentMarkers.length}, Rutas: ${currentPolylines.length}`)
+  console.log(`\n📊 ========== RESUMEN FINAL ==========`)
+  console.log(`✅ Total viajes procesados: ${results.length}`)
+  console.log(`✅ Total marcadores creados: ${currentMarkers.length}`)
+  console.log(`✅ Total rutas creadas: ${currentPolylines.length}`)
+  console.log(`📍 Mapa usado: ${isMobile ? 'MÓVIL' : 'DESKTOP'}`)
   
   // Verificar cuántos marcadores están realmente visibles en el mapa
-  const visibleMarkers = currentMarkers.filter(m => m.getMap() !== null).length
-  console.log(`✅ Marcadores visibles en el mapa: ${visibleMarkers}/${currentMarkers.length}`)
+  const visibleMarkers = currentMarkers.filter(m => {
+    const markerMap = m.getMap()
+    return markerMap !== null && markerMap === map
+  }).length
+  
+  const visiblePolylines = currentPolylines.filter(p => {
+    const polyMap = p.getMap()
+    return polyMap !== null && polyMap === map
+  }).length
+  
+  console.log(`✅ Marcadores visibles en el mapa correcto: ${visibleMarkers}/${currentMarkers.length}`)
+  console.log(`✅ Rutas visibles en el mapa correcto: ${visiblePolylines}/${currentPolylines.length}`)
   
   if (visibleMarkers < currentMarkers.length) {
-    console.warn(`⚠️ ADVERTENCIA: ${currentMarkers.length - visibleMarkers} marcadores NO están visibles en el mapa`)
+    console.warn(`⚠️ ADVERTENCIA: ${currentMarkers.length - visibleMarkers} marcadores NO están visibles en el mapa correcto`)
+    // Intentar corregir los marcadores que no están en el mapa correcto
+    currentMarkers.forEach((marker, idx) => {
+      const markerMap = marker.getMap()
+      if (!markerMap || markerMap !== map) {
+        console.log(`   🔧 Corrigiendo marcador ${idx + 1}...`)
+        marker.setMap(map)
+      }
+    })
   }
+  
+  if (visiblePolylines < currentPolylines.length) {
+    console.warn(`⚠️ ADVERTENCIA: ${currentPolylines.length - visiblePolylines} rutas NO están visibles en el mapa correcto`)
+    // Intentar corregir las rutas que no están en el mapa correcto
+    currentPolylines.forEach((polyline, idx) => {
+      const polyMap = polyline.getMap()
+      if (!polyMap || polyMap !== map) {
+        console.log(`   🔧 Corrigiendo ruta ${idx + 1}...`)
+        polyline.setMap(map)
+      }
+    })
+  }
+  
+  console.log(`📊 ====================================\n`)
 
   // Ajustar la vista para mostrar todos los marcadores
   if (results.length > 0 && visibleMarkers > 0) {
