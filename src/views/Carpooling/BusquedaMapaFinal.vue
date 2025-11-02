@@ -642,6 +642,7 @@ import { useSidebar } from '@/composables/useSidebar'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import DatePicker from '@/components/common/DatePicker.vue'
+import { supabaseClean } from '@/config/supabaseClean'
 
 // Router y sidebar
 const router = useRouter()
@@ -827,8 +828,15 @@ const selectPredefinedDestination = (destination: any) => {
 // Función de búsqueda
 const searchTrips = async () => {
   if (!searchForm.origin || !searchForm.destination) {
+    console.warn('⚠️ Faltan origen o destino para la búsqueda')
     return
   }
+  
+  console.log('🔍 Iniciando búsqueda de viajes...', {
+    origin: searchForm.origin,
+    destination: searchForm.destination,
+    date: searchForm.date
+  })
   
   isSearching.value = true
   hasSearched.value = true
@@ -845,14 +853,20 @@ const searchTrips = async () => {
       }
     )
     
+    console.log('✅ Búsqueda completada. Resultados encontrados:', results.length)
     searchResults.value = results
-    console.log('Resultados de búsqueda:', results)
     
     // Mostrar resultados en el mapa
-    showResultsOnMap(results)
+    if (results.length > 0) {
+      console.log('🗺️ Mostrando resultados en el mapa...')
+      await showResultsOnMap(results)
+    } else {
+      console.log('⚠️ No se encontraron resultados para mostrar en el mapa')
+    }
   } catch (error) {
-    console.error('Error en búsqueda:', error)
+    console.error('❌ Error en búsqueda:', error)
     searchResults.value = []
+    // Mostrar el error al usuario si es necesario
   } finally {
     isSearching.value = false
   }
@@ -874,80 +888,128 @@ const resetForm = () => {
 // Inicialización del mapa
 let mapMobile: google.maps.Map | null = null
 let mapDesktop: google.maps.Map | null = null
+let mapInitializationAttempts = 0
+const MAX_INIT_ATTEMPTS = 20
 
 const initializeMap = () => {
+  mapInitializationAttempts++
+  
   // Esperar a que Google Maps esté cargado
   if (typeof window.google === 'undefined' || !window.google.maps) {
-    console.log('⏳ Esperando a que Google Maps se cargue...')
+    if (mapInitializationAttempts >= MAX_INIT_ATTEMPTS) {
+      console.error('❌ No se pudo cargar Google Maps después de varios intentos')
+      return
+    }
+    console.log(`⏳ Esperando a que Google Maps se cargue... (intento ${mapInitializationAttempts}/${MAX_INIT_ATTEMPTS})`)
     setTimeout(initializeMap, 500)
     return
   }
 
   console.log('🗺️ Inicializando mapas de Google Maps...')
 
-  // Inicializar mapa móvil
-  const mapMobileElement = document.getElementById('map-mobile')
-  if (mapMobileElement && !mapMobile) {
-    console.log('📱 Inicializando mapa móvil')
-    mapMobile = new window.google.maps.Map(mapMobileElement, {
-      center: { lat: 40.4168, lng: -3.7038 }, // Madrid
-      zoom: 10,
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      styles: [
-        {
-          featureType: 'poi',
-          elementType: 'labels',
-          stylers: [{ visibility: 'off' }]
-        }
-      ]
-    })
-    console.log('✅ Mapa móvil inicializado:', mapMobile)
-  }
+  try {
+    // Inicializar mapa móvil
+    const mapMobileElement = document.getElementById('map-mobile')
+    if (mapMobileElement && !mapMobile) {
+      console.log('📱 Inicializando mapa móvil')
+      mapMobile = new window.google.maps.Map(mapMobileElement, {
+        center: { lat: 40.4168, lng: -3.7038 }, // Madrid
+        zoom: 10,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      })
+      console.log('✅ Mapa móvil inicializado:', mapMobile)
+    }
 
-  // Inicializar mapa desktop
-  const mapDesktopElement = document.getElementById('map-desktop')
-  if (mapDesktopElement && !mapDesktop) {
-    console.log('🖥️ Inicializando mapa desktop')
-    mapDesktop = new window.google.maps.Map(mapDesktopElement, {
-      center: { lat: 40.4168, lng: -3.7038 }, // Madrid
-      zoom: 10,
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      styles: [
-        {
-          featureType: 'poi',
-          elementType: 'labels',
-          stylers: [{ visibility: 'off' }]
-        }
-      ]
-    })
-    console.log('✅ Mapa desktop inicializado:', mapDesktop)
-  }
+    // Inicializar mapa desktop
+    const mapDesktopElement = document.getElementById('map-desktop')
+    if (mapDesktopElement && !mapDesktop) {
+      console.log('🖥️ Inicializando mapa desktop')
+      mapDesktop = new window.google.maps.Map(mapDesktopElement, {
+        center: { lat: 40.4168, lng: -3.7038 }, // Madrid
+        zoom: 10,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      })
+      console.log('✅ Mapa desktop inicializado:', mapDesktop)
+    }
 
-  console.log('🎉 Mapas inicializados correctamente')
+    console.log('🎉 Mapas inicializados correctamente')
+  } catch (error) {
+    console.error('❌ Error inicializando mapas:', error)
+  }
 }
 
-// Variables para almacenar marcadores y líneas
+// Función para asegurar que el mapa esté inicializado
+const ensureMapInitialized = async (): Promise<boolean> => {
+  const isMobile = window.innerWidth < 1024
+  const map = isMobile ? mapMobile : mapDesktop
+  
+  if (map) {
+    return true
+  }
+  
+  // Si el mapa no está inicializado, intentar inicializarlo
+  if (typeof window.google !== 'undefined' && window.google.maps) {
+    console.log('🔄 El mapa no está inicializado, inicializando ahora...')
+    initializeMap()
+    
+    // Esperar un poco y verificar de nuevo
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    const mapAfter = isMobile ? mapMobile : mapDesktop
+    return !!mapAfter
+  }
+  
+  return false
+}
+
+// Variables para almacenar marcadores, líneas e info windows
 let currentMarkers: any[] = []
 let currentPolylines: any[] = []
+let currentInfoWindows: google.maps.InfoWindow[] = []
 
 // Función para limpiar marcadores anteriores
 const clearMapMarkers = () => {
   currentMarkers.forEach(marker => marker.setMap(null))
   currentPolylines.forEach(polyline => polyline.setMap(null))
+  currentInfoWindows.forEach(infoWindow => infoWindow.close())
   currentMarkers = []
   currentPolylines = []
+  currentInfoWindows = []
 }
 
 // Función para mostrar un viaje específico en el mapa
 const showTripOnMap = async (result: SearchResult) => {
   console.log('🗺️ Mostrando viaje en mapa:', result)
   
+  // Asegurar que el mapa esté inicializado
+  const mapInitialized = await ensureMapInitialized()
+  if (!mapInitialized) {
+    console.error('❌ No se pudo inicializar el mapa. Reintentando...')
+    setTimeout(() => {
+      showTripOnMap(result)
+    }, 1000)
+    return
+  }
+  
   // Determinar qué mapa usar basado en el tamaño de pantalla
   const isMobile = window.innerWidth < 1024
   const map = isMobile ? mapMobile : mapDesktop
   
   if (!map) {
-    console.warn('❌ Mapa no inicializado. Móvil:', mapMobile, 'Desktop:', mapDesktop)
+    console.error('❌ Mapa no inicializado después de verificación. Móvil:', mapMobile, 'Desktop:', mapDesktop)
     return
   }
   
@@ -958,16 +1020,62 @@ const showTripOnMap = async (result: SearchResult) => {
 
   const trip = result.trip
   
-  // Marcador de origen
+  // Obtener información del conductor si no está disponible
+  if (!trip.profiles && trip.driver_id) {
+    try {
+      const { data: profile } = await supabaseClean
+        .from('profiles')
+        .select('id, name, avatar_url')
+        .eq('id', trip.driver_id)
+        .single()
+      
+      if (profile) {
+        trip.profiles = {
+          name: profile.name,
+          avatar_url: profile.avatar_url
+        }
+      } else {
+        trip.profiles = { name: 'Conductor', avatar_url: null }
+      }
+    } catch (error) {
+      console.warn('⚠️ No se pudo cargar el perfil del conductor:', error)
+      trip.profiles = { name: 'Conductor', avatar_url: null }
+    }
+  }
+  
+  // Crear función global para abrir detalles (necesario para InfoWindow)
+  ;(window as any).openTripDetails = (tripId: string) => {
+    router.push(`/viaje/${tripId}`)
+  }
+  
+  // Marcador de origen con icono personalizado más visible
   const originMarker = new google.maps.Marker({
     position: { lat: trip.origin_lat, lng: trip.origin_lng },
     map: map,
-    title: `Origen: ${trip.origin_name}`,
+    title: `${trip.origin_name} → ${trip.destination_name}`,
     icon: {
-      url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
-    }
+      url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+      scaledSize: new google.maps.Size(32, 32)
+    },
+    animation: google.maps.Animation.DROP
   })
   currentMarkers.push(originMarker)
+
+  // Crear InfoWindow con la card del viaje
+  const cardContent = createTripCardContent(result)
+  const infoWindow = new google.maps.InfoWindow({
+    content: cardContent,
+    maxWidth: 320
+  })
+  currentInfoWindows.push(infoWindow)
+
+  // Mostrar InfoWindow automáticamente y al hacer click en el marcador
+  infoWindow.open(map, originMarker)
+  originMarker.addListener('click', () => {
+    // Cerrar otros info windows
+    currentInfoWindows.forEach(iw => iw.close())
+    infoWindow.open(map, originMarker)
+  })
 
   // Marcador de destino
   const destinationMarker = new google.maps.Marker({
@@ -975,7 +1083,8 @@ const showTripOnMap = async (result: SearchResult) => {
     map: map,
     title: `Destino: ${trip.destination_name}`,
     icon: {
-      url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+      url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+      scaledSize: new google.maps.Size(24, 24)
     }
   })
   currentMarkers.push(destinationMarker)
@@ -1032,38 +1141,217 @@ const showTripOnMap = async (result: SearchResult) => {
   console.log('✅ Viaje mostrado en el mapa:', trip.origin_name, '→', trip.destination_name)
 }
 
+// Función para crear el contenido HTML de la card del viaje
+const createTripCardContent = (result: SearchResult): string => {
+  const trip = result.trip
+  const driverInfo = trip.profiles || { name: 'Conductor', avatar_url: null }
+  const driverName = driverInfo.name || 'Conductor'
+  const driverAvatar = driverInfo.avatar_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(driverName) + '&background=3B82F6&color=fff&size=64'
+  
+  // Formatear fecha y hora
+  const departureDate = trip.departure_time ? new Date(trip.departure_time) : null
+  const formattedDate = departureDate ? departureDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : 'Fecha no disponible'
+  const formattedTime = departureDate ? departureDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
+  
+  // Precio
+  const price = trip.price_per_seat || 0
+  
+  // Asientos disponibles
+  const availableSeats = result.bookingInfo?.remaining_seats ?? trip.available_seats ?? 0
+  
+  return `
+    <div style="min-width: 280px; max-width: 320px; font-family: system-ui, -apple-system, sans-serif;">
+      <!-- Header de la card -->
+      <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); padding: 16px; border-radius: 8px 8px 0 0;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img 
+            src="${driverAvatar}" 
+            alt="${driverName}"
+            style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid white; object-fit: cover;"
+            onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(driverName)}&background=3B82F6&color=fff&size=64'"
+          />
+          <div style="flex: 1;">
+            <div style="color: white; font-weight: 600; font-size: 16px; margin-bottom: 2px;">
+              ${driverName}
+            </div>
+            <div style="color: rgba(255, 255, 255, 0.9); font-size: 12px;">
+              🚗 Conductor
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contenido de la card -->
+      <div style="padding: 16px; background: white;">
+        <!-- Ruta -->
+        <div style="margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span style="color: #10B981; font-weight: 600;">●</span>
+            <span style="font-size: 14px; color: #374151; font-weight: 500;">
+              ${trip.origin_name}
+            </span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; padding-left: 4px;">
+            <span style="color: #EF4444; font-weight: 600;">●</span>
+            <span style="font-size: 14px; color: #374151; font-weight: 500;">
+              ${trip.destination_name}
+            </span>
+          </div>
+        </div>
+        
+        <!-- Información adicional -->
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 12px; background: #F9FAFB; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: #6B7280;">📅 Fecha</span>
+            <span style="font-size: 13px; color: #111827; font-weight: 500;">${formattedDate}</span>
+          </div>
+          ${formattedTime ? `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: #6B7280;">🕐 Hora</span>
+            <span style="font-size: 13px; color: #111827; font-weight: 500;">${formattedTime}</span>
+          </div>
+          ` : ''}
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: #6B7280;">🪑 Asientos</span>
+            <span style="font-size: 13px; color: #111827; font-weight: 500;">${availableSeats} disponibles</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: #6B7280;">💰 Precio</span>
+            <span style="font-size: 16px; color: #10B981; font-weight: 600;">${price.toFixed(2)}€</span>
+          </div>
+        </div>
+        
+        <!-- Botón ver detalles -->
+        <button 
+          onclick="window.openTripDetails('${trip.id}')"
+          style="
+            width: 100%;
+            padding: 12px;
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+          "
+          onmouseover="this.style.background='#2563EB'"
+          onmouseout="this.style.background='#3B82F6'"
+        >
+          Ver Detalles del Viaje →
+        </button>
+      </div>
+    </div>
+  `
+}
+
 // Función para mostrar resultados en el mapa
 const showResultsOnMap = async (results: SearchResult[]) => {
-  console.log('Mostrando resultados en mapa:', results)
+  console.log('📊 Mostrando resultados en mapa:', results.length, 'resultados')
+  
+  // Verificar que haya resultados
+  if (!results || results.length === 0) {
+    console.warn('⚠️ No hay resultados para mostrar en el mapa')
+    return
+  }
+  
+  // Asegurar que el mapa esté inicializado
+  const mapInitialized = await ensureMapInitialized()
+  if (!mapInitialized) {
+    console.error('❌ No se pudo inicializar el mapa. Reintentando...')
+    // Reintentar después de un segundo
+    setTimeout(() => {
+      showResultsOnMap(results)
+    }, 1000)
+    return
+  }
   
   // Determinar qué mapa usar basado en el tamaño de pantalla
   const isMobile = window.innerWidth < 1024
   const map = isMobile ? mapMobile : mapDesktop
   
   if (!map) {
-    console.warn('Mapa no inicializado. Móvil:', mapMobile, 'Desktop:', mapDesktop)
+    console.error('❌ Mapa no inicializado después de verificación. Móvil:', mapMobile, 'Desktop:', mapDesktop)
     return
   }
   
-  console.log('Usando mapa:', isMobile ? 'móvil' : 'desktop', map)
+  console.log('✅ Usando mapa:', isMobile ? 'móvil' : 'desktop', map)
 
   // Limpiar marcadores anteriores
   clearMapMarkers()
+
+  // Obtener información del conductor para todos los viajes que no la tengan
+  const tripsNeedingDriverInfo = results.filter(r => !r.trip.profiles || !r.trip.profiles.name)
+  const driverIds = tripsNeedingDriverInfo.map(r => r.trip.driver_id).filter(Boolean)
+  
+  let driverProfilesMap = new Map()
+  if (driverIds.length > 0) {
+    try {
+      const { data: profiles, error } = await supabaseClean
+        .from('profiles')
+        .select('id, name, avatar_url')
+        .in('id', driverIds)
+      
+      if (!error && profiles) {
+        profiles.forEach(profile => {
+          driverProfilesMap.set(profile.id, {
+            name: profile.name,
+            avatar_url: profile.avatar_url
+          })
+        })
+      }
+    } catch (error) {
+      console.warn('Error obteniendo perfiles de conductores:', error)
+    }
+  }
+
+  // Crear función global para abrir detalles (necesario para InfoWindow)
+  ;(window as any).openTripDetails = (tripId: string) => {
+    router.push(`/viaje/${tripId}`)
+  }
 
   // Crear marcadores para cada resultado
   for (const result of results) {
     const trip = result.trip
     
-    // Marcador de origen
+    // Obtener información del conductor
+    if (!trip.profiles) {
+      const driverProfile = driverProfilesMap.get(trip.driver_id)
+      if (driverProfile) {
+        trip.profiles = driverProfile
+      } else {
+        trip.profiles = { name: 'Conductor', avatar_url: null }
+      }
+    }
+    
+    // Marcador de origen con icono personalizado más visible
     const originMarker = new google.maps.Marker({
       position: { lat: trip.origin_lat, lng: trip.origin_lng },
       map: map,
-      title: `Origen: ${trip.origin_name}`,
+      title: `${trip.origin_name} → ${trip.destination_name}`,
       icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
-      }
+        url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+        scaledSize: new google.maps.Size(32, 32)
+      },
+      animation: google.maps.Animation.DROP
     })
     currentMarkers.push(originMarker)
+
+    // Crear InfoWindow con la card del viaje
+    const cardContent = createTripCardContent(result)
+    const infoWindow = new google.maps.InfoWindow({
+      content: cardContent,
+      maxWidth: 320
+    })
+    currentInfoWindows.push(infoWindow)
+
+    // Mostrar InfoWindow al hacer click en el marcador
+    originMarker.addListener('click', () => {
+      // Cerrar otros info windows
+      currentInfoWindows.forEach(iw => iw.close())
+      infoWindow.open(map, originMarker)
+    })
 
     // Marcador de destino
     const destinationMarker = new google.maps.Marker({
@@ -1071,7 +1359,8 @@ const showResultsOnMap = async (results: SearchResult[]) => {
       map: map,
       title: `Destino: ${trip.destination_name}`,
       icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+        url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        scaledSize: new google.maps.Size(24, 24)
       }
     })
     currentMarkers.push(destinationMarker)
@@ -1136,7 +1425,33 @@ searchForm.date = today
 
 // Inicializar mapa cuando el componente se monte
 onMounted(() => {
-  // Esperar un poco para que el DOM esté listo
-  setTimeout(initializeMap, 500)
+  console.log('🔧 Componente montado, iniciando inicialización del mapa...')
+  
+  // Esperar a que el DOM esté listo
+  setTimeout(() => {
+    // Verificar si Google Maps ya está cargado
+    if (typeof window.google !== 'undefined' && window.google.maps) {
+      console.log('✅ Google Maps ya está cargado, inicializando mapas inmediatamente')
+      initializeMap()
+    } else {
+      console.log('⏳ Google Maps no está cargado aún, esperando...')
+      // Intentar inicializar con un delay
+      setTimeout(initializeMap, 500)
+      
+      // También escuchar cuando Google Maps se cargue completamente
+      const checkGoogleMaps = setInterval(() => {
+        if (typeof window.google !== 'undefined' && window.google.maps) {
+          console.log('✅ Google Maps detectado, inicializando mapas')
+          clearInterval(checkGoogleMaps)
+          initializeMap()
+        }
+      }, 500)
+      
+      // Limpiar el interval después de 10 segundos
+      setTimeout(() => {
+        clearInterval(checkGoogleMaps)
+      }, 10000)
+    }
+  }, 300)
 })
 </script>

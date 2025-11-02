@@ -125,7 +125,7 @@ import { supabase } from '@/config/supabase'
 const router = useRouter()
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
-const currentUserId = ref<string | null>(null)
+const currentUserId = ref(null)
 
 const { notifications, unreadCount, isLoading, loadNotifications, markAsRead, subscribeToNotifications, unsubscribe } = useNotifications()
 
@@ -174,8 +174,6 @@ const handleClickOutside = (event) => {
 }
 
 const handleItemClick = async (notification) => {
-  event.preventDefault()
-  
   // Marcar como leída
   await markAsRead(notification.id)
   
