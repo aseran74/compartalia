@@ -294,6 +294,64 @@
                       </button>
                     </div>
                   </form>
+
+                  <!-- Sección de Resultados -->
+                  <div v-if="hasSearched" class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <h3 class="mb-4 text-lg font-semibold text-black dark:text-white">
+                      📋 Resultados ({{ searchResults.length }})
+                    </h3>
+                    
+                    <div v-if="isSearching" class="text-center py-8">
+                      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Buscando viajes...</p>
+                    </div>
+                    
+                    <div v-else-if="searchResults.length === 0" class="text-center py-8">
+                      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709"/>
+                      </svg>
+                      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">No se encontraron viajes</p>
+                    </div>
+                    
+                    <div v-else class="space-y-3 max-h-96 overflow-y-auto">
+                      <div 
+                        v-for="(result, index) in searchResults" 
+                        :key="result.trip.id"
+                        class="rounded-lg border border-stroke bg-white p-4 shadow-sm hover:shadow-md transition-shadow dark:border-strokedark dark:bg-gray-800"
+                      >
+                        <div class="flex items-start justify-between mb-2">
+                          <div class="flex-1">
+                            <h4 class="font-semibold text-black dark:text-white text-sm">
+                              {{ result.trip.origin_name }} → {{ result.trip.destination_name }}
+                            </h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                              {{ new Date(result.trip.departure_time).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) }}
+                              {{ new Date(result.trip.departure_time).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) }}
+                            </p>
+                          </div>
+                          <span class="text-sm font-bold text-blue-600 dark:text-blue-400">
+                            {{ result.trip.price_per_seat }}€
+                          </span>
+                        </div>
+                        
+                        <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-3">
+                          <span class="flex items-center gap-1">
+                            🪑 {{ result.trip.available_seats || 0 }} asientos
+                          </span>
+                          <span v-if="result.trip.profiles?.name" class="flex items-center gap-1">
+                            👤 {{ result.trip.profiles.name }}
+                          </span>
+                        </div>
+                        
+                        <button 
+                          @click="showTripOnMap(result); showFiltersMobile = false"
+                          class="w-full rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 active:bg-blue-800"
+                        >
+                          🗺️ Mostrar en Mapa
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
