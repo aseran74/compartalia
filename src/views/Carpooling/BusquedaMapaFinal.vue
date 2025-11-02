@@ -950,42 +950,68 @@ const initializeMap = () => {
   console.log('🗺️ Inicializando mapas de Google Maps...')
 
   try {
-    // Inicializar mapa móvil
-    const mapMobileElement = document.getElementById('map-mobile')
-    if (mapMobileElement && !mapMobile) {
-      console.log('📱 Inicializando mapa móvil')
-      mapMobile = new window.google.maps.Map(mapMobileElement, {
-        center: { lat: 40.4168, lng: -3.7038 }, // Madrid
-        zoom: 10,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        styles: [
-          {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }]
-          }
-        ]
-      })
-      console.log('✅ Mapa móvil inicializado:', mapMobile)
+    const currentIsMobile = window.innerWidth < 1024
+    
+    // Inicializar mapa móvil SOLO si estamos en vista móvil o el elemento existe
+    if (currentIsMobile || !mapDesktop) {
+      const mapMobileElement = document.getElementById('map-mobile')
+      if (mapMobileElement && !mapMobile) {
+        // Verificar que el elemento tenga dimensiones
+        const rect = mapMobileElement.getBoundingClientRect()
+        console.log('📱 Elemento mapa móvil encontrado. Dimensiones:', rect.width, 'x', rect.height)
+        
+        if (rect.width > 0 && rect.height > 0) {
+          console.log('📱 Inicializando mapa móvil')
+          mapMobile = new window.google.maps.Map(mapMobileElement, {
+            center: { lat: 40.4168, lng: -3.7038 }, // Madrid
+            zoom: 10,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            styles: [
+              {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }]
+              }
+            ]
+          })
+          console.log('✅ Mapa móvil inicializado:', mapMobile)
+        } else {
+          console.warn('⚠️ Elemento mapa móvil tiene dimensiones 0, esperando...')
+          // Reintentar después de un delay
+          setTimeout(() => {
+            if (!mapMobile) {
+              initializeMap()
+            }
+          }, 500)
+        }
+      }
     }
 
-    // Inicializar mapa desktop
-    const mapDesktopElement = document.getElementById('map-desktop')
-    if (mapDesktopElement && !mapDesktop) {
-      console.log('🖥️ Inicializando mapa desktop')
-      mapDesktop = new window.google.maps.Map(mapDesktopElement, {
-        center: { lat: 40.4168, lng: -3.7038 }, // Madrid
-        zoom: 10,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        styles: [
-          {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }]
-          }
-        ]
-      })
-      console.log('✅ Mapa desktop inicializado:', mapDesktop)
+    // Inicializar mapa desktop SOLO si estamos en vista desktop o el elemento existe
+    if (!currentIsMobile || !mapMobile) {
+      const mapDesktopElement = document.getElementById('map-desktop')
+      if (mapDesktopElement && !mapDesktop) {
+        // Verificar que el elemento tenga dimensiones
+        const rect = mapDesktopElement.getBoundingClientRect()
+        console.log('🖥️ Elemento mapa desktop encontrado. Dimensiones:', rect.width, 'x', rect.height)
+        
+        if (rect.width > 0 && rect.height > 0) {
+          console.log('🖥️ Inicializando mapa desktop')
+          mapDesktop = new window.google.maps.Map(mapDesktopElement, {
+            center: { lat: 40.4168, lng: -3.7038 }, // Madrid
+            zoom: 10,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            styles: [
+              {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }]
+              }
+            ]
+          })
+          console.log('✅ Mapa desktop inicializado:', mapDesktop)
+        }
+      }
     }
 
     console.log('🎉 Mapas inicializados correctamente')
@@ -1332,6 +1358,46 @@ const showResultsOnMap = async (results: SearchResult[]) => {
   const mapInitialized = await ensureMapInitialized()
   if (!mapInitialized) {
     console.error('❌ No se pudo inicializar el mapa. Reintentando...')
+    
+    // En móvil, intentar forzar la inicialización del mapa móvil
+    const currentIsMobile = window.innerWidth < 1024
+    if (currentIsMobile && !mapMobile) {
+      console.log('🔄 Forzando inicialización del mapa móvil...')
+      const mapMobileElement = document.getElementById('map-mobile')
+      if (mapMobileElement) {
+        const rect = mapMobileElement.getBoundingClientRect()
+        console.log('📏 Dimensiones del elemento mapa móvil:', rect.width, 'x', rect.height)
+        
+        if (rect.width > 0 && rect.height > 0) {
+          if (typeof window.google !== 'undefined' && window.google.maps) {
+            mapMobile = new window.google.maps.Map(mapMobileElement, {
+              center: { lat: 40.4168, lng: -3.7038 },
+              zoom: 10,
+              mapTypeId: google.maps.MapTypeId.ROADMAP,
+              styles: [
+                {
+                  featureType: 'poi',
+                  elementType: 'labels',
+                  stylers: [{ visibility: 'off' }]
+                }
+              ]
+            })
+            console.log('✅ Mapa móvil inicializado forzadamente')
+            
+            // Reintentar mostrar resultados
+            setTimeout(() => {
+              showResultsOnMap(results)
+            }, 500)
+            return
+          }
+        } else {
+          console.error('❌ El elemento mapa móvil no tiene dimensiones válidas')
+        }
+      } else {
+        console.error('❌ El elemento map-mobile no existe en el DOM')
+      }
+    }
+    
     // Reintentar después de un segundo
     setTimeout(() => {
       showResultsOnMap(results)
@@ -1436,12 +1502,32 @@ const showResultsOnMap = async (results: SearchResult[]) => {
       const mapElement = document.getElementById(mapElementId)
       
       if (mapElement && typeof window.google !== 'undefined' && window.google.maps) {
+        // Verificar que el elemento tenga dimensiones antes de inicializar
+        const rect = mapElement.getBoundingClientRect()
+        if (rect.width === 0 || rect.height === 0) {
+          console.error(`❌ El elemento ${mapElementId} no tiene dimensiones válidas:`, rect.width, 'x', rect.height)
+          console.error('   Esperando y reintentando...')
+          await new Promise(resolve => setTimeout(resolve, 500))
+          const retryRect = mapElement.getBoundingClientRect()
+          if (retryRect.width === 0 || retryRect.height === 0) {
+            console.error('   ❌ El elemento sigue sin dimensiones después de esperar')
+            return false
+          }
+        }
+        
         if (currentIsMobile && !mapMobile) {
           console.log('📱 Inicializando mapa móvil manualmente...')
           mapMobile = new window.google.maps.Map(mapElement, {
             center: { lat: 40.4168, lng: -3.7038 },
             zoom: 10,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            styles: [
+              {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }]
+              }
+            ]
           })
           map = mapMobile
           isMobile = true
@@ -1451,7 +1537,14 @@ const showResultsOnMap = async (results: SearchResult[]) => {
           mapDesktop = new window.google.maps.Map(mapElement, {
             center: { lat: 40.4168, lng: -3.7038 },
             zoom: 10,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            styles: [
+              {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }]
+              }
+            ]
           })
           map = mapDesktop
           isMobile = false
@@ -1795,6 +1888,8 @@ searchForm.date = today
 // Inicializar mapa cuando el componente se monte
 onMounted(() => {
   console.log('🔧 Componente montado, iniciando inicialización del mapa...')
+  console.log('📏 Ancho de ventana al montar:', window.innerWidth)
+  console.log('📱 Es móvil:', window.innerWidth < 1024)
   
   // Esperar a que el DOM esté listo
   setTimeout(() => {
@@ -1802,6 +1897,34 @@ onMounted(() => {
     if (typeof window.google !== 'undefined' && window.google.maps) {
       console.log('✅ Google Maps ya está cargado, inicializando mapas inmediatamente')
       initializeMap()
+      
+      // En móvil, hacer una verificación adicional después de un delay
+      if (window.innerWidth < 1024 && !mapMobile) {
+        setTimeout(() => {
+          console.log('🔄 Verificación adicional del mapa móvil después del montaje...')
+          const mapMobileElement = document.getElementById('map-mobile')
+          if (mapMobileElement) {
+            const rect = mapMobileElement.getBoundingClientRect()
+            console.log('📏 Dimensiones elemento mapa móvil:', rect.width, 'x', rect.height)
+            if (rect.width > 0 && rect.height > 0 && !mapMobile) {
+              console.log('📱 Inicializando mapa móvil en verificación adicional...')
+              mapMobile = new window.google.maps.Map(mapMobileElement, {
+                center: { lat: 40.4168, lng: -3.7038 },
+                zoom: 10,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                styles: [
+                  {
+                    featureType: 'poi',
+                    elementType: 'labels',
+                    stylers: [{ visibility: 'off' }]
+                  }
+                ]
+              })
+              console.log('✅ Mapa móvil inicializado en verificación adicional:', mapMobile)
+            }
+          }
+        }, 1500)
+      }
     } else {
       console.log('⏳ Google Maps no está cargado aún, esperando...')
       // Intentar inicializar con un delay
