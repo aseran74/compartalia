@@ -893,16 +893,15 @@ const carTransformStyle = computed(() => {
   // Detectar resolución 912x1368 y ajustar posición base
   let baseY = 50;
   if (width >= 880 && width <= 940 && height >= 1300 && height <= 1400) {
-    baseY = 150; // Más abajo en esta resolución
+    baseY = 60; // Posición base para esta resolución
   }
   
-  // Movimiento vertical con efecto onda
+  // Movimiento horizontal solamente (sin movimiento vertical)
   const scrollPercentage = Math.min(scrollY / innerHeight, 1);
-  const verticalMovement = Math.sin(scrollPercentage * Math.PI * 2) * 40;
-  const finalY = baseY + verticalMovement;
-  
-  // Movimiento horizontal
   const horizontalMovement = (scrollPercentage - 0.5) * 200;
+  
+  // Posición vertical fija (sin movimiento de onda)
+  const finalY = baseY;
   
   return {
     transform: `scale(1.1) translateX(${horizontalMovement}px) translateY(${finalY}px)`,
