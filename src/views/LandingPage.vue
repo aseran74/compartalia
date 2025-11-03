@@ -202,10 +202,11 @@
             <div class="scroll-content">
               <img src="/images/escena1.png" alt="Escena de personas" class="scroll-image scene-1" />
               <img 
+                ref="carImageRef"
                 src="/images/Escenacoche.png" 
                 alt="Escena de coche" 
                 class="scroll-image scene-2" 
-                :style="{ transform: `scale(1.1) translateX(${carPosition}px) translateY(50px)` }"
+                :style="carTransformStyle"
               />
             </div>
           </div>
@@ -857,11 +858,14 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import AuthModal from '@/components/auth/AuthModal.vue';
 
 const router = useRouter();
+
+// Referencia al elemento del coche
+const carImageRef = ref<HTMLImageElement | null>(null);
 
 // Auth composable
 const { user, userProfile, isAuthenticated, logout, loginWithGoogle } = useAuth();
@@ -874,19 +878,70 @@ const showAuthModal = ref(false);
 
 // Variable para el efecto de scroll del coche
 const carPosition = ref(0);
+const carVerticalPosition = ref(50); // Posición vertical base
+
+// Computed para el estilo del transform del coche
+const carTransformStyle = computed(() => {
+  // Forzar actualización leyendo scrollTrigger
+  const _ = scrollTrigger.value;
+  
+  const width = window.innerWidth || 0;
+  const height = window.innerHeight || 0;
+  const scrollY = window.scrollY || 0;
+  const innerHeight = window.innerHeight || 1;
+  
+  // Detectar resolución 912x1368 y ajustar posición base
+  let baseY = 50;
+  if (width >= 880 && width <= 940 && height >= 1300 && height <= 1400) {
+    baseY = 150; // Más abajo en esta resolución
+  }
+  
+  // Movimiento vertical con efecto onda
+  const scrollPercentage = Math.min(scrollY / innerHeight, 1);
+  const verticalMovement = Math.sin(scrollPercentage * Math.PI * 2) * 40;
+  const finalY = baseY + verticalMovement;
+  
+  // Movimiento horizontal
+  const horizontalMovement = (scrollPercentage - 0.5) * 200;
+  
+  return {
+    transform: `scale(1.1) translateX(${horizontalMovement}px) translateY(${finalY}px)`,
+    willChange: 'transform',
+    transition: 'none'
+  };
+});
+
+// Función para calcular la posición vertical base según la resolución
+function calculateVerticalPosition() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  
+  console.log('📏 [calculateVerticalPosition] Resolución actual:', width, 'x', height);
+  
+  // Resolución específica 912x1368 (con margen más amplio para capturar variaciones)
+  if (width >= 880 && width <= 940 && height >= 1300 && height <= 1400) {
+    console.log('✅ [calculateVerticalPosition] Detectada resolución tipo 912x1368, usando posición base 150px');
+    return 150; // Más abajo en esta resolución
+  }
+  
+  // Por defecto
+  console.log('📐 [calculateVerticalPosition] Resolución por defecto, usando posición base 50px');
+  return 50;
+}
 
 // Función para manejar el scroll
 function handleScroll() {
   isScrolled.value = window.scrollY > 50;
   
-  // Efecto de movimiento del coche según el scroll
-  const scrollY = window.scrollY;
-  const maxScroll = window.innerHeight;
-  const scrollPercentage = Math.min(scrollY / maxScroll, 1);
-  
-  // Mapear el scroll a posición horizontal del coche (-100px a 100px)
-  carPosition.value = (scrollPercentage - 0.5) * 200;
+  // Forzar actualización del computed del transform
+  scrollTrigger.value = window.scrollY;
 }
+
+// Forzar actualización del computed cuando cambia el scroll
+const scrollTrigger = ref(0);
+watch(scrollTrigger, () => {
+  // Esto fuerza que el computed se recalcule
+});
 
 // Funciones para el menú móvil
 function toggleMobileMenu() {
@@ -923,9 +978,50 @@ async function handleLogout() {
   }
 }
 
+// Función para manejar el resize
+function handleResize() {
+  carVerticalPosition.value = calculateVerticalPosition();
+}
+
 // Event listeners
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll);
+  console.log('🎯 LandingPage onMounted - Inicializando movimiento del coche');
+  
+  // Calcular posición vertical inicial
+  carVerticalPosition.value = calculateVerticalPosition();
+  console.log('📍 Posición vertical inicial calculada:', carVerticalPosition.value);
+  
+  // Actualizar posición cuando cambia el tamaño de la ventana
+  window.addEventListener('resize', handleResize);
+  
+  // Escuchar el evento de scroll
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  console.log('👂 Event listener de scroll agregado');
+  
+  // Llamar handleScroll inicialmente para calcular posición inicial
+  handleScroll();
+  console.log('✅ handleScroll llamado inicialmente');
+  
+  // Debug: Verificar valores de las variables reactivas del coche
+  console.log('🚗 [DEBUG] Variables del coche al montar:', {
+    carPosition: carPosition.value,
+    carVerticalPosition: carVerticalPosition.value,
+    windowWidth: window.innerWidth,
+    windowHeight: window.innerHeight
+  });
+  
+  // Verificar que el elemento del coche existe en el DOM
+  setTimeout(() => {
+    const carElement = document.querySelector('.scene-2');
+    console.log('🚗 [DEBUG] Elemento del coche encontrado:', !!carElement);
+    if (carElement) {
+      const computedStyle = window.getComputedStyle(carElement);
+      console.log('🚗 [DEBUG] Estilo computado del coche:', {
+        transform: computedStyle.transform,
+        willChange: computedStyle.willChange
+      });
+    }
+  }, 1000);
   
   // Debug: Verificar estado de autenticación
   console.log('LandingPage mounted - Auth state:', {
@@ -946,7 +1042,9 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  console.log('🔌 LandingPage onUnmounted - Removiendo event listeners');
   window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener('resize', handleResize);
 });
 
 // Ciudades principales del extrarradio (datos OK)
@@ -1097,7 +1195,8 @@ const handleGoogleLogin = async () => {
   /* Imagen superior con efecto de movimiento */
   transform-origin: center center;
   z-index: 9999;
-  transition: transform 0.1s ease-out;
+  /* La transición se controla desde el inline style para mejor rendimiento */
+  will-change: transform;
 }
 
 
@@ -1121,8 +1220,9 @@ const handleGoogleLogin = async () => {
     height: 400px;
   }
   
+  /* El movimiento se controla desde :style en el template */
   .scene-2 {
-    transform: scale(1.1) translateX(0px) translateY(0px) !important;
+    /* Sin transform aquí para que el inline style funcione */
   }
 }
 
@@ -1145,8 +1245,17 @@ const handleGoogleLogin = async () => {
     height: 350px;
   }
   
+  /* El movimiento se controla desde :style en el template */
   .scene-2 {
-    transform: scale(1.1) translateX(0px) translateY(0px) !important;
+    /* Sin transform aquí para que el inline style funcione */
+  }
+}
+
+/* Ajuste específico para resolución 912x1368 (tablet vertical) */
+@media (min-width: 900px) and (max-width: 920px) and (min-height: 1350px) and (max-height: 1380px) {
+  .scene-2 {
+    /* El movimiento se controla desde :style en el template */
+    /* No usar !important para permitir que funcione el inline style */
   }
 }
 
@@ -1184,8 +1293,9 @@ const handleGoogleLogin = async () => {
     transform: scale(1);
   }
   
+  /* El movimiento se controla desde :style en el template */
   .scene-2 {
-    transform: scale(1);
+    /* Sin transform aquí para que el inline style funcione */
   }
 }
 </style>
